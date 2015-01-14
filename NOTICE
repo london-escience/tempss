@@ -1,0 +1,23 @@
+Attribution is given to providers of the following third party libraries which are used
+in TemPro:
+
+- Jeromy French's Bootstrap Tree widget
+
+  http://jhfrench.github.io/bootstrap-tree/docs/example.html
+
+  which is in turn inspired by and based on work by Vitaliy Bychik
+
+  http://stackoverflow.com/users/1488999/vitaliy-bychik
+  http://stackoverflow.com/questions/11167628/trees-in-twitter-bootstrap/15480307#15480307
+
+  and Mehmet Atas
+
+  http://stackoverflow.com/users/554397/mehmet-atas
+  http://stackoverflow.com/questions/11167628/trees-in-twitter-bootstrap/16664260#16664260
+
+- bootstrap-fileinput.js: Nicer looking file inputs for bootstrap 3 by Jeff
+  Dairiki <dairiki@dairiki.org>, based on ideas from
+
+  http://www.abeautifulsite.net/blog/2013/08/whipping-file-inputs-into-shape-with-bootstrap-3/
+
+  and available at http://jsbin.com/OxOQoDa/8

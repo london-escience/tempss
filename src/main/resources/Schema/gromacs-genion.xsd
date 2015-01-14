@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+  <xs:element name="GROMACS_genion">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="RunInputFile" type="gromacsRunFile">
+                      <!-- -s [<.tpr/.tpb/...>] (topol.tpr) (Input)
+                              Run input file: tpr tpb tpa  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Run input file to add ions to</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OptionalInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="TopologyFile" type="optionalTopologyFile">
+                      <!-- -p [<.top>] (topol.top) (Input/Output, Optional)
+                              Topology file   -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Optional topology file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ProblemSetup">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="PositiveIon" type="DefaultOrString">
+                <!-- -pname <string> (NA)
+                      Name of the positive ion  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Positive ion, should be capitalised element name. Default is NA</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="NegativeIon" type="DefaultOrString">
+                <!-- -nname <string> (NA)
+                      Name of the negative ion  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Negative ion, should be capitalised element name. Default is CL</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="NumberOfPositiveIons" type="DefaultOrPositiveInteger">
+                <!-- -np <int> (0)
+                      Number of positive ions -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Number of positive ions. Default is 0.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="NumberOfNegativeIons" type="DefaultOrPositiveInteger">
+                <!-- -nn <int> (0)
+                      Number of negative ions -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Number of negative ions. Default is 0.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OutputStructureFile" type="outputStructureFile">
+                      <!-- -o [<.gro/.g96/...>] (out.gro) (Output)
+                              Structure file: gro g96 pdb brk ent esp -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Output structure file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

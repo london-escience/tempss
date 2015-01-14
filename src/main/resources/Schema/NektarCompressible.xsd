@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+PA notes on name spaces etc:
+Namespaces exist to help software pick up the appropriate xml tags to do its job.
+See http://www.xml.com/pub/a/1999/01/namespaces.html
+
+xmlns:xs="http://www.w3.org/2001/XMLSchema" tells software capable of validating xml that this is an xsd schema.
+It also tells an xml editor (e.g. visual studio, emacs, ...) what suggestions to offer for auto-completion when writing the xsd.
+
+targetNamespace="http://www.libhpc.imperial.ac.uk": As the current XML document is a schema this attribute defines the namespace that this schema is intended to target, or validate.
+
+xmlns="http://www.libhpc.imperial.ac.uk" - Defines the default namespace within the current document for all non-prefixed elements (i.e no xx: in  <xx:elementName>)
+PA: why is this necessary?
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="NektarCommon.xsd" />
+
+  <!-- Comment from John: please keep separate into method domain,
+       system domain, processor domain.    -->
+  <xs:simpleType name="gtOneDouble">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="boundary">
+    <xs:sequence>
+      <xs:element name="Comment" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:locationInFile>@COMMENT</libhpc:locationInFile>
+            <!-- This must not be editable in the HTML form because it identifies the boundary in the geometry file-->
+            <libhpc:editDisabled/>
+            <libhpc:documentation>Boundaries in the geometry file must have an attribute "COMMENT" describing the boundary. This is used by nekkloud/libhpc to associate boundary conditions with the appropriate boundary.
+
+This field is not editable.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rho">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the density field.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='rho']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+NotProvided: Boundary condition not provided.
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                  <xs:enumeration value="NotProvided"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rho']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+Wall: Wall (Euler)
+WallViscous: Wall (Navier-Stokes)
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rho']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="Wall"/>
+                  <xs:enumeration value="WallViscous"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="rhou">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the x-momentum field.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='rhou']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+NotProvided: Boundary condition not provided.
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                  <xs:enumeration value="NotProvided"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rhou']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+Wall: Wall (Euler)
+WallViscous: Wall (Navier-Stokes)
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rhou']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="Wall"/>
+                  <xs:enumeration value="WallViscous"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="rhov">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the y-momentum field.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='rhov']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+NotProvided: Boundary condition not provided.
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                  <xs:enumeration value="NotProvided"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rhov']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+Wall: Wall (Euler)
+WallViscous: Wall (Navier-Stokes)
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='rhov']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="Wall"/>
+                  <xs:enumeration value="WallViscous"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="E">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the energy field.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='E']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+NotProvided: Boundary condition not provided.
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                  <xs:enumeration value="NotProvided"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='E']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+Wall: Wall (Euler)
+WallViscous: Wall (Navier-Stokes)
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='E']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="Wall"/>
+                  <xs:enumeration value="WallViscous"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="geometryFileAndBoundaryConditions">
+    <xs:sequence>
+      <xs:element name="Geometry" type="fileName">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryCondition" type="boundary" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:refersToFile>
+              <libhpc:fileTreePath>CompressibleFlowSolver.ProblemSpecification.GeometryAndBoundaryConditions.Geometry</libhpc:fileTreePath>
+              <libhpc:dataXPath>GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION</libhpc:dataXPath>
+            </libhpc:refersToFile>
+            <libhpc:documentation>
+Specify the solution at the boundaries of the geometry.
+
+These parameters auto-populate from the geometry file, and may be over-ridden for individual runs.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EquationSystem">
+    <xs:choice>
+      <xs:element name="EulerCFE">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Simulate using the Euler equations</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NavierStokesCFE">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Simulate using the Navier-Stokes equations</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Re" type="positiveDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Simulation Reynolds number (http://en.wikipedia.org/wiki/Reynolds_number)</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="L" type="positiveDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Characteristic length scale</libhpc:documentation>
+                  <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="Pr" type="positiveDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Prandtl number (http://en.wikipedia.org/wiki/Prandtl_number)</libhpc:documentation>
+                  <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:element name="CompressibleFlowSolver">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>
+The Nektar++ finite element PDE solver for the compressible flow solver.
+
+Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
+        </libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Physics">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the parameters that define the physics of the problem or, equivalently, the PDE coefficients.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="EquationSystem" type="EquationSystem">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Two types of equation system are supported: the Euler equations and the Navier-Stokes equations.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Gamma" type="gtOneDouble">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Heat capacity ratio (http://en.wikipedia.org/wiki/Heat_capacity_ratio)</libhpc:documentation>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+              <xs:element name="GasConstant" type="gtOneDouble">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Specific gas constant (http://en.wikipedia.org/wiki/Gas_constant)</libhpc:documentation>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+              <xs:element name="AngleOfAttack" type="xs:double">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Angle of attack of simulation</libhpc:documentation>
+                          <libhpc:units>degrees</libhpc:units>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+              <xs:element name="rhoInf" type="positiveDouble">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Farfield density</libhpc:documentation>
+                          <libhpc:units>kg/m^2</libhpc:units>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+              <xs:element name="pInf" type="positiveDouble">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Farfield pressure</libhpc:documentation>
+                          <libhpc:units>Pa</libhpc:units>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+              <xs:element name="MachInf" type="xs:double">
+                  <xs:annotation>
+                      <xs:appinfo>
+                          <libhpc:documentation>Farfield Mach number</libhpc:documentation>
+                      </xs:appinfo>
+                  </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ProblemSpecification">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Specification of the particular problem to solve, including geometry initial and boundary conditions, etc.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GeometryAndBoundaryConditions" type="geometryFileAndBoundaryConditions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Expansion" type="Expansion">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify details of how the solution function will be approximated.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FinalTime" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>
+                      The time over which the simulation occurs.
+                    </libhpc:documentation>
+                    <libhpc:units>s</libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TimeStep" type="positiveIncDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Length of time step (0 for auto-timestep)</libhpc:documentation>
+                    <libhpc:units>s</libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CFL" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>CFL safety factor (ignored if TimeStep > 0)</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="RiemannSolver">
+ 	          <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                          <xs:enumeration value="AUSM0"/>
+                          <xs:enumeration value="AUSM1"/>
+                          <xs:enumeration value="AUSM2"/>
+                          <xs:enumeration value="AUSM3"/>
+                          <xs:enumeration value="Average"/>
+                          <xs:enumeration value="ExactToro"/>
+                          <xs:enumeration value="HLL"/>
+                          <xs:enumeration value="HLLC"/>
+                          <xs:enumeration value="LaxFriedrichs"/>
+                          <xs:enumeration value="Roe"/>
+                      </xs:restriction>
+                  </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NumericalAlgorithm" type="NumericalAlgorithm">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains all the parameters that specify the numerical algorithm for solving the problem.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Admin" type ="Admin">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

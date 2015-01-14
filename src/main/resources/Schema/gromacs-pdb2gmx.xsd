@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+  <xs:element name="GROMACS_pdb2gmx">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="InputStructureFile" type="structureFile">
+                      <!-- -f: Structure file: gro g96 pdb brk ent esp tpr tpb tpa -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Protein Structure File, in Protein Data Bank (pdb) format</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ProblemSetup">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="WaterModel">
+                <!-- -water <enum>: Water model to use: select, none, spc, spce, tip3p, tip4p, tip5p  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Water model to use</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="none"/>
+                    <xs:enumeration value="spc"/>
+                    <xs:enumeration value="spce"/>
+                    <xs:enumeration value="tip3p"/>
+                    <xs:enumeration value="tip4p"/>
+                    <xs:enumeration value="tip5p"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ForceField">
+                <!-- -ff <string>: Force field, interactive by default. Use -h for information. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Force field to use</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="amber03"/>
+                    <xs:enumeration value="amber94"/>
+                    <xs:enumeration value="amber96"/>
+                    <xs:enumeration value="amber99"/>
+                    <xs:enumeration value="amber99sb"/>
+                    <xs:enumeration value="amber99sb-ildn"/>
+                    <xs:enumeration value="amberGS"/>
+                    <xs:enumeration value="charmm27"/>
+                    <xs:enumeration value="gromos43a1"/>
+                    <xs:enumeration value="gromos43a2"/>
+                    <xs:enumeration value="gromos45a3"/>
+                    <xs:enumeration value="gromos53a5"/>
+                    <xs:enumeration value="gromos53a6"/>
+                    <xs:enumeration value="gromos54a7"/>
+                    <xs:enumeration value="oplsaa"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OutputStructureFile" type="outputStructureFile">
+                      <!-- -o:  Structure file: gro g96 pdb etc. -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Output structure file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

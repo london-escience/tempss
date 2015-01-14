@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+PA notes on name spaces etc:
+Namespaces exist to help software pick up the appropriate xml tags to do its job. 
+See http://www.xml.com/pub/a/1999/01/namespaces.html
+
+xmlns:xs="http://www.w3.org/2001/XMLSchema" tells software capable of validating xml that this is an xsd schema.
+It also tells an xml editor (e.g. visual studio, emacs, ...) what suggestions to offer for auto-completion when writing the xsd.
+
+targetNamespace="http://www.libhpc.imperial.ac.uk": As the current XML document is a schema this attribute defines the namespace that this schema is intended to target, or validate.
+
+xmlns="http://www.libhpc.imperial.ac.uk" - Defines the default namespace within the current document for all non-prefixed elements (i.e no xx: in  <xx:elementName>)
+PA: surely not necessary for an xsd? Lets delete this line.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           elementFormDefault="qualified">
+
+  
+  <xs:element name="recommendation" type="xs:string"/>
+  <xs:element name="documentation" type="xs:string"/>
+  <xs:element name="units" type="xs:string"/>
+  <!-- Use to mark that editing is not allowed (as in the comment in boundary conditions for example) -->
+  <xs:element name="editDisabled" type="xs:string"/>
+  <!-- Allows to point at a file (one of the input files, eg the geometry/bcs file and a particular xml tag within it-->
+  <xs:element name="refersToFile">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="fileTreePath" type="xs:string"/>
+        <xs:element name="dataXPath" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- Allows to provide an xpath using the refersToFile dataXPath as root to the data we need to map from our file-->
+  <xs:element name="locationInFile" type="xs:string"/>
+</xs:schema>

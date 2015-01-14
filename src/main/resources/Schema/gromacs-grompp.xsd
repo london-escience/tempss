@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+  <xs:element name="GROMACS_grompp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="GromppInputFile" type="gromppInputFile">
+                      <!-- -f [<.mdp>] (grompp.mdp) (Input)
+                              grompp input file with MD parameters -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Input file in grompp format</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="InputStructureFile" type="structureFile">
+                    <!-- -c [<.gro/.g96/...>] (conf.gro) (Input)
+                              Structure file: gro g96 pdb brk ent esp tpr tpb tpa -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Input Structure File</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="InputTopologyFile" type="topologyFile">
+                      <!-- -p [<.top>] (topol.top) (Input)
+                              Topology file -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Input topology file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="RunInputFile" type="gromacsRunFileOutput">
+                      <!-- -o [<.tpr/.tpb/...>] (topol.tpr) (Output)
+                            Run input file: tpr tpb tpa -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Run input file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+  <xs:element name="GROMACS_editconf">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="InputStructureFile" type="structureFile">
+                      <!-- -f: Structure file: gro g96 pdb brk ent esp tpr tpb tpa -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Protein Structure File, in Protein Data Bank (pdb) format</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ProblemSetup">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CentreMoleculeInBox" type="boolean">
+                <!-- [no]c (no): Center molecule in box (implied by -box and -d) -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Centre molecule in box</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="DistanceBetweenSoluteAndBox" type="DefaultOrPositiveReal">
+                <!-- -d <real> (0): Distance between the solute and the box  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Distance between the solute and the box (in nm)</libhpc:documentation>
+                    <libhpc:units>nm</libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="BoxType">
+                <!-- -bt <enum> (triclinic): Box type for -box and -d: triclinic, cubic, dodecahedron, octahedron -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Box type</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="triclinic"/>
+                    <xs:enumeration value="cubic"/>
+                    <xs:enumeration value="dodecahedron"/>
+                    <xs:enumeration value="octahedron"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OutputStructureFile" type="outputStructureFile">
+                      <!-- -o:  Structure file: gro g96 pdb brk ent esp -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Output structure file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

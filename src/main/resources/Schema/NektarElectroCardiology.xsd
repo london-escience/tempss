@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+PA notes on name spaces etc:
+Namespaces exist to help software pick up the appropriate xml tags to do its job. 
+See http://www.xml.com/pub/a/1999/01/namespaces.html
+
+xmlns:xs="http://www.w3.org/2001/XMLSchema" tells software capable of validating xml that this is an xsd schema.
+It also tells an xml editor (e.g. visual studio, emacs, ...) what suggestions to offer for auto-completion when writing the xsd.
+
+targetNamespace="http://www.libhpc.imperial.ac.uk": As the current XML document is a schema this attribute defines the namespace that this schema is intended to target, or validate.
+
+xmlns="http://www.libhpc.imperial.ac.uk" - Defines the default namespace within the current document for all non-prefixed elements (i.e no xx: in  <xx:elementName>)
+PA: why is this necessary?
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="NektarCommon.xsd" />
+  
+  <xs:complexType name="boundary">
+    <xs:sequence>
+      <xs:element name="Comment" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:locationInFile>@COMMENT</libhpc:locationInFile>
+            <!-- This must not be editable in the HTML form because it identifies the boundary in the geometry file-->
+            <libhpc:editDisabled/>
+            <libhpc:documentation>Boundaries in the geometry file must have an attribute "COMMENT" describing the boundary. This is used by nekkloud/libhpc to associate boundary conditions with the appropriate boundary.
+            
+This field is not editable.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="u">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the velocity field in the x-direction.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='u']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+NotProvided: Boundary condition not provided
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                  <xs:enumeration value="NotProvided"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='u']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='u']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="geometryFileAndBoundaryConditions">
+    <xs:sequence>
+      <xs:element name="Geometry" type="fileName">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryCondition" type="boundary" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:refersToFile>
+              <libhpc:fileTreePath>CardiacElectrophysiology.ProblemSpecification.GeometryAndBoundaryConditions.Geometry</libhpc:fileTreePath>
+              <libhpc:dataXPath>GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION</libhpc:dataXPath>
+            </libhpc:refersToFile>
+            <libhpc:documentation>
+Specify the solution at the boundaries of the geometry.
+
+These parameters auto-populate from the geometry file, and may be over-ridden for individual runs.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Monodomain">
+    <xs:sequence>
+      <xs:element name="Chi" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Membrane surface to volume ratio</libhpc:documentation>
+            <libhpc:units>mm&lt;sup&gt;-1&lt;/sup&gt;</libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Cm" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Membrane capacitance per unit area</libhpc:documentation>
+            <!-- &amp;#956; gives Greek letter mu (for micro) -->
+            <libhpc:units>&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;</libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IsotropicConductivity">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The isotropicConductivity specifies the conductivity of the tissue, assuming it is the same in the x-, y- and z-coordinate directions. 
+Nektar++ also allows anisotropic conductivity to be specified, to allow for fibres in the heart which conduct better along their length than across their breadth. (Anisotropic conductivity not currently supported by the libhpc/nekkloud tree).
+
+Choose between providing the conductivity directly, or by providing the intensity from an MRI scan, from which the conductivity will be approximated internally.
+          </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Conductivity" type="xs:double">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>The constant conductvity.</libhpc:documentation>
+                  <libhpc:units>mS mm&lt;sup&gt;-1&lt;/sup&gt;</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="Intensity">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Supply a constant value for the intensity. The conductivity is computed internally from the intensity.</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Intensity" type="xs:double">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>The constant intensity. The conductivity is proportional to 1 / (d_max - d_min) * (1 - Intensity).</libhpc:documentation>
+                        <!-- There are no units for the intensity.-->
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="d_min" type="xs:double">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <!--libhpc:documentation>d_min, d_max, o_min, o_max specify a bijective map to assign conductivity values to intensity values when using the IsotropicConductivity function. The intensity map is first thresholded to the range [d_min, d_max] and then the conductivity is calculated as (o_max - o_min) / (d_max - d_min) * (1 - Intensity) + o_min</libhpc:documentation-->
+                        <libhpc:documentation>d_min specifies the lower threshold of the intensity.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="d_max" type="xs:double">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>d_max specifies the upper threshold of the intensity.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="NotProvided" type="NotProvided"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <!--xs:element name="AnIsotropicConductivity">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Anisotropic conductivity allows conductivity to be specified differently in the x-, y- and z-coordinate directions. 
+This is not supported correctly by libhpc at present.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Constant">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Intensity" type="xs:double"/>
+                  <xs:element name="o_min" type="positiveDouble"/>
+                  <xs:element name="o_max" type="positiveDouble"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Function">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Function" type="fileName"/>
+                  <xs:element name="o_min" type="positiveDouble"/>
+                  <xs:element name="o_max" type="positiveDouble"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="NotProvided" type="NotProvided"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element-->
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Bidomain">
+    <xs:sequence>
+      <xs:element name="Sigmai" type="positiveDouble"/>
+      <xs:element name="Sigmaix" type="positiveDouble"/>
+      <xs:element name="Sigmaiy" type="positiveDouble"/>
+      <xs:element name="Sigmaiz" type="positiveDouble"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Model">
+    <xs:choice>
+      <xs:element name="Monodomain" type="Monodomain">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The monodomain model is a reduction of the bidomain model of the electrical propagation in myocardial tissue. The reduction comes from assuming that the intra- and extracellular domains have equal anisotropy ratios. Although not as physiologically accurate as the bidomain model, it is still adequate in some cases, and has reduced complexity.
+http://en.wikipedia.org/wiki/Monodomain_model </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Bidomain" type="Bidomain">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Model of the electrical properties of cardiac muscle that takes into account the anisotropy of both the intracellular and extracellular spaces. http://en.wikipedia.org/wiki/Bidomain_model </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Cell model variant types -->
+  <xs:complexType name="CourtemancheRamirezNattel98">
+    <xs:sequence>    
+      <xs:element name="CellModelVariant">        
+    	<xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Original"/>
+            <xs:enumeration value="AF"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="FitzhughNagumo"/>
+  <xs:complexType name="TenTusscher">
+    <xs:sequence>    
+      <xs:element name="CellModelVariant">        
+    	<xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Endocardium"/>
+            <xs:enumeration value="Epicardium"/>
+            <xs:enumeration value="Mid"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>  
+  </xs:complexType>
+  <xs:complexType name="AlievPanfilov">
+    <xs:sequence>
+      <xs:element name="A" type="xs:double"/>
+      <xs:element name="Eps" type="positiveDouble"/>
+      <xs:element name="K" type="positiveDouble"/>
+      <xs:element name="Mu1" type="positiveDouble"/>
+      <xs:element name="Mu2" type="positiveDouble"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="FentonKarma">
+    <xs:sequence>    
+      <xs:element name="CellModelVariant">        
+    	<xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="BR"/>
+            <xs:enumeration value="MBR"/>
+            <xs:enumeration value="MLR1"/>
+            <xs:enumeration value="GP"/>
+            <xs:enumeration value="CF1"/>
+            <xs:enumeration value="CF2a"/>
+            <xs:enumeration value="CF2b"/>
+            <xs:enumeration value="CF2c"/>
+            <xs:enumeration value="CF3a"/>
+            <xs:enumeration value="CF3b"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>  
+  </xs:complexType>
+
+  <xs:complexType name="CellModel">
+    <xs:sequence>
+      <xs:element name="CellModelType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              A number of ionic cell models are currently supported by the solver including:
+
+              - Courtemanche, Ramirez, Nattel, 1998
+              - Luo, Rudy, 1991
+              - ten Tusscher, Panfilov, 2006 (epicardial, endocardial and mid-myocardial variants)
+              
+              Phenomological cell models are also supported:
+
+              - Aliev-Panfilov
+              - Fitzhugh-Nagumo
+              
+              It is important to ensure that the units of the voltage and currents from the cell model are consistent with the units expected by the tissue level solver (monodomain/bidomain).
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="CourtemancheRamirezNattel98" type="CourtemancheRamirezNattel98">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Human atrial model.</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="FitzhughNagumo" type="FitzhughNagumo"/>
+            <xs:element name="TenTusscher" type="TenTusscher">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Human ventricular model.</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="AlievPanfilov" type="AlievPanfilov">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Phenomenological model.</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="FentonKarma" type="FentonKarma">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation></libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SubSteps" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Sets the number of substeps taken in time integrating the cell model for each PDE timestep.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Stimuli">
+    <xs:sequence>
+      <xs:element name="Stimulus" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify how pulses of current are applied to the heart to stimulate contraction.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="StimulusType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Specify the region to which the stimulus is applied.</libhpc:documentation>
+                  <libhpc:units></libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:choice>
+                  <xs:element name="StimulusPoint">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>Apply the stimulus at a single point.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="p_strength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Strength of the stimulus</libhpc:documentation>
+                              <libhpc:units>&amp;#956;A (To do: check that this is supplied directly in micro amps)</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="StimulusCircle">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>Provide the stimulus in a spherical region.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="p_strength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Strength of the stimulus current applied per unit volume</libhpc:documentation>
+                              <libhpc:units>&amp;#956;A mm&lt;sup&gt;-3&lt;/sup&gt; </libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_x1" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>x-coordinate of centre of the sphere</libhpc:documentation>
+                              <libhpc:units>mm</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_y1" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>y-coordinate of centre of the circle</libhpc:documentation>
+                              <libhpc:units>mm</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_z1" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>z-coordinate of centre of the circle</libhpc:documentation>
+                              <libhpc:units>mm</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_r1" type="positiveDouble">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Radius of the circle</libhpc:documentation>
+                              <libhpc:units>mm</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_is" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Specifies the "smoothness" of the boundaries of the region; higher values produce a sharper boundary. Typical value 50. Appropriate value depends on spatial discretization: coarser discretization needs less steepness.</libhpc:documentation>
+                              <libhpc:units></libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="StimulusRectangle">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>stimulates a cuboid-shaped region of the domain, specified by two coordinates x1, y1, z1 and x2, y2, z2.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="p_strength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Strength of the stimulus current applied per unit volume</libhpc:documentation>
+                              <libhpc:units>&amp;#956;A mm&lt;sup&gt;-3&lt;/sup&gt; </libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="p_x1" type="xs:double"/>
+                        <xs:element name="p_y1" type="xs:double"/>
+                        <xs:element name="p_z1" type="xs:double"/>
+                        <xs:element name="p_x2" type="xs:double"/>
+                        <xs:element name="p_y2" type="xs:double"/>
+                        <xs:element name="p_z2" type="xs:double"/>
+                        <xs:element name="p_is" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Specifies the "smoothness" of the boundaries of the region; higher values produce a sharper boundary. Typical value 50. Appropriate value depends on spatial discretization: coarser discretization needs less steepness.</libhpc:documentation>
+                              <libhpc:units></libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:choice>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Protocol">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Specifies the time-dependent function indicating the strength of the stimulus</libhpc:documentation>
+                  <libhpc:units></libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:choice>
+                  <xs:element name="ProtocolS1S2">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>Two stimuli are provided. Stimulus S1 is regular, while stimulus S2 happens only once.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="Start" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Start time of the stimulus (usually set to time zero).</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Duration" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="S1CycleLength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Cycle length of stimulus S1</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Num_S1" type="xs:positiveInteger">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Number of times stimulus S1 is repeated</libhpc:documentation>
+                              <libhpc:units></libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="S2CycleLength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Specifies the time between the start of the S1 beat and the S2 beat</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="ProtocolS1">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>One stimulus, S1, is provided. It has a regular cycle length and can be repeated a number of times.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="Start" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Start time of the stimulus (usually set to time zero).</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Duration" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="S1CycleLength" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Cycle length of stimulus S1</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Num_S1" type="xs:positiveInteger">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Number of times stimulus S1 is repeated</libhpc:documentation>
+                              <libhpc:units></libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="ProtocolSingle">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>A single stimulus, S1, is provided, and not repeated.</libhpc:documentation>
+                        <libhpc:units></libhpc:units>
+                      </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="Start" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Start time of the stimulus (usually set to time zero).</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Duration" type="xs:double">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+                              <libhpc:units>ms</libhpc:units>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:choice>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Comment from John: please keep separate into method domain, 
+  system domain, processor domain.    -->
+  <xs:element name="CardiacElectrophysiology">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>
+The Nektar++ finite element PDE solver for cardiac electrophysiology.
+
+Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
+        </libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Physics">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the parameters that define the physics of the problem or, equivalently, the PDE coefficients.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Model" type="Model">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Two models for the electrical properties of cardiac muscle are 
+supported, the monodomain model and the bidomain model.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CellModel" type="CellModel">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The action potential of a cardiac cell can be modelled at either a biophysical level of detail, including a number of transmembrane currents, or as a phenomenological model, to reproduce the features of the action potential, with fewer variables. Each cell model will include a unique system of ODEs to represent the gating variables of that model.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ProblemSpecification">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Specification of the particular problem to solve, including geometry initial and boundary conditions, etc.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GeometryAndBoundaryConditions" type="geometryFileAndBoundaryConditions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The geometry on which the problem is being solved (usually a mesh representing a heart).</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="InitialConditions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="Constant" type="xs:double">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Provide a constant initial value.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="Function" type="fileName">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Provide initial value as a function (not currently supported by libhpc/nekkloud.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Stimuli" type="Stimuli">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify one or more electrical stimuli to the heart (currently only one supported by nekkloud/libhpc).</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Expansion" type ="Expansion">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify details of how the solution function will be approximated.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FinalTime" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>
+                      The time over which the simulation occurs.
+                    </libhpc:documentation>
+                    <libhpc:units>ms</libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TimeStep" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Length of time step</libhpc:documentation>
+                    <libhpc:units>ms</libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NumericalAlgorithm" type="NumericalAlgorithm">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains all the parameters that specify the numerical algorithm for solving the problem.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Admin" type ="Admin">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

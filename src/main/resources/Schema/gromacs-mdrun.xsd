@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+<!--
+Options not used:
+-h        Print help info and quit
+-version  Print version info and quit
+-nice     Set the nicelevel
+
+ -->
+
+  <xs:complexType name="ParticleDecomposition"/>
+
+  <xs:complexType name="Vector">
+    <xs:sequence>
+      <xs:element name="x" type="positiveDouble"/>
+      <xs:element name="y" type="positiveDouble"/>
+      <xs:element name="z" type="positiveDouble"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DecompositionGrid">
+    <!-- -dd Domain decomposition grid, 0 is optimize -->
+    <xs:choice>
+      <xs:element name="Optimize" type="Default"/>
+      <xs:element name="SpatialGrid" type="Vector"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="DomainDecomposition">
+    <xs:sequence>
+      <xs:element name="DecompositionGrid" type="DecompositionGrid">
+        <!-- -dd Domain decomposition grid, 0 is optimize -->
+      </xs:element>
+      <xs:element name="DomainDecompositionNodeOrder">
+        <!-- -ddorder: DD node order: interleave, pp_pme or cartesian -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="interleave"/>
+            <xs:enumeration value="pp_pme"/>
+            <xs:enumeration value="cartesian"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	    <xs:element name="DynamicLoadBalancing">
+        <!-- -dlb: Dynamic load balancing (with DD): auto, no or yes -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="auto"/>
+            <xs:enumeration value="yes"/>
+            <xs:enumeration value="no"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="NPMENodes" type="DefaultOrPositiveInteger">
+        <!-- -npme: Number of separate nodes to be used for PME, -1 is guess -->
+      </xs:element>
+      <xs:element name="TunePMEGridSpacing" type="boolean">
+        <!-- -tunepme: Optimize PME load between PP/PME nodes or GPU/CPU -->
+      </xs:element>
+      <xs:element name="MaxDistanceForBondedInteractions" type="DefaultOrPositiveReal">
+        <!-- -rdd: The maximum distance for bonded interactions with DD (nm), 0 is determine from initial coordinates -->
+      </xs:element>
+      <xs:element name="CheckBondedInteractions" type="boolean">
+        <!-- -ddcheck: Check for all bonded interactions with DD -->
+      </xs:element>
+      <xs:element name="MaxDistanceForP-LINCS" type="DefaultOrPositiveReal">
+        <!-- -rcon: Maximum distance for P-LINCS (nm), 0 is estimate -->
+      </xs:element>
+      <xs:element name="MinimumCellScaling" type="DefaultOrPositiveReal">
+        <!-- -dds: Minimum allowed dlb scaling of the DD cell size -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Parallelisation">
+    <xs:sequence>
+      <xs:element name="Decomposition">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ParticleDecomposition" type="ParticleDecomposition">
+              <!-- -pd: Use particle decompostion -->
+            </xs:element>
+            <xs:element name="DomainDecomposition" type="DomainDecomposition"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ThreadOptions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="TotalThreads" type="GuessOrPositiveInteger">
+              <!-- -nt: Total number of threads to start (0 is guess) -->
+            </xs:element>
+            <xs:element name="NumberOfThreadMPIThreads" type="GuessOrPositiveInteger">
+              <!-- -ntmpi: Number of thread-MPI threads to start (0 is guess) -->
+            </xs:element>
+            <xs:element name="OpenMPThreadsPerMPIProcess" type="GuessOrPositiveInteger">
+              <!-- -ntomp: Number of OpenMP threads per MPI process/thread to start (0 is guess) -->
+            </xs:element>
+            <xs:element name="OpenMPThreadsPerPMEMPIProcess" type="GuessOrPositiveInteger">
+              <!-- -ntomp_pme: Number of OpenMP threads per MPI process/thread to start (0 is -ntomp) -->
+            </xs:element>
+            <xs:element name="PinThreadsToCores">
+              <!-- -pin: Fix threads (or processes) to specific cores: auto, on or off -->
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="auto"/>
+                    <xs:enumeration value="yes"/>
+                    <xs:enumeration value="no"/>
+                  </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PinStride" type="DefaultOrPositiveInteger">
+              <!-- -pinstride: Pinning distance in logical cores for threads, use 0 to minimize the number of threads per physical core -->
+            </xs:element>
+            <xs:element name="PinOffset" type="DefaultOrPositiveInteger">
+              <!-- -pinoffset: The starting logical core number for pinning to cores; used to avoid pinning threads from different mdrun instances to the same core -->
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CheckPointInput">
+    <xs:sequence>
+      <xs:element name="CheckpointInputFile" type="checkpointFile">
+        <!-- -cpi: Checkpoint file -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CheckPointDetails">
+    <xs:sequence>
+      <xs:element name="CheckPointInterval" type="positiveDouble">
+        <!-- -cpt: Checkpoint interval (minutes) -->
+      </xs:element>
+      <xs:element name="CheckPointOutputFile" type="xs:string">
+        <!-- -cpo: Checkpoint file -->
+      </xs:element>
+      <xs:element name="KeepAllCheckPointFiles" type="boolean">
+        <!-- -cpnum: Keep and number checkpoint files  -->
+      </xs:element>
+      <xs:element name="AppendToExistingFiles" type="boolean">
+        <!-- -append: Append to previous output files when continuing from checkpoint instead of adding the simulation part number to all file names -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CheckPointing">
+    <xs:choice>
+      <xs:element name="Off" type="Default">
+        <!-- No option to set, just don't display details -->
+      </xs:element>
+      <xs:element name="On" type="CheckPointDetails"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Comment from John: please keep separate into method domain,
+  system domain, processor domain.    -->
+  <xs:element name="GROMACS_mdrun">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+		                <xs:element name="SimulationInput" type="gromacsRunFile">
+                      <!-- -s: Run input file: tpr tpb tpa -->
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OptionalInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="PotentialFunctionsTable" type="functionsTable">
+                      <!-- -table: xvgr/xmgr file -->
+                    </xs:element>
+                    <xs:element name="PairInteractionFunctionsTable" type="functionsTable">
+                      <!-- -tablep: xvgr/xmgr file -->
+                    </xs:element>
+                    <xs:element name="BondedFunctionsTable" type="functionsTable">
+                      <!-- -tableb: xvgr/xmgr file -->
+                      <!-- Note this refers to several files so needs fixing -->
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RunControl">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Parallelisation" type="Parallelisation"/>
+              <xs:element name="GlobalCommunicationFrequency" type="DefaultOrPositiveInteger">
+                <!-- -gcom: Global communication frequency -->
+              </xs:element>
+              <xs:element name="CheckPointing" type="CheckPointing"/>
+              <xs:element name="CompactLogFile" type="boolean">
+                <!-- -compact: Write a compact log file -->
+              </xs:element>
+              <xs:element name="SeparatePotentials" type="boolean">
+                <!-- -sepopt: Write separate V and dVdl terms for each interaction type and node to the log file(s) -->
+              </xs:element>
+              <xs:element name="PrintForces" type="DefaultOrPositiveReal">
+                <!-- -pforce: Print all forces larger than this (kJ/mol nm) -->
+              </xs:element>
+              <xs:element name="BinaryReproducibility" type="boolean">
+                <!-- -reprod: Try to avoid optimizations that affect binary reproducibility -->
+              </xs:element>
+              <xs:element name="NumberOfSteps" type="DefaultOrPositiveInteger">
+                <!-- -nsteps: Run this number of steps, overrides .mdp file option -->
+              </xs:element>
+              <xs:element name="MaximumRunTimeHours" type="DefaultOrPositiveReal">
+                <!-- -maxh: Terminate after 0.99 times this time (hours) -->
+              </xs:element>
+              <xs:element name="MultipleSimulations" type="DefaultOrPositiveInteger">
+                <!-- -multi: Do multiple simulations in parallel -->
+              </xs:element>
+              <xs:element name="ReplicaExchangeSteps" type="DefaultOrPositiveInteger">
+                <!-- -replex: Attempt replica exchange periodically with this period (steps) -->
+              </xs:element>
+              <xs:element name="NumberOfRandomExchangesEachReplicaInterval" type="DefaultOrPositiveInteger">
+                <!-- -nex: Number of random exchanges to carry out each exchange interval (N^3 is one suggestion). -nex zero or not specified gives neighbor replica exchange.  -->
+              </xs:element>
+              <xs:element name="ReSeed" type="DefaultOrPositiveInteger">
+                <!-- -reseed: Seed for replica exchange, -1 is generate a seed -->
+              </xs:element>
+              <xs:element name="Ionize" type="boolean">
+                <!-- -ionize: Do a simulation including the effect of an X-Ray bombardment on your system -->
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="LogFile" type="xs:string">
+                      <!-- -g: Log file -->
+                    </xs:element>
+                    <xs:element name="TrajectoryFile" type="xs:string">
+                      <!-- -o: Full precision trajectory: trr trj cpt -->
+                    </xs:element>
+                    <xs:element name="StructureFile" type="xs:string">
+                      <!-- -c:  Structure file: gro g96 pdb etc. -->
+                    </xs:element>
+                    <xs:element name="EnergyFile" type="xs:string">
+                      <!-- -e: Energy file -->
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OptionalOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CompressedTrajectoryFile" type="xs:string">
+                      <!-- -x: Compressed trajectory (portable xdr format) -->
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

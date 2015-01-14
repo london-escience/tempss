@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="gromacs-base.xsd" />
+
+  <xs:element name="GROMACS_solvate">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="SolventStructureFile" type="structureFile">
+                      <!-- -cs [<.gro/.g96/...>] (spc216.gro) (Input, Library)
+                                Structure file: gro g96 pdb brk ent esp tpr tpb tpa  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Structure File of Solute (Protein)</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OptionalInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="SoluteStructureFile" type="structureFile">
+                    <!-- -cp [<.gro/.g96/...>] (protein.gro) (Input, Optional)
+                              Structure file: gro g96 pdb brk ent esp tpr tpb tpa  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Structure File of solvent</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="TopologyFile" type="topologyFile">
+                      <!-- -p [<.top>] (topol.top) (Input/Output, Optional)
+                              Topology file  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Optional topology file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MandatoryOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OutputStructureFile" type="outputStructureFile">
+                      <!-- -o:  Structure file: gro g96 pdb brk ent esp -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Output structure file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

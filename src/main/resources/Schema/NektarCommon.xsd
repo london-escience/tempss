@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+PA notes on name spaces etc:
+Namespaces exist to help software pick up the appropriate xml tags to do its job. 
+See http://www.xml.com/pub/a/1999/01/namespaces.html
+
+xmlns:xs="http://www.w3.org/2001/XMLSchema" tells software capable of validating xml that this is an xsd schema.
+It also tells an xml editor (e.g. visual studio, emacs, ...) what suggestions to offer for auto-completion when writing the xsd.
+
+targetNamespace="http://www.libhpc.imperial.ac.uk": As the current XML document is a schema this attribute defines the namespace that this schema is intended to target, or validate.
+
+xmlns="http://www.libhpc.imperial.ac.uk" - Defines the default namespace within the current document for all non-prefixed elements (i.e no xx: in  <xx:elementName>)
+PA: why is this necessary?
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:simpleType name="positiveDouble">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="positiveIncDouble">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="NotProvided"/>
+
+  <xs:complexType name="GlobalMatrixEvaluation"/>
+
+  <xs:complexType name="fileName">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileType" type="xs:string" fixed="XML" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="boundaryCondition">
+    <xs:sequence>
+      <xs:element name ="Type">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:locationInFile>*[@VAR='u']/name()</libhpc:locationInFile>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="D"/>
+            <xs:enumeration value="N"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Value" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:locationInFile>*[@VAR='u']@VALUE</libhpc:locationInFile>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- This version of the filename entry allows elements from the file to be repeated in the schema
+       Used to allow the boundary conditions to be saved in the geometry file, but output and displayed
+       in the gui. 
+  -->
+  <xs:complexType name="TimeIntegration">
+    <xs:sequence>
+      <!--xs:element name="TimeIntegrationMethod" type="xs:string"/-->
+      <xs:element name="TimeIntegrationMethod">
+        <xs:annotation>
+          <xs:appinfo>
+              <libhpc:documentation>Method of time stepping. See: http://www.nektar.info/wiki/3.2/Reference/TimeStepping
+
+- Formally Explicit Methods: These types of methods are considered explicit from an ODE point of view. They are characterised by a lower triangular coefficient matrix formula, i.e. formula for formula. To avoid confusion, we make a further distinction:
+  -direct explicit method: Only forward operators are required.
+  -indirect explicit method: The inverse operator is required.
+- Diagonally Implicit Methods': Compared to explicit methods, the coefficient matrix formula has now non-zero entries on the diagonal. This means that each stage value depend on the stage derivative at the same stage, requiring an implicit step. However, the calculation of the different stage values is still uncoupled. Best known are the DIRK schemes.
+- IMEX schemes: These schemes support the concept of being able to split right hand forcing term into an explicit and implicit component. This is useful in advection diffusion type problems where the advection is handled explicity and the diffusion is handled implicit.
+
+Choices supported by libhpc/nekkloud:
+                
+"ForwardEuler"	Forward-Euler scheme
+"BackwardEuler"	Backward Euler scheme
+"IMEXOrder1"	IMEX 1st order scheme using Euler Backwards Euler Forwards
+"IMEXOrder2"	IMEX 2nd order scheme using Backward Different Formula and Extrapolation
+"IMEXOrder3"	IMEX 3rd order scheme using Backward Different Formula and Extrapolation
+"DIRKOrder1"	Diagonally Implicit Runge-Kutta scheme of order 1
+"ClassicalRungeKutta4" 4th order Runge Kutta scheme
+              </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="IMEXOrder1"/>
+            <xs:enumeration value="IMEXOrder2"/>
+            <xs:enumeration value="IMEXOrder3"/>
+            <xs:enumeration value="DIRKOrder1"/>
+            <xs:enumeration value="ForwardEuler"/>
+            <xs:enumeration value="BackwardEuler"/>
+            <xs:enumeration value="ClassicalRungeKutta4"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="DiffusionAdvancement">
+        <xs:annotation>
+          <xs:appinfo>
+              <libhpc:documentation>
+Specifies whether diffusion is handled implicitly or explicitly in the time integration scheme. 
+NB: In Cardiac Electrophysiology, the current code only supports Implicit integration of the diffusion term. The cell model is always integrated explicitly. In the Compressible solver, the current code only supports explicit integration.
+              </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Implicit"/>
+            <xs:enumeration value="Explicit"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DirectMatrixInversion">
+    <xs:sequence>
+      <xs:element name="SubStructuring">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Substructuring allows the matrix to be reorganised into a form that is easier to invert.
+  Full: the degrees of freedom from all elements are put together into one big matrix
+  StaticCondensation: Using linear algebra, the matrix is restructured so that all the degrees of freedom on element boundaries come first. This gives a dense matrix in the top left hand corner, and a series of block matrices elsewhere. Then the Schur complement method is used to invert the matrix.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Full"/>
+            <xs:enumeration value="StaticCondensation"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IterativeMatrixInversion">
+    <xs:sequence>
+      <xs:element name="SubStructuring">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              Substructuring allows the matrix to be reorganised into a form that is easier to invert.
+              Full: the degrees of freedom from all elements are put together into one big matrix
+              StaticCondensation: Using linear algebra, the matrix is restructured so that all the degrees of freedom on element boundaries come first. This gives a dense matrix in the top left hand corner, and a series of block matrices elsewhere. Then the Schur complement method is used to invert the matrix.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Full"/>
+            <xs:enumeration value="StaticCondensation"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Preconditioner">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+The preconditioner uses linear algebra to bring the matrix into a form for which the conjugate gradient iterative algorithm converges faster. A perfect preconditioner would be the inverse of the matrix!
+
+LowEnergy: use for 3D elements with high polynomial order
+BlockDiagonal: use for 2D elements with high polynomial order
+Diagonal: use for anything else
+LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulation (rarely used)
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="LowEnergy"/>
+            <xs:enumeration value="Diagonal"/>
+            <xs:enumeration value="BlockDiagonal"/>
+            <xs:enumeration value="LowEnergyWithLinearSpace"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="SuccessiveRHS" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>When SuccessiveRHS is set to true, a number of previous solutions to the linear solver are used to extrapolate an initial guess for the current solve
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IterativeSolverTolerance" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Required tolerance in solution when solving iteratively</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="MatrixInversion">
+    <xs:choice>
+      <xs:element name="Direct" type="DirectMatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Iterative" type="IterativeMatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Invert the matrix iteratively using the conjugate gradient approach. Uses repeated matrix multiplication to converge to a solution to the matrix inverse problem rather than direcly inverting the matrix.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:simpleType name="ElementalEvaluationOptions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SumFactorization"/>
+      <xs:enumeration value="LocalMatrix"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="OperatorOptimizations">
+    <xs:choice>
+      <xs:element name="GlobalMatrixEvaluation" type="GlobalMatrixEvaluation">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Represent the operator as a large, sparse, global matrix. This is typically more efficient at low polynomial orders.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ElementalEvaluation">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Consider the action of the operator locally on each element, and then perform an assembly operation. This is more efficient at high polynomial orders.
+            
+Elemental evaluation can be handled with two alternative approaches: LocalMatrix and SumFactorization. The choice of approach can be different for the different elemnt types (triangle, quadrilateral, etc) 
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Triangles" type="ElementalEvaluationOptions">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+Elemental evaluation approach for triangular elements.
+
+LocalMatrix: Represent as a dense matrix for each element (typically more efficient at intermediate polynomial orders)
+SumFactorization: Represent as a tensor product of smaller dense matrices (more efficient at very high polynomial orders)
+                  </libhpc:documentation>
+                  <libhpc:units></libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="Quadrilaterals" type="ElementalEvaluationOptions">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+Elemental evaluation approach for quadrilateral elements.
+                    
+LocalMatrix: Represent as a dense matrix for each element (typically more efficient at intermediate polynomial orders)
+SumFactorization: Represent as a tensor product of smaller dense matrices (more efficient at very high polynomial orders)
+                  </libhpc:documentation>
+                  <libhpc:units></libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="GlobalOptimizationParameters">
+    <xs:sequence>
+      <xs:element name="BackwardTransform" type="OperatorOptimizations">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Matrix-vector multiplication approach when performing the backward transform.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="InnerProductWRTBase" type="OperatorOptimizations">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Matrix-vector multiplication approach when performing inner product.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MassMatrixOp" type="OperatorOptimizations">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Matrix-vector multiplication approach for the mass operator.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="HelmholtzMatrixOp" type="OperatorOptimizations">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Matrix-vector multiplication approach for the Helmholtz operator.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NumericalAlgorithm">
+    <xs:sequence>
+      <xs:element name="Projection">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+ContinuousGalerkin: enforces continuity of solution across element boundaries
+DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shocks in solution
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ContinuousGalerkin"/>
+            <xs:enumeration value="DiscontinuousGalerkin"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TimeIntegration" type="TimeIntegration">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters setting the method for time integration.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MatrixInversion" type="MatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="GlobalOptimizationParameters" type="GlobalOptimizationParameters">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+Specify the algorithm to use for matrix-vector multiplication. This is specified individually for the various matrix operators that are encountered. These are the: 
+  - backward transform
+  - inner product
+  - Helmholtz and 
+  - mass 
+operators.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Admin">
+    <xs:sequence>
+      <xs:element name="IO_CheckSteps" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The solution can be dumped out at regular intervals. This parameter specifies the number of time steps for this interval.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IO_InfoSteps" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the interval in time steps between each print out of the current solution time.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Expansion">
+    <xs:sequence>
+      <!-- Poly order  = num modes -1 !!!-->
+      <xs:element name="PolynomialOrder" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The order of polynomial expansion used on each element. Higher order gives better approximation to the true solution.
+The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BasisType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              The type of polynomials used as a basis to expand the solution function.
+There are two styles of basis polynomial: modal and nodal. 
+Modal / hierarchical basis: don't need to redefine basis functions when increase the order (but have to be modified to get zero at boundary).
+Nodal: have to be redefined when the polynomial order is increased, but are naturally zero at the boundaries.
+
+Available choices:
+  MODIFIED: Legendre polynomials (modal) that have been multiplied by two linear functions to make them zero at the boundaries.
+  GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+  GLL_LAGRANGE: GLL is same as Gauss but with end points as well. Gauss-Lobatto-Legendre
+  GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+  CHEBYSHEV: another modal approach (similar to Fourier modes).</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="MODIFIED"/>
+            <xs:enumeration value="GAUSS_LAGRANGE"/>
+            <xs:enumeration value="GLL_LAGRANGE"/>
+            <xs:enumeration value="GLL_LAGRANGE_SEM"/>
+            <xs:enumeration value="CHEBYSHEV"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
