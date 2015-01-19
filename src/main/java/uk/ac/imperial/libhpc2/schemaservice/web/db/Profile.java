@@ -1,0 +1,42 @@
+package uk.ac.imperial.libhpc2.schemaservice.web.db;
+
+import java.util.Map;
+
+public class Profile {
+	
+	private int _id;
+	private String _name;
+	private String _profileXml;
+	
+	public Profile() {};
+	
+	public Profile(Map<String,Object> pData) {
+		this._id = (Integer)pData.get("id");
+		this._name = (String)pData.get("name");
+		this._profileXml = (String)pData.get("profileXml");
+	}
+	
+	public int getId() {
+		return _id;
+	}
+	
+	public void setId(int pId) {
+		this._id = pId;
+	}
+	
+	public String getName() {
+		return _name;
+	}
+	
+	public void setName(String pName) {
+		this._name = pName;
+	}
+	
+	public String getProfileXml() {
+		return _profileXml;
+	}
+	
+	public void setProfileXml(String pProfileXml) {
+		this._profileXml = pProfileXml;
+	}
+}

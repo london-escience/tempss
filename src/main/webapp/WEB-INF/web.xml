@@ -5,6 +5,14 @@
 <web-app>
   <display-name>Libhpc Schema Service</display-name>
   <!-- Resource cleanup for fileupload cleaner -->
+  <context-param>
+    <param-name>log4jConfigLocation</param-name>
+    <param-value>classpath:log4j.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+  </listener>
+  
   <listener>
     <listener-class>
       org.apache.commons.fileupload.servlet.FileCleanerCleanup
@@ -13,7 +21,7 @@
   <listener>
     <listener-class>uk.ac.imperial.libhpc2.schemaservice.TemproServletContextListener</listener-class>
   </listener>
-   
+  
   <servlet>
     <servlet-name>SchemaProcessorServlet</servlet-name>
     <servlet-class>uk.ac.imperial.libhpc2.schemaservice.SchemaProcessorServlet</servlet-class>
@@ -22,6 +30,12 @@
   <servlet>
     <servlet-name>JerseyServletContainer</servlet-name>
     <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+  </servlet>
+  
+  <servlet>
+      <servlet-name>profiles</servlet-name>
+      <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+      <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>
@@ -32,6 +46,11 @@
   <servlet-mapping>
     <servlet-name>JerseyServletContainer</servlet-name>
     <url-pattern>/api/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+      <servlet-name>profiles</servlet-name>
+      <url-pattern>/profiles/*</url-pattern>
   </servlet-mapping>
 
 </web-app>

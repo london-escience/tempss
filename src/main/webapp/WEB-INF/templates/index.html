@@ -1,0 +1,15 @@
+{% extends "base" %}
+
+{% block content %}
+
+  <h1>Hello World!</h1>
+  <h6>This page has been configured by {{ firstname }} {{ surname }}</h6>
+  <h2>Profiles</h2>
+  {% for p in profiles %}
+    <br/>
+    Profile: {{ p.name }}<br/>
+    Content: {{ p.profileXml }}
+    <br/><br/>
+  {% endfor %}
+
+{% endblock content %}

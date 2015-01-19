@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web"/>
+    
+    <bean id="pebbleEngine" class="com.mitchellbosecke.pebble.PebbleEngine">
+		<property name="loader">
+			<bean class="com.mitchellbosecke.pebble.spring.PebbleTemplateLoader" />
+		</property>
+	</bean>
+	
+	<bean id="viewResolver" class="com.mitchellbosecke.pebble.spring.PebbleViewResolver">
+		<property name="prefix" value="/WEB-INF/templates/" />
+		<property name="suffix" value=".html" />
+		<property name="pebbleEngine" ref="pebbleEngine" />
+	</bean>
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
+	    <property name="driverClassName" value="org.sqlite.JDBC" />
+	    <property name="url" value="jdbc:sqlite::resource:profiles.db" />
+	    <property name="initialSize" value="1" />
+	    <!--  <property name="maxTotal" value="1" />  REQUIRED INSTEAD OF maxActive FOR DBCP2-->
+	    <property name="maxActive" value="1" /> 
+	    <property name="maxIdle" value="1" />
+	    <property name="poolPreparedStatements" value="true" />
+	</bean>
+	
+	<bean id="profileDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcProfileDaoImpl" />
+	
+	
+</beans>
