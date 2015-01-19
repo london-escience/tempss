@@ -439,7 +439,7 @@ function submitComponentRequest() {
 
     // Load the html tree representing the component interface from the server.
     $.ajax({
-        url: '/schemaservice/process',
+        url: '/temproservice/process',
         data: formData,
         processData: false,
         contentType: false,
@@ -501,7 +501,7 @@ function submitXML() {
 
 
     $.ajax({
-        url: '/schemaservice/process',
+        url: '/temproservice/process',
         data: formData,
         processData: false,
         contentType: false,
