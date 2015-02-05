@@ -1,6 +1,6 @@
 # TemPro
 
-### A template and profile editor managing application inputs
+### A template and profile editor for managing application inputs
 
 TemPro is a web service for managing application parameter templates and
 profiles which are used for collaboratively generating input files for
