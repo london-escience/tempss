@@ -548,7 +548,9 @@ function collapseTree() {
     // At startup, hide all nodes except the root.
 
     // Hide all li nodes
-    $("li").hide();
+    // $("li").hide();
+    //JC - modified to correct issue with menu not showing.
+    $("#schema-tree li").hide();
 
     // Hide all ul nodes that are choices (i.e. have choice-id attribute).
     // This ensures when we click on a choice bubble which has been selected, nothing will show.
@@ -557,6 +559,9 @@ function collapseTree() {
 
     // Show the root.
     $("[role='tree']").children().show();
+    // Show the top level elements - JC
+    $("#schema-tree ul[role='tree'] > li > ul").children().show();
+
 
     // Handle file uploads
     $("input[type='file']").change(function () {

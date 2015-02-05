@@ -1,1 +1,41 @@
- 
+body {
+    padding-bottom: 30px;
+    padding-top: 70px;
+}
+
+.navbar-inverse {
+	background-color: #295AD1;
+}
+
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:focus, .navbar-inverse .navbar-nav > .active > a:hover {
+    background-color: #062E69;
+    color: #fff;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    color: #d5d5d5;
+}
+
+.navbar-inverse .navbar-brand {
+    color: #d5d5d5;
+}
+
+#profile-list .well {
+	min-height: 400px;
+}
+
+.loading img {
+	width: 16px;
+}
+
+.loading span {
+	display: inline-block;
+	padding-left: 6px;
+	font-size: 10px;
+	padding-top: 10px;
+	color: #777;
+}
+
+.infotext {
+	color: #888;
+}

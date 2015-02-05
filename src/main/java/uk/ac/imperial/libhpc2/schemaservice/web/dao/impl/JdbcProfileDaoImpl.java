@@ -32,6 +32,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		_insertProfile = new SimpleJdbcInsert(_jdbcTemplate).withTableName("profile").usingGeneratedKeyColumns("id");
 	}
 	
+	@Override
 	public int add(Profile pProfile) {
 		Map<String,String> rowParams = new HashMap<String, String>(2);
 		rowParams.put("name", pProfile.getName());
@@ -40,6 +41,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		return id.intValue();
 	}
 	
+	@Override
 	public List<Profile> findAll() {
 		//List<Profile> profiles = _jdbcTemplate.queryForList("select * from profile", Profile.class);
 		List<Map<String,Object>> profileDataList = _jdbcTemplate.queryForList("select * from profile");
@@ -59,6 +61,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		return profiles;
 	}
 	
+	@Override
 	public Profile findByName(String pName) {
 		Profile profile = _jdbcTemplate.queryForObject("select * from profile where name = ?", 
 				Profile.class, pName);	
@@ -71,6 +74,21 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		sLog.debug("Found profile with name <{}> and XML <{}>.", profile.getName(), profile.getProfileXml());
 		
 		return profile;
+	}
+
+	@Override
+	public List<Profile> findByTemplateId(String pTemplateId) {
+		List<Profile> profileList = _jdbcTemplate.queryForList("select * from profile where templateId = ?", 
+				Profile.class, pTemplateId);	
+		
+		if(profileList.size() == 0) {
+			sLog.debug("Profiles for templateId <{}> not found.", pTemplateId);
+			return null;
+		}
+		
+		sLog.debug("Found <> profiles for template id <{}>.", profileList.size(), pTemplateId);
+		
+		return profileList;
 	}
 	
 }

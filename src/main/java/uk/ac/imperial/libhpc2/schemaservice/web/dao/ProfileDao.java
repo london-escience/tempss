@@ -11,5 +11,7 @@ public interface ProfileDao {
 	public List<Profile> findAll();
 	
 	public Profile findByName(String pName);
+	
+	public List<Profile> findByTemplateId(String pTemplateId);
 
 }

@@ -6,6 +6,7 @@ public class Profile {
 	
 	private int _id;
 	private String _name;
+	private String _templateId;
 	private String _profileXml;
 	
 	public Profile() {};
@@ -13,6 +14,7 @@ public class Profile {
 	public Profile(Map<String,Object> pData) {
 		this._id = (Integer)pData.get("id");
 		this._name = (String)pData.get("name");
+		this._templateId = (String)pData.get("tenmplateId");
 		this._profileXml = (String)pData.get("profileXml");
 	}
 	
@@ -30,6 +32,14 @@ public class Profile {
 	
 	public void setName(String pName) {
 		this._name = pName;
+	}
+	
+	public String getTemplateId() {
+		return _templateId;
+	}
+	
+	public void setTemplateId(String pTemplateId) {
+		this._templateId = pTemplateId;
 	}
 	
 	public String getProfileXml() {
