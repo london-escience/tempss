@@ -15,7 +15,13 @@
 	<logger name="uk.ac.imperial.libhpc2">
 		<level value="DEBUG" />
 	</logger>
+
 	
+	<logger name="org.springframework">
+	        <level value="DEBUG" />
+	</logger>	
+    
+    
 	<root>
 		<priority value="INFO" />
 		<appender-ref ref="console" />

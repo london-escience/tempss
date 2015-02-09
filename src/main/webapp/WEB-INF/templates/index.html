@@ -31,8 +31,14 @@
 	<div class="row">
 		<div class="col-md-3" id="profile-list">
 			<div class="well">
-				<h4>Profiles:</h4>
-			    <div id="profiles">
+				<div>
+				    <h4 style="float:left;">Profiles:</h4>
+				    <div class="col-sm-4 loading" id="profiles-loading" style="float: right; width: 140px; padding-top: 4px; display:none;">
+				          <img src="../assets/img/loading.gif"/>
+				          <span>Finding profiles...</span>
+				    </div>
+				</div>
+			    <div id="profiles" style="clear: both;">
 			        <h6 class="infotext">Profiles for the currently selected template will appear here.</h6>
 			    </div>
 			</div>
@@ -87,8 +93,8 @@
       </div>
       <div class="modal-footer">
       	<div id="delete-profile-modal-errors"></div>
-        <button type="button" id="cancel-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-        <button id="delete-btn-modal" type="button" class="btn btn-success">Save</button>
+        <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="save-profile-btn-modal" type="button" class="btn btn-success">Save</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -118,16 +124,36 @@
 		})
 		
 		// When the "Save as profile" button is clicked below a
-		// tempalte that has had values entered into it, open 
+		// template that has had values entered into it, open 
 		// the save profile modal to prompt the user for a profile name
 		$('#save-as-profile-btn').on('click', function(e) {
+			$('#profileName').val("");
+			if($('#profileName').val() == "") {
+				$('#save-profile-btn-modal').prop('disabled', true);
+			}
+			else {
+				$('#save-profile-btn-modal').removeProp('disabled');
+			}
 			$('#save-profile-modal').modal();
 		});
 		
-		// When the save profile button is clicked, open a modal
-		// prompting the user to enter a profile name
-		$('#save-profile-btn').on('click', function(e) {
+		// When the modal input box is changed, check if there is text
+		// in it and if so, make sure the save button is enabled.
+		$('body').on('keyup', '#profileName', function() {
+			var saveBtn = $('#save-profile-btn-modal');
 			
+			if($('#profileName').val() == "") {
+				saveBtn.prop('disabled', true);
+			}
+			else {
+				saveBtn.prop('disabled', false);
+			}
+		});
+		
+		// When the save button on the modal is clicked to save the
+		// profile using the provided name, initiate the save process
+		$('#save-profile-btn-modal').on('click', function(e) {
+			saveProfile($('input[name=componentname]').val(), $('#profileName').val());
 		});
 	});
 </script>

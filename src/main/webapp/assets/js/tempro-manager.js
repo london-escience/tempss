@@ -93,7 +93,21 @@ function updateProfileList(templateId) {
 	}
 	
 	// Now do a database lookup for profiles for this template.
-	
+	$("#profiles-loading").show();
+	$.ajax({
+        method:   'get',
+        url:      '/temproservice/api/template/id/' + templateId,
+        success:  function(data){
+        	// Data that comes back is the raw HTML to place into the page
+        	$("#template-container").html(data)
+        	
+            $("#profiles-loading").hide(0);
+        },
+        error: function() {
+            $("#profiles-loading").hide(0);
+            $('#profiles').html('<h6 class="infotext">Unable to get profiles for the "' + templateId + '" template.</h6>');
+        }
+    });
 	// If no profiles are available
 	$('#profiles').html('<h6 class="infotext">There are no profiles registered for the "' + templateId + '" template.</h6>');
 }
@@ -117,7 +131,7 @@ function disableProfileButtons(disable) {
 // pop up, save the profile, relating to the specified
 // template.
 function saveProfile(templateId, profileName) {
-	
+	log('Request to save profile <' + profileName + '> for template <' + templateId + '>.');
 	
 }
 

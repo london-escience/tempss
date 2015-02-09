@@ -10,10 +10,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
+
+import com.mitchellbosecke.pebble.PebbleEngine;
 
 @Controller
 public class RootController {

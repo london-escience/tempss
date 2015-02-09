@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Repository;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 
-@Repository
 public class JdbcProfileDaoImpl implements ProfileDao {
 
 	private static final Logger sLog = LoggerFactory.getLogger(JdbcProfileDaoImpl.class.getName());
@@ -25,9 +25,8 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	private JdbcTemplate _jdbcTemplate;
 	private SimpleJdbcInsert _insertProfile;
 	
-	@Autowired
 	public void setDataSource(DataSource dataSource) {
-		sLog.debug("Setting data source for profile data access object.");
+		sLog.debug("Setting data source <" + dataSource + "> for profile data access object.");
 		_jdbcTemplate = new JdbcTemplate(dataSource);
 		_insertProfile = new SimpleJdbcInsert(_jdbcTemplate).withTableName("profile").usingGeneratedKeyColumns("id");
 	}
@@ -36,6 +35,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	public int add(Profile pProfile) {
 		Map<String,String> rowParams = new HashMap<String, String>(2);
 		rowParams.put("name", pProfile.getName());
+		rowParams.put("templateId", pProfile.getTemplateId());
 		rowParams.put("profileXml", pProfile.getProfileXml());
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
@@ -78,17 +78,23 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 
 	@Override
 	public List<Profile> findByTemplateId(String pTemplateId) {
-		List<Profile> profileList = _jdbcTemplate.queryForList("select * from profile where templateId = ?", 
-				Profile.class, pTemplateId);	
+		List<Map<String,Object>> profileList = _jdbcTemplate.queryForList(
+				"select * from profile where templateId = ?", pTemplateId);	
 		
 		if(profileList.size() == 0) {
 			sLog.debug("Profiles for templateId <{}> not found.", pTemplateId);
 			return null;
 		}
 		
-		sLog.debug("Found <> profiles for template id <{}>.", profileList.size(), pTemplateId);
+		sLog.debug("Found <{}> profiles for template id <{}>.", profileList.size(), pTemplateId);
 		
-		return profileList;
+		List<Profile> profileResult = new ArrayList<Profile>();
+		for(Map<String,Object> dbItem : profileList) {
+			Profile p = new Profile(dbItem);
+			profileResult.add(p);
+		}
+		
+		return profileResult;
 	}
 	
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="profileDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcProfileDaoImpl">
+	    <property name="dataSource" ref="dataSource"/>
+	</bean>
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
+	    <property name="driverClassName" value="org.sqlite.JDBC" />
+	    <!-- <property name="url" value="jdbc:sqlite::resource:profiles.db" />  -->
+	    <!-- Use DB in a directory outside the main tomcat app tree when
+	         testing/debugging via Eclipse. -->
+	    <property name="url" value="jdbc:sqlite:/tmp/profiles.db" />
+	    <property name="initialSize" value="1" />
+	    <!--  <property name="maxTotal" value="1" />  REQUIRED INSTEAD OF maxActive FOR DBCP2-->
+	    <property name="maxActive" value="1" /> 
+	    <property name="maxIdle" value="1" />
+	    <property name="poolPreparedStatements" value="true" />
+	</bean>
+
+</beans>

@@ -44,10 +44,20 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,30 +69,25 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
-import com.sun.jersey.multipart.FormDataParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
 import uk.ac.imperial.libhpc2.schemaservice.TemproObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 
 /**
  * Jersey REST class representing the profile endpoint
  */
+@Component
 @Path("profile")
 public class ProfileRestResource {
 
@@ -92,17 +97,24 @@ public class ProfileRestResource {
     private static final Logger sLog = Logger.getLogger(ProfileRestResource.class.getName());
 	
     /**
+     * Profile data access object for accessing the profile database
+     */
+    @Autowired
+	ProfileDao profileDao;
+    
+    /**
      * ServletContext obejct used to access profile metadata
      * Injected via @Context annotation
      */
     ServletContext _context;
-	
-	
-	
+			
     @Context
     public void setServletContext(ServletContext pContext) {
         this._context = pContext;
         sLog.fine("Servlet context injected: " + pContext);
+        //sLog.fine("Manuallly wiring dao bean into class...");
+        //profileDao = (ProfileDao)((BeanFactory)pContext).getBean("profileDao");
+        //sLog.fine("Bean <" + profileDao + "> has been injected as profileDao...");
     }
 	
     /**
@@ -241,4 +253,123 @@ public class ProfileRestResource {
 				
         return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
+    
+    /**
+     * Save the provided JSON data as a profile for the specified template.
+     * 
+     * @param templateId the ID of the template that we're saving the profile for
+     * @param profileJson the JSON data containing the XML profile as the value of the "profile" key 
+     * @param pRequest the HttpServletRequest object for this request
+     * @return
+     */
+    @POST
+    @Path("{templateId}/{profileName}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
+    @SuppressWarnings("unchecked")
+    public Response saveProfile(
+        @PathParam("templateId") String templateId,
+        @PathParam("profileName") String profileName,
+        @RequestBody String profileJson,
+        @Context HttpServletRequest pRequest) {
+
+    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+    	
+    	String profileXml = "";
+    	JSONObject jsonResponse = new JSONObject();
+ 
+    	// Get the profile XML string from the incoming request data
+		try {
+			JSONObject profileObj = new JSONObject(profileJson);
+			profileXml = profileObj.getString("profile");
+			sLog.fine("Handling save request for profile name <" + profileName + "> for template <" 
+					  + templateId + ">:\n" + profileXml);
+		} catch (JSONException e) {
+			String responseText = "{\"status\", \"ERROR\", \"error\", \"" + e.getMessage() + "\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+    	
+    	// Check the specified template exists, if so, save the 
+		// profile data to the database with the provided name
+		TemproObject metadata = components.get(templateId);
+		
+		Map<String, Object> profileData = new HashMap<String,Object>();
+		profileData.put("name", profileName);
+		profileData.put("templateId", templateId);
+		profileData.put("profileXml", profileXml);
+		Profile profile = new Profile(profileData);
+		profileDao.add(profile);
+		sLog.info("The value of profileDao is: " + profileDao);
+		
+		try {
+			jsonResponse.put("result", "OK");
+			jsonResponse.put("name", profileName);
+			jsonResponse.put("templateId", templateId);
+			jsonResponse.put("profileXml", profileXml);
+		} catch (JSONException e) {
+			String responseText = "{\"status\", \"ERROR\", \"error\", \"" + e.getMessage() + "\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+    	    	    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    /**
+     * Get the names of the profiles registered for the template
+     * with the specified ID. Returns a JSON object with the key
+     * profile_names. Its value is a list of string names.
+     * 
+     * @param pTemplateId the ID of the template to get profile names for.
+     * @return a response object containing the JSON name data or an error response.
+     */
+    @GET
+    @Path("{templateId}/names")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
+    public Response getProfileNamesJson(
+    		@PathParam("templateId") String pTemplateId) {
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+    	JSONArray profileArray = new JSONArray();
+    	if(profiles != null) {
+    		for(Profile p : profiles) {
+        		profileArray.put(p.getName());
+        	}	
+    	}
+    	JSONObject jsonResponse = new JSONObject();
+    	try {
+			jsonResponse.put("profile_names", profileArray);
+		} catch (JSONException e) {
+			String responseText = "{\"status\", \"ERROR\", \"error\", \"" + e.getMessage() + "\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    /**
+     * Get the names of the profiles registered for the template
+     * with the specified ID. Returns a string with each profile
+     * name on a new line.
+     * 
+     * @param pTemplateId the ID of the template to get profile names for.
+     * @return a response object containing profile names as a string,
+     *  or an error response.
+     */
+    @GET
+    @Path("{templateId}/names")
+    @Produces("text/plain")
+    public Response getProfileNamesText(
+    		@PathParam("templateId") String pTemplateId) {
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+    	StringBuilder profileNames = new StringBuilder();
+    	// If there are no profiles for the specified template (or the template
+    	// doesn't exist)...
+    	if(profiles != null) {
+	    	for(Profile p : profiles) {
+	    		profileNames.append(p.getName());
+	    		profileNames.append("\n");
+	    	}
+    	}
+    	return Response.ok(profileNames.toString(), MediaType.TEXT_PLAIN).build();
+    }
+        		
 }
