@@ -8,6 +8,8 @@ public interface ProfileDao {
 
 	public int add(Profile pProfile);
 	
+	public int delete(String pTemplateId, String pProfileName);
+	
 	public List<Profile> findAll();
 	
 	public Profile findByName(String pName);

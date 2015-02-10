@@ -42,6 +42,12 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	}
 	
 	@Override
+	public int delete(String pTemplateId, String pProfileName) {
+		int rowsAffected = _jdbcTemplate.update("DELETE FROM profile WHERE templateId = ? AND name = ?", new Object[] {pTemplateId, pProfileName});
+		return rowsAffected;
+	}
+	
+	@Override
 	public List<Profile> findAll() {
 		//List<Profile> profiles = _jdbcTemplate.queryForList("select * from profile", Profile.class);
 		List<Map<String,Object>> profileDataList = _jdbcTemplate.queryForList("select * from profile");
@@ -63,8 +69,15 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	
 	@Override
 	public Profile findByName(String pName) {
-		Profile profile = _jdbcTemplate.queryForObject("select * from profile where name = ?", 
-				Profile.class, pName);	
+		List<Map<String,Object>> profiles = _jdbcTemplate.queryForList("select * from profile where name = ?", pName);	
+		Profile profile = null;
+		if(profiles.size() > 0) {
+			Map<String,Object> profileData = profiles.get(0);
+			profile = new Profile(profileData);
+		}
+		if(profiles.size() > 1) {
+			sLog.error("More than 1 profile with specified name <{}> found. Returning first instance.", pName);
+		}
 		
 		if(profile == null) {
 			sLog.debug("Profile with name <{}> not found.", pName);

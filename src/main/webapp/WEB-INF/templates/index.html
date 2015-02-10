@@ -9,7 +9,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="well">
-				<h3 style="padding-bottom: 20px;">Templates</h3>
+			  <h3 style="padding-bottom: 20px;">Templates</h3>
 				<form class="form-horizontal">
 				  <div class="form-group">
 				    <label for="template-select" class="col-sm-2 control-label">Available templates:</label>
@@ -52,6 +52,10 @@
 				      	  <img src="../assets/img/loading.gif"/>
 				      	  <span>Loading template tree...</span>
 				    	</div>
+				    	<div class="loading" id="template-profile-loading" style="display: none; float: right;">
+				      	  <img src="../assets/img/loading.gif"/>
+				      	  <span>Loading profile...</span>
+				    	</div>
 					    <h4>Template:</h4>
 					    <div id="template-container">
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
@@ -87,12 +91,15 @@
 		    </div>
 		  </div>
 		  <div class="form-group">
-		  	<div id="profile-save-errors" class="col-sm-offset-3 col-sm-8"><h6> </h6></div>
+		  	<div id="profile-save-errors" class="col-sm-offset-3 col-sm-8 text-danger"></div>
 		  </div>
 		</form> 
       </div>
       <div class="modal-footer">
-      	<div id="delete-profile-modal-errors"></div>
+      	<div class="loading" id="profile-saving" style="float: left; display: none;">
+      	  <img src="../assets/img/loading.gif"/>
+      	  <span>Saving profile...</span>
+    	</div>
         <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
         <button id="save-profile-btn-modal" type="button" class="btn btn-success">Save</button>
       </div>
@@ -100,6 +107,47 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="delete-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Delete profile</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="delete-confirm-text"></div>
+		  <div id="profile-delete-errors"></div> 
+      </div>
+      <div class="modal-footer">
+      	<div class="loading" id="profile-deleting" style="float: left; display: none;">
+      	  <img src="../assets/img/loading.gif"/>
+      	  <span>Deleting profile...</span>
+    	</div>
+        <button type="button" id="cancel-delete-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="delete-profile-btn-modal" type="button" class="btn btn-success">Delete</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="confirm-load-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Load profile</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p>
+		  <p>Any unsaved changes entered into the current template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="load-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Continue</button>
+        <button id="cancel-load-btn-modal" type="button" class="btn btn-success">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 	
 {% endblock modals %}
 
@@ -155,6 +203,40 @@
 		$('#save-profile-btn-modal').on('click', function(e) {
 			saveProfile($('input[name=componentname]').val(), $('#profileName').val());
 		});
+		
+		// Add click event listeners for items in the profile list
+		$('#profile-list').on('click', '.profile-link', function(e) {
+			// Load selected profile into the template
+			var profileId = $(e.currentTarget).data('pid');
+			var templateId = $('input[name=componentname]').val();
+			loadProfile(templateId, profileId);
+			e.preventDefault();
+		});
+		
+		// Add click listeners for the delete and load profile icons
+		$('#profile-list').on('click', '.delete-profile', function(e) {
+			var selectedProfileName = $(e.currentTarget).parent().parent().find('.profile-link').first().data('pid');
+			$('#delete-confirm-text').html('<h5 class="text-danger">Are you sure you want to delete profile "'
+					+ '<span id="delete-profile-name">' + selectedProfileName + '</span>"?');
+			$('#profile-delete-errors').html("");
+			$('#delete-profile-modal').modal('show');
+		});
+		
+		$('#profile-list').on('click', '.load-profile', function(e) {
+			var selectedProfileName = $(e.currentTarget).parent().parent().find('.profile-link').first().data('pid');
+			var templateId = $('input[name=componentname]').val();
+			log('About to load profile <' + selectedProfileName + '>.');
+			loadProfile(templateId, selectedProfileName);
+		});
+		
+		// Delete profile when the confirm button is pressed on the confirmation modal
+		$('#delete-profile-btn-modal').on('click', function() {
+			var profileToDelete = $('#delete-profile-name').text();
+			var templateId = $('input[name=componentname]').val();
+			log('About to delete profile <' + profileToDelete + '>.');
+			deleteProfile(templateId, profileToDelete);
+		});
+
 	});
 </script>
 {% endblock script %}

@@ -39,3 +39,24 @@ body {
 .infotext {
 	color: #888;
 }
+
+.profile-item {
+	padding: 8px 12px;
+}
+
+.profile-item a {
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.profile-item a:hover {
+	color: #989898;
+}
+
+.profile-item .glyphicon {
+	/* color: #4290D2; */
+	color: #777;
+	padding-left: 5px;
+	padding-right: 5px;
+	cursor: pointer;
+}

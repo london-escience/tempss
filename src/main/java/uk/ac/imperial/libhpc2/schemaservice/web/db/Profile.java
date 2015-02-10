@@ -12,9 +12,12 @@ public class Profile {
 	public Profile() {};
 	
 	public Profile(Map<String,Object> pData) {
-		this._id = (Integer)pData.get("id");
+		Integer id = (Integer)pData.get("id");
+		if(id != null) {
+			this._id = (Integer)pData.get("id");
+		}
 		this._name = (String)pData.get("name");
-		this._templateId = (String)pData.get("tenmplateId");
+		this._templateId = (String)pData.get("templateId");
 		this._profileXml = (String)pData.get("profileXml");
 	}
 	

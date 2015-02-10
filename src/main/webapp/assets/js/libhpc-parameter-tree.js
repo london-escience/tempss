@@ -330,21 +330,15 @@ function loadChildXML(obj, path, $xml) {
     });
 }
 
-
 function loadlibrary() {
     var parameterXml = $("input[name='libraryxml']").data("fileContents");
+    loadlibrary(parameterXml);
+}
 
-    console.log(parameterXml);
+function loadlibrary(parameterXml) {
 
     var xmlDoc = $.parseXML(parameterXml);
-    var $xml = $(xmlDoc); // The $ of $xml just reminds us it is a jquery object
-    //var $test2 = $xml.find("NektarElectroCardiology > Physics > Model > Monodomain > Chi");
-    //var test3 = $test2.text();
-    //alert(test3);
-
-
-    //var val = $test.text();
-    //alert(val);
+    var $xml = $(xmlDoc);
 
     var root = $("[role='tree']").children("li");
     var thisName = $.trim(root.children("span").text());

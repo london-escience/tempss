@@ -57,6 +57,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -255,12 +256,68 @@ public class ProfileRestResource {
     }
     
     /**
-     * Save the provided JSON data as a profile for the specified template.
+     * Get the profile identified by "profileName" that is based
+     * on the template identified by "templateId".
+     * 
+     * @param templateId the template ID that the requested profile is based on
+     * @param profileName the name of the profile to obtain
+     * @param pRequest the HTTP request object.
+     * @return a JSON object containing the request status and, if successful,
+     *         the profile data. If status is OK, the profile is present under the
+     *         'profile' key. If an ERROR has occurred, the error can be found 
+     *         under key 'code' and any additional description of the error under 
+     *         the key 'message'.
+     */
+    @GET
+    @Path("{templateId}/{profileName}")
+    @Produces("application/json")
+    public Response loadProfile(
+        @PathParam("templateId") String templateId,
+        @PathParam("profileName") String profileName,
+        @Context HttpServletRequest pRequest) {
+    
+    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+
+    	// Check the specified template exists
+		TemproObject templateMetadata = components.get(templateId);
+		if(templateMetadata == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
+					"\"The specified template <" + templateId + "> does not exist.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		// Now try and get the profile
+		Profile p = profileDao.findByName(profileName);
+		if(p == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
+					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
+			return Response.status(Status.NOT_FOUND).entity(responseText).build();
+		}
+		
+		JSONObject jsonResponse = new JSONObject();
+		try {
+			jsonResponse.put("status", "OK");
+			jsonResponse.put("name", p.getName());
+			jsonResponse.put("templateId", p.getTemplateId());
+			jsonResponse.put("profile", p.getProfileXml());
+		} catch (JSONException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_DATA\", \"error\":\"" + e.getMessage() + "\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+    	    	    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    /**
+     * Save the provided XML data (within a JSON wrapper with key 'profile')
+     * as a profile for the specified template.
      * 
      * @param templateId the ID of the template that we're saving the profile for
      * @param profileJson the JSON data containing the XML profile as the value of the "profile" key 
      * @param pRequest the HttpServletRequest object for this request
-     * @return
+     * @return a JSON object containing a status key. If status is OK, the request
+     *         completed successfully, if it is ERROR, the error can be found under key 'code'
+     *         and any additional description of the error under the key 'message'.
      */
     @POST
     @Path("{templateId}/{profileName}")
@@ -274,7 +331,23 @@ public class ProfileRestResource {
         @Context HttpServletRequest pRequest) {
 
     	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
-    	
+
+    	// Check the specified template exists, if so, save the 
+		// profile data to the database with the provided name
+		TemproObject templateMetadata = components.get(templateId);
+		if(templateMetadata == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
+					"\"The specified template <" + templateId + "> does not exist.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		// Now check if the specified profile name already exists
+		if(profileDao.findByName(profileName) != null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
+					"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
+			return Response.status(Status.CONFLICT).entity(responseText).build();
+		}
+
     	String profileXml = "";
     	JSONObject jsonResponse = new JSONObject();
  
@@ -285,14 +358,10 @@ public class ProfileRestResource {
 			sLog.fine("Handling save request for profile name <" + profileName + "> for template <" 
 					  + templateId + ">:\n" + profileXml);
 		} catch (JSONException e) {
-			String responseText = "{\"status\", \"ERROR\", \"error\", \"" + e.getMessage() + "\"}";
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
-    	
-    	// Check the specified template exists, if so, save the 
-		// profile data to the database with the provided name
-		TemproObject metadata = components.get(templateId);
-		
+    			
 		Map<String, Object> profileData = new HashMap<String,Object>();
 		profileData.put("name", profileName);
 		profileData.put("templateId", templateId);
@@ -302,13 +371,81 @@ public class ProfileRestResource {
 		sLog.info("The value of profileDao is: " + profileDao);
 		
 		try {
-			jsonResponse.put("result", "OK");
+			jsonResponse.put("status", "OK");
 			jsonResponse.put("name", profileName);
 			jsonResponse.put("templateId", templateId);
-			jsonResponse.put("profileXml", profileXml);
 		} catch (JSONException e) {
-			String responseText = "{\"status\", \"ERROR\", \"error\", \"" + e.getMessage() + "\"}";
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+    	    	    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    
+    
+    /**
+     * Delete the profile identified by "profileName" that is based
+     * on the template identified by "templateId".
+     * 
+     * @param templateId the template ID that the profile to delete is based on
+     * @param profileName the name of the profile to delete
+     * @param pRequest the HTTP request object.
+     * @return a JSON object containing a status key. If status is OK, the request
+     *         completed successfully, if it is ERROR, the error can be found under key 'code'
+     *         and any additional description of the error under the key 'message'.
+     */
+    @DELETE
+    @Path("{templateId}/{profileName}")
+    @Produces("application/json")
+    public Response deleteProfile(
+        @PathParam("templateId") String templateId,
+        @PathParam("profileName") String profileName,
+        @Context HttpServletRequest pRequest) {
+    
+    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+
+    	// Undertake sme validation checks...
+    	// Check the specified template exists
+		TemproObject templateMetadata = components.get(templateId);
+		if(templateMetadata == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
+					"\"The specified template <" + templateId + "> does not exist.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		// Now check that the specified profile name exists
+		if(profileDao.findByName(profileName) == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
+					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
+			return Response.status(Status.NOT_FOUND).entity(responseText).build();
+		}
+		
+		// Now delete the profile
+		int rowsAffected = profileDao.delete(templateId, profileName);
+		
+		if(rowsAffected == 0) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NOT_DELETED\", \"error\":" +
+					"\"Profile <" + profileName + "> for template <" + templateId + 
+					"> was not present to delete.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		if(rowsAffected > 1) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"MULTIPLE_PROFILES_DELETED\", \"error\":" +
+					"\"Multiple profiles were deleted when trying to delete profile <" + profileName + 
+					"> for template <" + templateId + "> was not present to delete.\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+		
+		JSONObject jsonResponse = new JSONObject();
+		try {
+			jsonResponse.put("status", "OK");
+			jsonResponse.put("name", profileName);
+			jsonResponse.put("templateId", templateId);
+		} catch (JSONException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_DATA\", \"error\":\"" + e.getMessage() + "\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
 		}
     	    	    	
     	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
@@ -328,6 +465,7 @@ public class ProfileRestResource {
     @Produces("application/json")
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
+
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
     	JSONArray profileArray = new JSONArray();
     	if(profiles != null) {
@@ -359,6 +497,7 @@ public class ProfileRestResource {
     @Produces("text/plain")
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
+
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
     	StringBuilder profileNames = new StringBuilder();
     	// If there are no profiles for the specified template (or the template
@@ -371,5 +510,4 @@ public class ProfileRestResource {
     	}
     	return Response.ok(profileNames.toString(), MediaType.TEXT_PLAIN).build();
     }
-        		
 }

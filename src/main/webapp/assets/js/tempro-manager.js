@@ -92,15 +92,31 @@ function updateProfileList(templateId) {
 		return;
 	}
 	
-	// Now do a database lookup for profiles for this template.
+	// Now do a database lookup for profile names for this template.
 	$("#profiles-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/temproservice/api/template/id/' + templateId,
+        url:      '/temproservice/api/profile/' + templateId + '/names',
+        dataType: 'json',
         success:  function(data){
-        	// Data that comes back is the raw HTML to place into the page
-        	$("#template-container").html(data)
-        	
+        	log('Profile name data received from server: ' + data.profile_names);
+        	if(data.profile_names.length > 0) {
+	        	var htmlString = "";
+	        	for(var i = 0; i < data.profile_names.length; i++) {
+	        		htmlString += '<div class="profile-item"><a class="profile-link" href="#"' +  
+	        			'data-pid="'+ data.profile_names[i] + '">' + data.profile_names[i] +
+	        			'</a><div style="float: right;">' +
+	        			'<span class="glyphicon glyphicon-remove-sign delete-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Delete profile"></span>' +
+	        			'<span class="glyphicon glyphicon-floppy-save load-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Load profile into template"></span>' +
+	        			'</div></div>\n';
+	        	}
+	        	$('#profiles').html(htmlString);
+	        	$('.profile-item span[data-toggle="tooltip"]').tooltip();
+        	}
+        	else {
+        		// If no profiles are available
+        		$('#profiles').html('<h6 class="infotext">There are no profiles registered for the "' + templateId + '" template.</h6>');
+        	}
             $("#profiles-loading").hide(0);
         },
         error: function() {
@@ -108,8 +124,6 @@ function updateProfileList(templateId) {
             $('#profiles').html('<h6 class="infotext">Unable to get profiles for the "' + templateId + '" template.</h6>');
         }
     });
-	// If no profiles are available
-	$('#profiles').html('<h6 class="infotext">There are no profiles registered for the "' + templateId + '" template.</h6>');
 }
 
 // Disable the buttons used for saving a profile or 
@@ -132,7 +146,184 @@ function disableProfileButtons(disable) {
 // template.
 function saveProfile(templateId, profileName) {
 	log('Request to save profile <' + profileName + '> for template <' + templateId + '>.');
+	var profileData = getProfileXml($("ul[role='tree']"));
+	var profileObject = {profile:profileData};
+	$("#profile-saving").show();
+	// Clear any existing error text
+	$('#profile-save-errors').html("");
+	$.ajax({
+        method:   'POST',
+        url:      '/temproservice/api/profile/' + templateId + '/' + profileName,
+        dataType: 'json',
+        contentType: 'application/json',
+        data:     JSON.stringify(profileObject),
+        success:  function(data){
+        	// Check if save succeeded
+        	if(data.status == 'OK') {
+        		// Close the modal and update the profile list since 
+        		//save completed successfully.
+        		$('#save-profile-modal').modal('hide');
+        		updateProfileList(templateId);
+        	}
+        	else {
+        		$('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
+        	}
+        	$("#profile-saving").hide();
+        },
+        error: function(data) {
+        	var result = $.parseJSON(data.responseText);
+        	if(result.status == 'ERROR'){
+        		// Some error occurred, show the error message in the modal
+        		var errorText = "";
+        		switch(result.code) {
+        		case 'INVALID_TEMPLATE':
+        			errorText = "An invalid template identifier has been specified.";
+        			break;
+        		case 'PROFILE_NAME_EXISTS':
+        			errorText = "The specified profile name already exists.";
+        			break;
+        		case 'REQUEST_DATA':
+        			errorText = "The JSON request data provided is invalid.";
+        			break;
+        		case 'RESPONSE_DATA':
+        			errorText = "Unable to prepare JSON response data. Profile may have saved successfully";
+        			break;
+        		default:
+        			errorText = "An unknown error has occurred.";
+        		}
+        		$('#profile-save-errors').html("<h6>Unable to save profile: " + errorText + "</h6>");
+        	}
+    		else {
+        		$('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
+        	}
+        	$("#profile-saving").hide();
+        }
+    });
+}
+
+// Load the specified profile into the currently displayed template.
+function loadProfile(templateId, profileId) {
+	log("Request to load profile <" + profileId + "> for template <" + templateId + ">");
+	$("#template-profile-loading").show();
+	$.ajax({
+        method:   'GET',
+        url:      '/temproservice/api/profile/' + templateId + '/' + profileId,
+        dataType: 'json',
+        success:  function(data) {
+        	// Check if save succeeded
+        	if(data.status == 'OK') {
+        		// Extract the profile data and load it into
+        		// the template
+        		var profileXml = data.profile;
+        		loadlibrary(profileXml);
+        	}
+        	else {
+        		//$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
+        	}
+        	$("#template-profile-loading").hide();
+        },
+        error: function(data) {
+        	var result = $.parseJSON(data.responseText);
+        	if(result.status == 'ERROR') {
+        		// An error occurred, show the error message in the modal
+        		var errorText = "";
+        		switch(result.code) {
+        		case 'INVALID_TEMPLATE':
+        			errorText = "An invalid template identifier has been specified.";
+        			break;
+        		case 'PROFILE_DOES_NOT_EXIST':
+        			errorText = "The specified profile does not exist.";
+        			break;
+        		case 'RESPONSE_DATA':
+        			errorText = "Profile load failed, unable to prepare JSON response data.";
+        			break;
+        		default:
+        			errorText = "An unknown error has occurred while loading profile.";
+        		}
+        		//$('#profile-delete-errors').html("<h6>Unable to delete profile: " + errorText + "</h6>");
+        	}
+    		else {
+        		//$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
+        	}
+        	$("#template-profile-loading").hide();
+        }
+	});
 	
+}
+
+// Delete the specified profile and then update the profile list
+function deleteProfile(templateId, profileId) {
+	log("Request to delete profile <" + profileId + "> for template <" + templateId + ">");
+	$("#profile-deleting").show();
+	// Clear any existing error text
+	$('#profile-delete-errors').html("");
+	$.ajax({
+        method:   'DELETE',
+        url:      '/temproservice/api/profile/' + templateId + '/' + profileId,
+        dataType: 'json',
+        success:  function(data) {
+        	// Check if save succeeded
+        	if(data.status == 'OK') {
+        		// Close the modal and update the profile list since 
+        		//save completed successfully.
+        		$('#delete-profile-modal').modal('hide');
+        		$('#delete-confirm-text').html("");
+        		updateProfileList(templateId);
+        	}
+        	else {
+        		$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
+        	}
+        	$("#profile-deleting").hide();
+        },
+        error: function(data) {
+        	var result = $.parseJSON(data.responseText);
+        	if(result.status == 'ERROR') {
+        		// An error occurred, show the error message in the modal
+        		var errorText = "";
+        		switch(result.code) {
+        		case 'INVALID_TEMPLATE':
+        			errorText = "An invalid template identifier has been specified.";
+        			break;
+        		case 'PROFILE_DOES_NOT_EXIST':
+        			errorText = "The specified profile does not exist.";
+        			break;
+        		case 'PROFILE_NOT_DELETED':
+        			errorText = "The specified profile could not be deleted.";
+        			break;
+        		case 'MULTIPLE_PROFILES_DELETED':
+        			errorText = "ERROR: Multiple profiles deleted.";
+        			break;
+        		case 'RESPONSE_DATA':
+        			errorText = "Unable to prepare JSON response data. Profile may have been successfully deleted";
+        			break;
+        		default:
+        			errorText = "An unknown error has occurred.";
+        		}
+        		$('#profile-delete-errors').html("<h6>Unable to delete profile: " + errorText + "</h6>");
+        	}
+    		else {
+        		$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
+        	}
+        	$("#profile-deleting").hide();
+        }
+	});
+	
+}
+
+// Get the profile XML data from the specified element
+// This function must be provided with the ul element
+// with the role "tree" at the root of a template tree.
+function getProfileXml(treeElement) {
+	// Get the XML for the tree
+	var indentation = "    ";
+	var treeRoot = treeElement.children("li");
+	var thisName = $.trim(treeRoot.children("span").text());
+
+	xmlString = "<" + thisName + ">\n";
+	xmlString += generateChildXML(treeRoot, indentation, false);
+	xmlString += "</" + thisName + ">\n";
+
+	return xmlString;
 }
 
 // Utility function for displaying log messages
