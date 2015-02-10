@@ -293,19 +293,19 @@ function loadChildXML(obj, path, $xml) {
             isLeaf = true;
         }
 
-        console.log(thisPath);
+        //console.log(thisPath);
 
         // If it's an input box, get the text
         if ($(child).children("input").length) {
             var xmlEntry = $.trim($xml.find(thisPath).text());
-            console.log(xmlEntry);
+            //console.log(xmlEntry);
             // Set the entry and call the onchange function
             $(child).children("input").val(xmlEntry).change();
         }
         // If it's a dropdown select box at a leaf, get the selection
         if (isLeaf && $(child).children("select").length) {
             var xmlEntry = $.trim($xml.find(thisPath).text());
-            console.log(xmlEntry);
+            //console.log(xmlEntry);
             $(child).children("select").val(xmlEntry).change();
         }
         // If it's a choice via dropdown select but not a leaf
@@ -318,7 +318,7 @@ function loadChildXML(obj, path, $xml) {
             }
             else {
                 var choiceVal = xmlEntry.nodeName;
-                console.log(choiceVal);
+                //console.log(choiceVal);
                 $(child).children("select").val(choiceVal).change();
             }
         }

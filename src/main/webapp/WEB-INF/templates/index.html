@@ -148,6 +148,25 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div id="confirm-clear-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Reset template</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to clear all inserted values and empty the current template?</p>
+		  <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-clear-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="clear-profile-btn-modal" type="button" class="btn btn-success">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 	
 {% endblock modals %}
 
@@ -237,6 +256,18 @@
 			deleteProfile(templateId, profileToDelete);
 		});
 
+		// Open a modal to confirm that the user wants to clear 
+		// the current profile data.
+		$('#clear-profile-btn').on('click', function() {
+			$('#confirm-clear-profile-modal').modal('show');
+		});
+		
+		$('#clear-profile-btn-modal').on('click', function() {
+			clearProfileContentInTemplate();
+			$('#confirm-clear-profile-modal').modal('hide');
+		});
+		
+		
 	});
 </script>
 {% endblock script %}

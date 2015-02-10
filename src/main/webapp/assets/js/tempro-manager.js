@@ -310,6 +310,15 @@ function deleteProfile(templateId, profileId) {
 	
 }
 
+// Clears any profile content entered into the template and
+// returns it to the original blank template.
+function clearProfileContentInTemplate() {
+	// For now, we re-load the blank template from the service rather
+	// than clearing values on the client side.
+	var templateId = $('input[name=componentname]').val();
+	displayTemplate(templateId, 'REFRESH');
+}
+
 // Get the profile XML data from the specified element
 // This function must be provided with the ul element
 // with the role "tree" at the root of a template tree.
