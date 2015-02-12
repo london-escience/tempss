@@ -4,11 +4,13 @@ body {
 }
 
 .navbar-inverse {
-	background-color: #295AD1;
+	/* background-color: #295AD1; */
+	background-color: #222;
 }
 
 .navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:focus, .navbar-inverse .navbar-nav > .active > a:hover {
-    background-color: #062E69;
+    /* background-color: #062E69; */
+    background-color: #444;
     color: #fff;
 }
 

@@ -141,6 +141,18 @@ function disableProfileButtons(disable) {
 	
 }
 
+// Disable/enable the button used for application 
+// input when there is not a valid profile loaded
+function disableGenerateInputButton(disable) {
+	if(disable) {
+		$('#generate-input-file-btn').prop('disabled', true);
+	}
+	else {
+		$('#generate-input-file-btn').removeProp('disabled');
+	}
+	
+}
+
 // Given a profile name entered by the user into a modal
 // pop up, save the profile, relating to the specified
 // template.
@@ -216,6 +228,24 @@ function loadProfile(templateId, profileId) {
         		// the template
         		var profileXml = data.profile;
         		loadlibrary(profileXml);
+        		// Now add valid/invalid listeners to the root node
+        		// to enable the save button when the whole tree is valid
+        		// and disable when it is invalidated.
+        		$('ul[role=tree]').on('nodeValid', function() {
+        			disableGenerateInputButton(false);
+        		});
+        		$('ul[role=tree]').on('nodeInvalid', function() {
+        			disableGenerateInputButton(true);
+        		});
+        		// TODO: If the root node is already valid on load, we
+        		// need to fire the nodeValid event now since it won't
+        		// be triggered otherwise. Should we add listeners before
+        		// loading profile or will this result in a performance
+        		// issue? Since we're interested only in the root node
+        		// this is considered ok for now...
+        		if($('ul[role=tree]').hasClass('valid')) {
+        			$('ul[role=tree]').trigger('nodeValid', $('ul[role=tree]'));
+        		}
         	}
         	else {
         		//$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
@@ -317,6 +347,15 @@ function clearProfileContentInTemplate() {
 	// than clearing values on the client side.
 	var templateId = $('input[name=componentname]').val();
 	displayTemplate(templateId, 'REFRESH');
+}
+
+// Process the job profile currently displayed in the template,
+// running it through the profile XSLT that transforms the 
+// profile into a job input file.
+function temproProcessProfile() {
+	var treeRootNode = $("ul[role='tree']").children("li");
+	var templateId = $('input[name=componentname]').val();
+	processJobProfile(treeRootNode, templateId);
 }
 
 // Get the profile XML data from the specified element

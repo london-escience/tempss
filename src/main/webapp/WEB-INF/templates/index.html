@@ -56,9 +56,16 @@
 				      	  <img src="../assets/img/loading.gif"/>
 				      	  <span>Loading profile...</span>
 				    	</div>
-					    <h4>Template:</h4>
+					    <h4>Profile editor:</h4>
 					    <div id="template-container">
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
+					    </div>
+					    <div style="float: left; padding-bottom: 30px;">
+					    	<button class="btn btn-info" id="generate-input-file-btn">Generate app input file</button>
+					    	<span class="loading" id="process-profile-loading" style="padding-left: 8px; display: none;"> 
+					    	  <img src="../assets/img/loading.gif"/>
+				      	      <span>Processing profile...</span>
+				      	    </span>
 					    </div>
 					    <div style="float: right; padding-bottom: 30px;">
 					    	<button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
@@ -173,12 +180,15 @@
 {% block script %}
 <script type="text/javascript" src="../assets/js/bootstrap-tree.js"></script>
 <script type="text/javascript" src="../assets/js/libhpc-parameter-tree.js"></script>
+<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fileDownload/1.4.2/jquery.fileDownload.min.js"></script> -->
+<script type="text/javascript" src="../assets/js/jquery.fileDownload.js"></script>
 <script type="text/javascript">
 	$(document).ready( function() {
 		log("Document ready...")
 		
 		updateTemplateList();
 		disableProfileButtons(true);
+		disableGenerateInputButton(true); 
 		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
@@ -267,7 +277,11 @@
 			$('#confirm-clear-profile-modal').modal('hide');
 		});
 		
-		
+		// Genrate the input data file for the current, valid profile.
+		$('#generate-input-file-btn').on('click', function() {
+			$('#process-profile-loading').show();
+			temproProcessProfile();
+		});
 	});
 </script>
 {% endblock script %}

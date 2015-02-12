@@ -124,7 +124,7 @@ function setLeavesWithoutInputsToValid() {
         var isDropDown = ($(this).find('select').length > 0);
         // If there are no inputs, then the leaf must be valid!
         if (!(isTextInput || isDropDown)) {
-            $(this).closest("ul").attr('class', 'valid');
+            $(this).closest("ul").attr('class', 'valid').trigger('nodeValid',$(this).closest("ul"));
         }
     });
 }
@@ -136,10 +136,14 @@ function validateParentNodes(caller) {
         // Node is valid if there are no in-valid children
         var isValid = (parent.children('li').children('ul:not([class="valid"], [chosen="false"])').length == 0);
         if (isValid) {
-            parent.closest("ul").attr('class', 'valid');
+            parent.closest("ul").attr('class', 'valid').trigger('nodeValid',parent.closest("ul"));
+            // TODO: If we're dealing with the root node of the tree,
+            // fire an event to say that the tree has been made valid.
         }
         else {
-            parent.closest("ul").removeAttr('class', 'valid');
+            parent.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',parent.closest("ul"));
+            // TODO: If we're dealing with the root node of the tree,
+            // fire an event to say that the tree has been made invalid.
         }
 
         // TODO: add index to safeguard against infinite loop.
@@ -153,37 +157,37 @@ function validateEntries(caller, validationtype, restrictions_json) {
 
     try {
         // Start by assuming it's not valid
-        caller.closest("ul").removeAttr('class', 'valid');
+        caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
 
         switch (validationtype) {
             case "xs:double":
                 if (!isNaN(caller.val())) {
                     // If it's a number
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
             case "xs:positiveInteger":
                 // See http://stackoverflow.com/questions/16941386/validate-a-string-is-non-negative-whole-number-in-javascript
                 var intRegex = /^\d+$/; // ^ start of string, \d digit, + any number of times, $ end of string
                 if (intRegex.test(caller.val()) && caller.val() > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
             case "xs:boolean":
                 if (caller.val() === "true" || caller.val() === "false") {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));;
                 }
                 break;
             case "xs:file":
                 // Any string filename will do for now, but extension will be checked below.
                 if (caller.val().length > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
             case "xs:string":
                 // Any string will do for now.
                 if (caller.val().length > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
         }
@@ -194,22 +198,22 @@ function validateEntries(caller, validationtype, restrictions_json) {
                 switch (item) {
                     case "xs:minExclusive":
                         if (caller.val() <= value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:maxExclusive":
                         if (caller.val() >= value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:minInclusive":
                         if (caller.val() < value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:maxInclusive":
                         if (caller.val() > value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:enumeration":
@@ -221,7 +225,7 @@ function validateEntries(caller, validationtype, restrictions_json) {
                             }
                         }
                         if (!(isStringEnumerationFound)) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:filetype":
@@ -236,7 +240,7 @@ function validateEntries(caller, validationtype, restrictions_json) {
                         }
                         if (!(extensionFound)) {
                             // File is not valid after all
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                 }
@@ -245,12 +249,12 @@ function validateEntries(caller, validationtype, restrictions_json) {
 
         // Assume an empty input is never valid.
         if (caller.val() == "") {
-            caller.closest("ul").removeAttr('class', 'valid');
+            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
         }
     }
     catch (exception) {
         // If there was an exception, set to invalid
-        caller.closest("ul").removeAttr('class', 'valid');
+        caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
     }
     validateParentNodes(caller.parent().closest('ul'));
 }
@@ -462,6 +466,8 @@ function submitComponentRequest() {
 
 }
 
+// This function is DEPRECATED - it uses the old HTTP POST-based
+// service interface. Please use processJobProfile instead.
 function submitXML() {
     $('#xml-results').html("Submitting xml ...");
 
@@ -533,9 +539,71 @@ function submitXML() {
 
         }
     });
+}
 
+// Process the job profile data currently in the template tree
+// identified by treeRootNode. Send this data to the TemPro REST
+// API and return the JSON response to the caller.
+function processJobProfile(treeRootNode, templateId) {
+	
+    var profileXml = "";
+    //var rootNode = $("[role='tree']").children("li");
+    var templateName = $.trim(treeRootNode.children("span").text());
+    var indentation = "    ";
+    
+    profileXml += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    profileXml += "<" + templateName + ">\n";
+    profileXml += generateChildXML(treeRootNode, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
+    profileXml += "</" + templateName + ">\n";
 
+    // Create form data object to post the xml and files to the server
+    var formData = new FormData();
 
+    // Add the files to the form data
+    $("input[type = 'file']").each(function (index, element) {
+        formData.append('xmlupload_file', element.files[0]);  // Just assume one file provided for each thing for now.
+    });
+
+    // Add the xml string
+    formData.append('xmlupload', profileXml);
+
+    // Add a field to tell the server what component this is.
+    // The component name has to match the name of the root node in the tree!
+    // UPDATED: This is no longer required with the REST API
+    // var componentName = $("input[name = 'componentname']").val();
+    // formData.append('componentname', componentName);
+
+    $.ajax({
+        url: '/temproservice/api/profile/' + templateId + '/convert',
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        dataType: 'json',
+        success: function (data) {
+        	// If the request returns successfully we'll
+        	// have some JSON data containing a group of URLs
+        	// The TransformedXml parameter will contain a 
+        	// link to the required data.
+        	log('Location of transformed XML: ' + data.TransformedXml);
+        	
+        	var inputFileUrl = data.TransformedXml;
+        	
+        	// Trigger a download request to get the transformed XML
+        	// and prompt the user to save the file.
+        	$.fileDownload(inputFileUrl);
+        	
+        	// If a loading element is displayed, hide it
+        	if($('process-profile-loading').length > 0) {
+        		$('process-profile-loading').hide();
+        	}
+        },
+        error: function(data) {
+        	log('An error occured downloading the application input file for templateId ' + templateId);
+        	
+        	
+        }
+    });
 }
 
 function collapseTree() {

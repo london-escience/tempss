@@ -45,6 +45,7 @@
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -104,7 +105,7 @@ public class ProfileRestResource {
 	ProfileDao profileDao;
     
     /**
-     * ServletContext obejct used to access profile metadata
+     * ServletContext object used to access profile metadata
      * Injected via @Context annotation
      */
     ServletContext _context;
