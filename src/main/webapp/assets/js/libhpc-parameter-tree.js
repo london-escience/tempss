@@ -334,17 +334,24 @@ function loadChildXML(obj, path, $xml) {
     });
 }
 
-function loadlibrary() {
-    var parameterXml = $("input[name='libraryxml']").data("fileContents");
-    loadlibrary(parameterXml);
+// Added this for API clarity, retained original
+// loadlibrary function to retain compatibility
+// with legacy applications
+function loadProfile(profileXML, targetTemplate) {
+	loadlibrary(profileXML, targetTemplate);
 }
 
-function loadlibrary(parameterXml) {
+function loadlibrary() {
+    var parameterXml = $("input[name='libraryxml']").data("fileContents");
+    loadlibrary(parameterXml, "[role='tree']");
+}
+
+function loadlibrary(parameterXml, targetTemplate) {
 
     var xmlDoc = $.parseXML(parameterXml);
     var $xml = $(xmlDoc);
 
-    var root = $("[role='tree']").children("li");
+    var root = $(targetTemplate).children("li");
     var thisName = $.trim(root.children("span").text());
     loadChildXML(root, thisName, $xml);
 }
@@ -539,6 +546,21 @@ function submitXML() {
 
         }
     });
+}
+
+// Generate an XML profile document for the specified template with 
+// values entered into it. This function extracts data currently 
+// entered into the template and builds a profile document for it.
+function getProfileXML(templateRoot) {
+    var xmlString = "";
+    var root = $(templateRoot).children("li");
+    var thisName = $.trim(root.children("span").text());
+    var indentation = "    ";
+
+    xmlString += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    xmlString += "<" + thisName + ">\n";
+    xmlString += generateChildXML(root, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
+    xmlString += "</" + thisName + ">\n";
 }
 
 // Process the job profile data currently in the template tree
