@@ -44,11 +44,15 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,13 +68,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.json.JSONArray;
@@ -511,4 +519,49 @@ public class ProfileRestResource {
     	}
     	return Response.ok(profileNames.toString(), MediaType.TEXT_PLAIN).build();
     }
+    
+    /**
+     * Convert the provided profile data to an input file using
+     * the transform stored in the template metadata. 
+     * @param pFileId the ID of the file to convert, as obtained from the
+     *               response to the convert call.
+     * @return the application input file specified by the fileId
+     */
+    @GET
+    @Path("inputFile/{fileId}")
+    public Response getApplicationInputFile(
+        @PathParam("fileId") String pFileId,
+        @Context HttpServletRequest pRequest) {
+    	
+    	sLog.fine("Request to get application input file with ID: " + pFileId);
+    	
+    	String fileDirPath = _context.getRealPath("temp");
+    	final File dataFile = new File(fileDirPath + File.separator + "output_xml_" + pFileId + ".xml");
+    	if(!dataFile.exists()) {
+    		return Response.status(Status.NOT_FOUND).entity("Request app input data file could not be found.").build();
+    	}
+    	
+    	StreamingOutput so = new StreamingOutput() {
+			@Override
+			public void write(OutputStream pOut) throws IOException,
+					WebApplicationException {
+
+				FileInputStream in = new FileInputStream(dataFile);
+				byte[] data = new byte[1024];
+				int dataRead = -1;
+				while((dataRead = in.read(data)) != -1) {
+					pOut.write(data, 0, dataRead);
+				}
+				pOut.close();
+				in.close();
+			}
+		};
+		
+		// Create the content disposition object for the file download
+		ContentDisposition cd = ContentDisposition.type("attachment").creationDate(new Date()).fileName("tempro_input_file_" + pFileId).build();
+		
+		NewCookie c = new NewCookie("fileDownload","true", "/",null, null, NewCookie.DEFAULT_MAX_AGE, false);
+		return Response.status(Status.OK).header("Content-Disposition", cd).cookie(c).entity(so).build();
+    }
+
 }

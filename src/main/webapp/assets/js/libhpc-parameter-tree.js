@@ -133,7 +133,7 @@ function validateParentNodes(caller) {
     // NB closest() traverses up the tree (including element itself).
     if (caller.parent().closest('ul').length > 0) {
         var parent = caller.parent().closest('ul');
-        // Node is valid if there are no in-valid children
+        // Node is valid if there are no invalid children
         var isValid = (parent.children('li').children('ul:not([class="valid"], [chosen="false"])').length == 0);
         if (isValid) {
             parent.closest("ul").attr('class', 'valid').trigger('nodeValid',parent.closest("ul"));
@@ -156,14 +156,34 @@ function validateParentNodes(caller) {
 function validateEntries(caller, validationtype, restrictions_json) {
 
     try {
-        // Start by assuming it's not valid
-        caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
+        // Start by assuming it's not valid, but remove any "invalid" class
+    	// signifying a previous validation error since this will be re-added
+    	// below if validation has still failed. Also remove validation data
+    	// error strings.
+    	// TODO: Check if we need to fire the nodeInvalid event here
+    	caller.closest("ul").removeClass('invalid');
+        caller.closest("ul").removeClass('valid').trigger('nodeInvalid',caller.closest("ul"));
+        var ul = $(caller.closest("ul"));
+        ul.find('.val-help').remove();
+        
 
         switch (validationtype) {
             case "xs:double":
                 if (!isNaN(caller.val())) {
                     // If it's a number
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
+                }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A double value is required for this property." ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
+                	//caller.closest("ul").attr('data-val-error','A double value is required for this property.');
+                	//caller.closest("ul").attr('title','A double value is required for this property.');
+                	//alert(caller.closest("ul").data('val-error'));
                 }
                 break;
             case "xs:positiveInteger":
@@ -172,10 +192,29 @@ function validateEntries(caller, validationtype, restrictions_json) {
                 if (intRegex.test(caller.val()) && caller.val() > 0) {
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A positive integer value is required for this property." ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
+                }
+
                 break;
             case "xs:boolean":
                 if (caller.val() === "true" || caller.val() === "false") {
-                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));;
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
+                }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A boolean value ("true" or "false") is required for this property. ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
                 }
                 break;
             case "xs:file":
@@ -337,7 +376,7 @@ function loadChildXML(obj, path, $xml) {
 // Added this for API clarity, retained original
 // loadlibrary function to retain compatibility
 // with legacy applications
-function loadProfile(profileXML, targetTemplate) {
+function loadLibhpcProfile(profileXML, targetTemplate) {
 	loadlibrary(profileXML, targetTemplate);
 }
 
@@ -610,20 +649,23 @@ function processJobProfile(treeRootNode, templateId) {
         	log('Location of transformed XML: ' + data.TransformedXml);
         	
         	var inputFileUrl = data.TransformedXml;
+        	var fileId = inputFileUrl.substring(inputFileUrl.lastIndexOf('_') +1, inputFileUrl.length - 4);
+        	log('Using fileId <' + fileId + '>');
         	
         	// Trigger a download request to get the transformed XML
         	// and prompt the user to save the file.
-        	$.fileDownload(inputFileUrl);
+        	$.fileDownload('/temproservice/api/profile/inputFile/' + fileId);
         	
         	// If a loading element is displayed, hide it
-        	if($('process-profile-loading').length > 0) {
-        		$('process-profile-loading').hide();
+        	if($('#process-profile-loading').length > 0) {
+        		$('#process-profile-loading').hide();
         	}
         },
         error: function(data) {
         	log('An error occured downloading the application input file for templateId ' + templateId);
-        	
-        	
+        	if($('#process-profile-loading').length > 0) {
+        		$('#process-profile-loading').hide();
+        	}
         }
     });
 }

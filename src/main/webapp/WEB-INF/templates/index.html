@@ -286,6 +286,11 @@
 			$('#process-profile-loading').show();
 			temproProcessProfile();
 		});
+		
+		// Set up tooltips for validation help
+		$('body').tooltip({
+		    selector: ".val-help"
+		});
 	});
 </script>
 {% endblock script %}

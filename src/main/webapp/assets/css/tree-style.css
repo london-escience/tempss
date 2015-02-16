@@ -133,12 +133,22 @@ ul {
 	position: relative;
 }
 
-ul.valid li span:before {
+ul.valid li span:first-child:before {
   content:"\e089";
   font-family:"Glyphicons Halflings";
   position: absolute;
   top: 8px;
   left: -14px;
   color: #46A939;
+  font-size: 1.2em;
+}
+
+ul.invalid li span:first-child:before {
+  content:"\e088";
+  font-family:"Glyphicons Halflings";
+  position: absolute;
+  top: 8px;
+  left: -14px;
+  color: #E52638;
   font-size: 1.2em;
 }

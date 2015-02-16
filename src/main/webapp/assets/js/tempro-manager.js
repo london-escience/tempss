@@ -227,7 +227,7 @@ function loadProfile(templateId, profileId) {
         		// Extract the profile data and load it into
         		// the template
         		var profileXml = data.profile;
-        		loadlibrary(profileXml, 'ul[role=tree]');
+        		loadLibhpcProfile(profileXml, 'ul[role=tree]');
         		// Now add valid/invalid listeners to the root node
         		// to enable the save button when the whole tree is valid
         		// and disable when it is invalidated.
