@@ -73,6 +73,7 @@ function displayTemplate(templateId, templateText) {
             // Enable the profile buttons for saving/clearing template content
             disableProfileButtons(false);
         	
+            setEditingProfileName("");
             $("#template-tree-loading").hide(0);
         },
         error: function() {
@@ -251,6 +252,7 @@ function loadProfile(templateId, profileId) {
         	else {
         		//$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
         	}
+        	setEditingProfileName(profileId);
         	$("#template-profile-loading").hide();
         },
         error: function(data) {
@@ -387,6 +389,13 @@ function attachChangeHandlers() {
 			templateEdited = true;
 		}
 	});
+}
+
+function setEditingProfileName(profileName) {
+	if(profileName == "NONE") {
+		profileName = "";
+	}
+	$('#editing-profile-name').text(profileName);
 }
 
 // Utility function for displaying log messages

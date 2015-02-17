@@ -62,3 +62,7 @@ body {
 	padding-right: 5px;
 	cursor: pointer;
 }
+
+#editing-profile-name {
+	color: #777;
+}
