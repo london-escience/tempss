@@ -178,6 +178,25 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div id="confirm-change-template-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Change template confirmation</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to switch to a different template?</p>
+		  <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-change-template-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="change-template-btn-modal" type="button" class="btn btn-success">Continue</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 	
 {% endblock modals %}
 
@@ -194,15 +213,41 @@
 		disableProfileButtons(true);
 		disableGenerateInputButton(true); 
 		
+		// Variable to check whether a template has been edited
+		window.templateEdited = false;
+		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
 			var selected = $(target).find(":selected");
 			var selectedText = selected.text();
 			var selectedValue = selected.val();
+			
+			// Before changing the template, if any modifications
+			// to the base template have been made, confirm that
+			// the user wants to change template. This change will
+			// lose any unsaved changes.
+			if(templateEdited) {
+				$('#confirm-change-template-modal').modal('show');
+			}
+			else {
+				setTimeout(function() {
+					templateChanged(selectedValue, selectedText);
+				}, 0);
+			}
+		});
+		
+		// If the template change confirmation was displayed, this event
+		// will be fired if the user chooses to continue with the change.
+		$('#change-template-btn-modal').on('click', function(e) {
+			var selected = $('#template-select').find(":selected");
+			var selectedText = selected.text();
+			var selectedValue = selected.val();
 			setTimeout(function() {
 				templateChanged(selectedValue, selectedText);
 			}, 0);
-		})
+			templateEdited = false;
+			$('#confirm-change-template-modal').modal('hide');
+		});
 		
 		// When the "Save as profile" button is clicked below a
 		// template that has had values entered into it, open 
@@ -286,7 +331,7 @@
 			$('#process-profile-loading').show();
 			temproProcessProfile();
 		});
-		
+				
 		// Set up tooltips for validation help
 		$('body').tooltip({
 		    selector: ".val-help"

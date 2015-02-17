@@ -8,7 +8,7 @@
 // template is changed.
 function templateChanged(selectedValue, selectedText) {
 	displayTemplate(selectedValue, selectedText);
-	updateProfileList(selectedValue);	
+	updateProfileList(selectedValue);
 }
 
 function updateTemplateList() {
@@ -41,7 +41,7 @@ function displayTemplate(templateId, templateText) {
 	
 	if(templateId == "NONE") {
 		disableProfileButtons(true);
-		$("#template-container").html("<h6>No template selected. Please select a template from the drop-down list above.</h6>");
+		$("#template-container").html("<h6 class=\"infotext\">No template selected. Please select a template from the drop-down list above.</h6>");
 		return;
 	} 
 	
@@ -55,6 +55,7 @@ function displayTemplate(templateId, templateText) {
         	// Add the javascript handlers to this HTML to enable
         	// clicking of the nodes, etc.
         	attachClickHandlers(); // Currently this function resides in bootstrap-tree.js.
+        	attachChangeHandlers(); // Part of tempro manager js
         	collapseTree();
         	setLeavesWithoutInputsToValid();
 
@@ -372,6 +373,20 @@ function getProfileXml(treeElement) {
 	xmlString += "</" + thisName + ">\n";
 
 	return xmlString;
+}
+
+// Function to attach click handlers to all the clickable nodes
+// in a template tree. This ensures that if a user has opened up
+// nodes in a tree, they are prompted before browsing to another
+// tree in case there are changes that will be lost.
+// TODO: Modify this so that we can detect if something has actually
+// been altered rather than just checking if a node has been expanded.
+function attachChangeHandlers() {
+	$('#template-container .parent_li > span').on('click', function(e) {
+		if(templateEdited == false) {
+			templateEdited = true;
+		}
+	});
 }
 
 // Utility function for displaying log messages
