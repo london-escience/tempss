@@ -1,10 +1,3 @@
-// These are just used by the IDE (Visual Studio) to enable auto-completion.
-// So use the full, not min, version in order to et full param names.
-
-/// <reference path="jquery-1.11.0.js" />
-/// <reference path="bootstrap-tree.js" />
-
-
 /*
   Sometimes some of the data loaded is an xml file.
   We may want to extract data from the xml file and display it in the tree.
@@ -124,7 +117,7 @@ function setLeavesWithoutInputsToValid() {
         var isDropDown = ($(this).find('select').length > 0);
         // If there are no inputs, then the leaf must be valid!
         if (!(isTextInput || isDropDown)) {
-            $(this).closest("ul").attr('class', 'valid');
+            $(this).closest("ul").attr('class', 'valid').trigger('nodeValid',$(this).closest("ul"));
         }
     });
 }
@@ -133,13 +126,17 @@ function validateParentNodes(caller) {
     // NB closest() traverses up the tree (including element itself).
     if (caller.parent().closest('ul').length > 0) {
         var parent = caller.parent().closest('ul');
-        // Node is valid if there are no in-valid children
+        // Node is valid if there are no invalid children
         var isValid = (parent.children('li').children('ul:not([class="valid"], [chosen="false"])').length == 0);
         if (isValid) {
-            parent.closest("ul").attr('class', 'valid');
+            parent.closest("ul").attr('class', 'valid').trigger('nodeValid',parent.closest("ul"));
+            // TODO: If we're dealing with the root node of the tree,
+            // fire an event to say that the tree has been made valid.
         }
         else {
-            parent.closest("ul").removeAttr('class', 'valid');
+            parent.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',parent.closest("ul"));
+            // TODO: If we're dealing with the root node of the tree,
+            // fire an event to say that the tree has been made invalid.
         }
 
         // TODO: add index to safeguard against infinite loop.
@@ -152,38 +149,77 @@ function validateParentNodes(caller) {
 function validateEntries(caller, validationtype, restrictions_json) {
 
     try {
-        // Start by assuming it's not valid
-        caller.closest("ul").removeAttr('class', 'valid');
+        // Start by assuming it's not valid, but remove any "invalid" class
+    	// signifying a previous validation error since this will be re-added
+    	// below if validation has still failed. Also remove validation data
+    	// error strings.
+    	// TODO: Check if we need to fire the nodeInvalid event here
+    	caller.closest("ul").removeClass('invalid');
+        caller.closest("ul").removeClass('valid').trigger('nodeInvalid',caller.closest("ul"));
+        var ul = $(caller.closest("ul"));
+        ul.find('.val-help').remove();
+        
 
         switch (validationtype) {
             case "xs:double":
                 if (!isNaN(caller.val())) {
                     // If it's a number
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
+                }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A double value is required for this property." ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
+                	//caller.closest("ul").attr('data-val-error','A double value is required for this property.');
+                	//caller.closest("ul").attr('title','A double value is required for this property.');
+                	//alert(caller.closest("ul").data('val-error'));
                 }
                 break;
             case "xs:positiveInteger":
                 // See http://stackoverflow.com/questions/16941386/validate-a-string-is-non-negative-whole-number-in-javascript
                 var intRegex = /^\d+$/; // ^ start of string, \d digit, + any number of times, $ end of string
                 if (intRegex.test(caller.val()) && caller.val() > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A positive integer value is required for this property." ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
+                }
+
                 break;
             case "xs:boolean":
                 if (caller.val() === "true" || caller.val() === "false") {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
+                }
+                else {
+                	// Add the invalid class to display a red X for this node
+                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                	caller.closest("ul").children().first().append(
+                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
+                			'style="padding-left: 10px;" ' +
+                			'title="A boolean value ("true" or "false") is required for this property. ' +
+                			'data-toggle="tooltip" data-placement="right"></i>');
                 }
                 break;
             case "xs:file":
                 // Any string filename will do for now, but extension will be checked below.
                 if (caller.val().length > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
             case "xs:string":
                 // Any string will do for now.
                 if (caller.val().length > 0) {
-                    caller.closest("ul").attr('class', 'valid');
+                    caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;
         }
@@ -194,22 +230,22 @@ function validateEntries(caller, validationtype, restrictions_json) {
                 switch (item) {
                     case "xs:minExclusive":
                         if (caller.val() <= value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:maxExclusive":
                         if (caller.val() >= value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:minInclusive":
                         if (caller.val() < value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:maxInclusive":
                         if (caller.val() > value) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:enumeration":
@@ -221,7 +257,7 @@ function validateEntries(caller, validationtype, restrictions_json) {
                             }
                         }
                         if (!(isStringEnumerationFound)) {
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                     case "xs:filetype":
@@ -236,7 +272,7 @@ function validateEntries(caller, validationtype, restrictions_json) {
                         }
                         if (!(extensionFound)) {
                             // File is not valid after all
-                            caller.closest("ul").removeAttr('class', 'valid');
+                            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
                         }
                         break;
                 }
@@ -245,12 +281,12 @@ function validateEntries(caller, validationtype, restrictions_json) {
 
         // Assume an empty input is never valid.
         if (caller.val() == "") {
-            caller.closest("ul").removeAttr('class', 'valid');
+            caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
         }
     }
     catch (exception) {
         // If there was an exception, set to invalid
-        caller.closest("ul").removeAttr('class', 'valid');
+        caller.closest("ul").removeAttr('class', 'valid').trigger('nodeInvalid',caller.closest("ul"));
     }
     validateParentNodes(caller.parent().closest('ul'));
 }
@@ -293,19 +329,19 @@ function loadChildXML(obj, path, $xml) {
             isLeaf = true;
         }
 
-        console.log(thisPath);
+        //console.log(thisPath);
 
         // If it's an input box, get the text
         if ($(child).children("input").length) {
             var xmlEntry = $.trim($xml.find(thisPath).text());
-            console.log(xmlEntry);
+            //console.log(xmlEntry);
             // Set the entry and call the onchange function
             $(child).children("input").val(xmlEntry).change();
         }
         // If it's a dropdown select box at a leaf, get the selection
         if (isLeaf && $(child).children("select").length) {
             var xmlEntry = $.trim($xml.find(thisPath).text());
-            console.log(xmlEntry);
+            //console.log(xmlEntry);
             $(child).children("select").val(xmlEntry).change();
         }
         // If it's a choice via dropdown select but not a leaf
@@ -318,7 +354,7 @@ function loadChildXML(obj, path, $xml) {
             }
             else {
                 var choiceVal = xmlEntry.nodeName;
-                console.log(choiceVal);
+                //console.log(choiceVal);
                 $(child).children("select").val(choiceVal).change();
             }
         }
@@ -330,23 +366,24 @@ function loadChildXML(obj, path, $xml) {
     });
 }
 
+// Added this for API clarity, retained original
+// loadlibrary function to retain compatibility
+// with legacy applications
+function loadLibhpcProfile(profileXML, targetTemplate) {
+	loadlibrary(profileXML, targetTemplate);
+}
 
 function loadlibrary() {
     var parameterXml = $("input[name='libraryxml']").data("fileContents");
+    loadlibrary(parameterXml, "[role='tree']");
+}
 
-    console.log(parameterXml);
+function loadlibrary(parameterXml, targetTemplate) {
 
     var xmlDoc = $.parseXML(parameterXml);
-    var $xml = $(xmlDoc); // The $ of $xml just reminds us it is a jquery object
-    //var $test2 = $xml.find("NektarElectroCardiology > Physics > Model > Monodomain > Chi");
-    //var test3 = $test2.text();
-    //alert(test3);
+    var $xml = $(xmlDoc);
 
-
-    //var val = $test.text();
-    //alert(val);
-
-    var root = $("[role='tree']").children("li");
+    var root = $(targetTemplate).children("li");
     var thisName = $.trim(root.children("span").text());
     loadChildXML(root, thisName, $xml);
 }
@@ -415,19 +452,6 @@ function generateParameterXML() {
 
 }
 
-// Function to hide everything except the tree so tree diagram can be printed
-function hideForPrinting() {
-    $('#xmlsubmission').hide();
-    $('#libraryload').hide();
-    $('h1').hide();
-}
-
-// Function to hide inputs to the tree so tree diagram can be printed
-function hideInputs() {
-    $('input').hide();
-    $('select').hide();
-}
-
 function submitComponentRequest() {
     $('#errormessages').html("");
 
@@ -468,6 +492,8 @@ function submitComponentRequest() {
 
 }
 
+// This function is DEPRECATED - it uses the old HTTP POST-based
+// service interface. Please use processJobProfile instead.
 function submitXML() {
     $('#xml-results').html("Submitting xml ...");
 
@@ -539,16 +565,98 @@ function submitXML() {
 
         }
     });
+}
 
+// Generate an XML profile document for the specified template with 
+// values entered into it. This function extracts data currently 
+// entered into the template and builds a profile document for it.
+function getProfileXML(templateRoot) {
+    var xmlString = "";
+    var root = $(templateRoot).children("li");
+    var thisName = $.trim(root.children("span").text());
+    var indentation = "    ";
 
+    xmlString += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    xmlString += "<" + thisName + ">\n";
+    xmlString += generateChildXML(root, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
+    xmlString += "</" + thisName + ">\n";
+}
 
+// Process the job profile data currently in the template tree
+// identified by treeRootNode. Send this data to the TemPro REST
+// API and return the JSON response to the caller.
+function processJobProfile(treeRootNode, templateId) {
+	
+    var profileXml = "";
+    //var rootNode = $("[role='tree']").children("li");
+    var templateName = $.trim(treeRootNode.children("span").text());
+    var indentation = "    ";
+    
+    profileXml += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    profileXml += "<" + templateName + ">\n";
+    profileXml += generateChildXML(treeRootNode, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
+    profileXml += "</" + templateName + ">\n";
+
+    // Create form data object to post the xml and files to the server
+    var formData = new FormData();
+
+    // Add the files to the form data
+    $("input[type = 'file']").each(function (index, element) {
+        formData.append('xmlupload_file', element.files[0]);  // Just assume one file provided for each thing for now.
+    });
+
+    // Add the xml string
+    formData.append('xmlupload', profileXml);
+
+    // Add a field to tell the server what component this is.
+    // The component name has to match the name of the root node in the tree!
+    // UPDATED: This is no longer required with the REST API
+    // var componentName = $("input[name = 'componentname']").val();
+    // formData.append('componentname', componentName);
+
+    $.ajax({
+        url: '/temproservice/api/profile/' + templateId + '/convert',
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        dataType: 'json',
+        success: function (data) {
+        	// If the request returns successfully we'll
+        	// have some JSON data containing a group of URLs
+        	// The TransformedXml parameter will contain a 
+        	// link to the required data.
+        	log('Location of transformed XML: ' + data.TransformedXml);
+        	
+        	var inputFileUrl = data.TransformedXml;
+        	var fileId = inputFileUrl.substring(inputFileUrl.lastIndexOf('_') +1, inputFileUrl.length - 4);
+        	log('Using fileId <' + fileId + '>');
+        	
+        	// Trigger a download request to get the transformed XML
+        	// and prompt the user to save the file.
+        	$.fileDownload('/temproservice/api/profile/inputFile/' + fileId);
+        	
+        	// If a loading element is displayed, hide it
+        	if($('#process-profile-loading').length > 0) {
+        		$('#process-profile-loading').hide();
+        	}
+        },
+        error: function(data) {
+        	log('An error occured downloading the application input file for templateId ' + templateId);
+        	if($('#process-profile-loading').length > 0) {
+        		$('#process-profile-loading').hide();
+        	}
+        }
+    });
 }
 
 function collapseTree() {
     // At startup, hide all nodes except the root.
 
     // Hide all li nodes
-    $("li").hide();
+    // $("li").hide();
+    //JC - modified to correct issue with menu not showing.
+    $("#schema-tree li").hide();
 
     // Hide all ul nodes that are choices (i.e. have choice-id attribute).
     // This ensures when we click on a choice bubble which has been selected, nothing will show.
@@ -557,6 +665,9 @@ function collapseTree() {
 
     // Show the root.
     $("[role='tree']").children().show();
+    // Show the top level elements - JC
+    $("#schema-tree ul[role='tree'] > li > ul").children().show();
+
 
     // Handle file uploads
     $("input[type='file']").change(function () {
@@ -582,10 +693,13 @@ function collapseTree() {
     });
 }
 
+function expandTree() {
+	$("#schema-tree li").show();
+}
+
 $(document).ready(function () {
 
     // Hide the contents of the xmlsubmission div on the libhpc component selctor page.
-    // This is ugly, but it will do for now.
     $('#xmlsubmission').hide();
     $('#libraryload').hide();
 

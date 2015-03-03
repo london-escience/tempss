@@ -1,0 +1,359 @@
+{% extends "base" %}
+
+{% block title %}
+<title>Tempro :: Profile Manager</title>
+{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="../assets/css/tree-style.css" media="all" />
+{% endblock style %}
+
+{% block content %}
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="well">
+			  <h3 style="padding-bottom: 20px;">Templates</h3>
+				<form class="form-horizontal">
+				  <div class="form-group">
+				    <label for="template-select" class="col-sm-2 control-label">Available templates:</label>
+				    <div class="col-sm-8">
+				      <select class="form-control" id="template-select">
+					    <option value="NONE">Select a template...</option>
+					  </select>
+				    </div>
+				    <div class="col-sm-2 loading" id="template-loading" style="display:none;">
+				      <img src="../assets/img/loading.gif"/>
+				      <span>Loading template list...</span>
+				    </div>
+				  </div>
+			    </form>
+			</div>
+		</div>	
+	</div>
+
+	<div class="row">
+		<div class="col-md-3" id="profile-list">
+			<div class="well">
+				<div>
+				    <h4 style="float:left;">Profiles:</h4>
+				    <div class="col-sm-4 loading" id="profiles-loading" style="float: right; width: 140px; padding-top: 4px; display:none;">
+				          <img src="../assets/img/loading.gif"/>
+				          <span>Finding profiles...</span>
+				    </div>
+				</div>
+			    <div id="profiles" style="clear: both;">
+			        <h6 class="infotext">Profiles for the currently selected template will appear here.</h6>
+			    </div>
+			</div>
+		</div>
+		
+		<div class="col-md-9" id="template-tree">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="well" style="padding-bottom: 50px;">
+						<div class="loading" id="template-tree-loading" style="display: none; float: right;">
+				      	  <img src="../assets/img/loading.gif"/>
+				      	  <span>Loading template tree...</span>
+				    	</div>
+				    	<div class="loading" id="template-profile-loading" style="display: none; float: right;">
+				      	  <img src="../assets/img/loading.gif"/>
+				      	  <span>Loading profile...</span>
+				    	</div>
+					    <span id="tree-collapse" class="glyphicon glyphicon-minus-sign 
+					              text-info tree-control-btn" 
+					          data-toggle="tooltip" title="Collapse tree"></span>
+					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
+					              text-info tree-control-btn" 
+					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
+					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
+					    
+					    <div id="template-container">
+					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
+					    </div>
+					    <div style="float: left; padding-bottom: 30px;">
+					    	<button class="btn btn-info" id="generate-input-file-btn">Generate app input file</button>
+					    	<span class="loading" id="process-profile-loading" style="padding-left: 8px; display: none;"> 
+					    	  <img src="../assets/img/loading.gif"/>
+				      	      <span>Processing profile...</span>
+				      	    </span>
+					    </div>
+					    <div style="float: right; padding-bottom: 30px;">
+					    	<button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
+					        <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
+					    </div>
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+			
+
+{% endblock content %}
+
+{% block modals %}
+
+<div id="save-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Save profile</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizonal" role="form" style="padding-bottom: 60px;">
+		  <div id="save-profile-group" class="form-group">
+		    <label for="profileName" class="col-sm-3 control-label">Profile name</label>
+		    <div class="col-sm-8">
+		    	<input type="text" class="form-control" id="profileName" placeholder="Enter a profile name">
+		    </div>
+		  </div>
+		  <div class="form-group">
+		  	<div id="profile-save-errors" class="col-sm-offset-3 col-sm-8 text-danger"></div>
+		  </div>
+		</form> 
+      </div>
+      <div class="modal-footer">
+      	<div class="loading" id="profile-saving" style="float: left; display: none;">
+      	  <img src="../assets/img/loading.gif"/>
+      	  <span>Saving profile...</span>
+    	</div>
+        <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="save-profile-btn-modal" type="button" class="btn btn-success">Save</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="delete-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Delete profile</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="delete-confirm-text"></div>
+		  <div id="profile-delete-errors"></div> 
+      </div>
+      <div class="modal-footer">
+      	<div class="loading" id="profile-deleting" style="float: left; display: none;">
+      	  <img src="../assets/img/loading.gif"/>
+      	  <span>Deleting profile...</span>
+    	</div>
+        <button type="button" id="cancel-delete-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="delete-profile-btn-modal" type="button" class="btn btn-success">Delete</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="confirm-load-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Load profile</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p>
+		  <p>Any unsaved changes entered into the current template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="load-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Continue</button>
+        <button id="cancel-load-btn-modal" type="button" class="btn btn-success">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="confirm-clear-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Reset template</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to clear all inserted values and empty the current template?</p>
+		  <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-clear-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="clear-profile-btn-modal" type="button" class="btn btn-success">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="confirm-change-template-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Change template confirmation</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to switch to a different template?</p>
+		  <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-change-template-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="change-template-btn-modal" type="button" class="btn btn-success">Continue</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+	
+{% endblock modals %}
+
+{% block script %}
+<script type="text/javascript" src="../assets/js/bootstrap-tree.js"></script>
+<script type="text/javascript" src="../assets/js/libhpc-parameter-tree.js"></script>
+<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fileDownload/1.4.2/jquery.fileDownload.min.js"></script> -->
+<script type="text/javascript" src="../assets/js/jquery.fileDownload.js"></script>
+<script type="text/javascript">
+	$(document).ready( function() {
+		log("Document ready...")
+		
+		updateTemplateList();
+		disableProfileButtons(true);
+		disableGenerateInputButton(true); 
+		
+		// Variable to check whether a template has been edited
+		window.templateEdited = false;
+		
+		$('#template-select').on('change', function(e) {
+			var target = e.currentTarget;
+			var selected = $(target).find(":selected");
+			var selectedText = selected.text();
+			var selectedValue = selected.val();
+			
+			// Before changing the template, if any modifications
+			// to the base template have been made, confirm that
+			// the user wants to change template. This change will
+			// lose any unsaved changes.
+			if(templateEdited) {
+				$('#confirm-change-template-modal').modal('show');
+			}
+			else {
+				setTimeout(function() {
+					templateChanged(selectedValue, selectedText);
+				}, 0);
+			}
+		});
+		
+		// If the template change confirmation was displayed, this event
+		// will be fired if the user chooses to continue with the change.
+		$('#change-template-btn-modal').on('click', function(e) {
+			var selected = $('#template-select').find(":selected");
+			var selectedText = selected.text();
+			var selectedValue = selected.val();
+			setTimeout(function() {
+				templateChanged(selectedValue, selectedText);
+			}, 0);
+			templateEdited = false;
+			$('#confirm-change-template-modal').modal('hide');
+		});
+		
+		// When the "Save as profile" button is clicked below a
+		// template that has had values entered into it, open 
+		// the save profile modal to prompt the user for a profile name
+		$('#save-as-profile-btn').on('click', function(e) {
+			$('#profileName').val("");
+			if($('#profileName').val() == "") {
+				$('#save-profile-btn-modal').prop('disabled', true);
+			}
+			else {
+				$('#save-profile-btn-modal').removeProp('disabled');
+			}
+			$('#save-profile-modal').modal();
+		});
+		
+		// When the modal input box is changed, check if there is text
+		// in it and if so, make sure the save button is enabled.
+		$('body').on('keyup', '#profileName', function() {
+			var saveBtn = $('#save-profile-btn-modal');
+			
+			if($('#profileName').val() == "") {
+				saveBtn.prop('disabled', true);
+			}
+			else {
+				saveBtn.prop('disabled', false);
+			}
+		});
+		
+		// When the save button on the modal is clicked to save the
+		// profile using the provided name, initiate the save process
+		$('#save-profile-btn-modal').on('click', function(e) {
+			saveProfile($('input[name=componentname]').val(), $('#profileName').val());
+		});
+		
+		// Add click event listeners for items in the profile list
+		$('#profile-list').on('click', '.profile-link', function(e) {
+			// Load selected profile into the template
+			var profileId = $(e.currentTarget).data('pid');
+			var templateId = $('input[name=componentname]').val();
+			loadProfile(templateId, profileId);
+			e.preventDefault();
+		});
+		
+		// Add click listeners for the delete and load profile icons
+		$('#profile-list').on('click', '.delete-profile', function(e) {
+			var selectedProfileName = $(e.currentTarget).parent().parent().find('.profile-link').first().data('pid');
+			$('#delete-confirm-text').html('<h5 class="text-danger">Are you sure you want to delete profile "'
+					+ '<span id="delete-profile-name">' + selectedProfileName + '</span>"?');
+			$('#profile-delete-errors').html("");
+			$('#delete-profile-modal').modal('show');
+		});
+		
+		$('#profile-list').on('click', '.load-profile', function(e) {
+			var selectedProfileName = $(e.currentTarget).parent().parent().find('.profile-link').first().data('pid');
+			var templateId = $('input[name=componentname]').val();
+			log('About to load profile <' + selectedProfileName + '>.');
+			loadProfile(templateId, selectedProfileName);
+		});
+		
+		// Delete profile when the confirm button is pressed on the confirmation modal
+		$('#delete-profile-btn-modal').on('click', function() {
+			var profileToDelete = $('#delete-profile-name').text();
+			var templateId = $('input[name=componentname]').val();
+			log('About to delete profile <' + profileToDelete + '>.');
+			deleteProfile(templateId, profileToDelete);
+		});
+
+		// Open a modal to confirm that the user wants to clear 
+		// the current profile data.
+		$('#clear-profile-btn').on('click', function() {
+			$('#confirm-clear-profile-modal').modal('show');
+		});
+		
+		$('#clear-profile-btn-modal').on('click', function() {
+			clearProfileContentInTemplate();
+			$('#confirm-clear-profile-modal').modal('hide');
+		});
+		
+		// Genrate the input data file for the current, valid profile.
+		$('#generate-input-file-btn').on('click', function() {
+			$('#process-profile-loading').show();
+			temproProcessProfile();
+		});
+				
+		// Set up tooltips for validation help and tree expand/collapse buttons
+		$('body').tooltip({
+		    selector: ".val-help, .tree-control-btn"
+		});
+		
+		$('#tree-collapse').on('click', function() {
+			collapseTree();
+		});
+		
+		$('#tree-expand').on('click', function() {
+			expandTree();
+		});
+		
+		// Set up tooltips for collapse/expand tree buttons
+		hideTreeExpandCollapseButtons(true);
+	});
+</script>
+{% endblock script %}

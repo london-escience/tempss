@@ -110,7 +110,7 @@ public class SchemaProcessor {
     public String processComponentSelector(TemproObject pComponentMetadata)
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
-        sLog.info("ServletContext: " + _context);
+        sLog.fine("ServletContext: " + _context);
         String schemaPath = _context.getRealPath("WEB-INF/classes") + File.separator;
         String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();

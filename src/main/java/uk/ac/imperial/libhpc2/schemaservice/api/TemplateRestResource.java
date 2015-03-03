@@ -44,8 +44,13 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,21 +64,17 @@ import javax.xml.transform.TransformerException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
 import uk.ac.imperial.libhpc2.schemaservice.TemproObject;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Jersey REST class representing the template endpoint
  * @author jhc02
  *
  */
+@Component
 @Path("template")
 public class TemplateRestResource {
 
@@ -87,8 +88,6 @@ public class TemplateRestResource {
      * Injected via @Context annotation
      */
     ServletContext _context;
-
-
 
     @Context
     public void setServletContext(ServletContext pContext) {
