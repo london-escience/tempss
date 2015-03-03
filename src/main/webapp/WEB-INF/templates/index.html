@@ -60,7 +60,14 @@
 				      	  <img src="../assets/img/loading.gif"/>
 				      	  <span>Loading profile...</span>
 				    	</div>
+					    <span id="tree-collapse" class="glyphicon glyphicon-minus-sign 
+					              text-info tree-control-btn" 
+					          data-toggle="tooltip" title="Collapse tree"></span>
+					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
+					              text-info tree-control-btn" 
+					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
 					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
+					    
 					    <div id="template-container">
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
 					    </div>
@@ -332,10 +339,21 @@
 			temproProcessProfile();
 		});
 				
-		// Set up tooltips for validation help
+		// Set up tooltips for validation help and tree expand/collapse buttons
 		$('body').tooltip({
-		    selector: ".val-help"
+		    selector: ".val-help, .tree-control-btn"
 		});
+		
+		$('#tree-collapse').on('click', function() {
+			collapseTree();
+		});
+		
+		$('#tree-expand').on('click', function() {
+			expandTree();
+		});
+		
+		// Set up tooltips for collapse/expand tree buttons
+		hideTreeExpandCollapseButtons(true);
 	});
 </script>
 {% endblock script %}

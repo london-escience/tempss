@@ -1,10 +1,3 @@
-// These are just used by the IDE (Visual Studio) to enable auto-completion.
-// So use the full, not min, version in order to et full param names.
-
-/// <reference path="jquery-1.11.0.js" />
-/// <reference path="bootstrap-tree.js" />
-
-
 /*
   Sometimes some of the data loaded is an xml file.
   We may want to extract data from the xml file and display it in the tree.
@@ -459,19 +452,6 @@ function generateParameterXML() {
 
 }
 
-// Function to hide everything except the tree so tree diagram can be printed
-function hideForPrinting() {
-    $('#xmlsubmission').hide();
-    $('#libraryload').hide();
-    $('h1').hide();
-}
-
-// Function to hide inputs to the tree so tree diagram can be printed
-function hideInputs() {
-    $('input').hide();
-    $('select').hide();
-}
-
 function submitComponentRequest() {
     $('#errormessages').html("");
 
@@ -713,10 +693,13 @@ function collapseTree() {
     });
 }
 
+function expandTree() {
+	$("#schema-tree li").show();
+}
+
 $(document).ready(function () {
 
     // Hide the contents of the xmlsubmission div on the libhpc component selctor page.
-    // This is ugly, but it will do for now.
     $('#xmlsubmission').hide();
     $('#libraryload').hide();
 

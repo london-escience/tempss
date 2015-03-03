@@ -66,3 +66,10 @@ body {
 #editing-profile-name {
 	color: #777;
 }
+
+.tree-control-btn {
+	float: right;
+	padding-left: 6px;
+	cursor: pointer;
+	cursor: hand; 
+}

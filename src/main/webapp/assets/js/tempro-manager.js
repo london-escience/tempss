@@ -41,6 +41,7 @@ function displayTemplate(templateId, templateText) {
 	
 	if(templateId == "NONE") {
 		disableProfileButtons(true);
+		hideTreeExpandCollapseButtons(true);
 		$("#template-container").html("<h6 class=\"infotext\">No template selected. Please select a template from the drop-down list above.</h6>");
 		return;
 	} 
@@ -71,7 +72,9 @@ function displayTemplate(templateId, templateText) {
             */
 
             // Enable the profile buttons for saving/clearing template content
+            // and show the expand/collapse buttons
             disableProfileButtons(false);
+            hideTreeExpandCollapseButtons(false);
         	
             setEditingProfileName("");
             $("#template-tree-loading").hide(0);
@@ -139,6 +142,20 @@ function disableProfileButtons(disable) {
 	else {
 		$('#clear-profile-btn').removeProp('disabled');
 		$('#save-as-profile-btn').removeProp('disabled');
+	}
+	
+}
+
+// Hide the buttons used for expanding or collapsing a  
+// template tree shown in the profile editor.
+function hideTreeExpandCollapseButtons(hide) {
+	if(hide) {
+		$('#tree-expand').hide();
+		$('#tree-collapse').hide();	
+	}
+	else {
+		$('#tree-expand').show();
+		$('#tree-collapse').show();
 	}
 	
 }
@@ -254,6 +271,7 @@ function loadProfile(templateId, profileId) {
         	}
         	setEditingProfileName(profileId);
         	$("#template-profile-loading").hide();
+        	
         },
         error: function(data) {
         	var result = $.parseJSON(data.responseText);
