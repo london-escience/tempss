@@ -46,6 +46,24 @@ the `temproservice.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
 the service. If your Tomcat server is configured to run on port 8080, the
 service will be accessible at `http://localhost:8080/temproservice`.
 
+###### Using Docker
+A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPro service. To build the image, clone the repository and change into the base repository directory, `tempro`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
+
+`sudo docker build --rm=true -t <my tag> .`
+
+You should replace `<my tag>` with a tag that will be used to identify the image.
+
+Assuming the image builds successfully, `sudo docker images` should show the new image listed.
+
+You can now start a container based on this image. Network ports for the running services will be mapped to ports on the host system and these mappings are configured in the run command. `${HOST_IP}` should be the IP of the interface on the host server that will receive requests to forward to the container. Currently the image is configured to run SSH on port 22 and Apache Tomcat on port 8080. To be able to SSH to the container, you will need to uncomment the line in the Dockerfile that creates an authorized_keys file and paste your public key into this line. The container is run as follows:
+
+`sudo docker run -t -d -p ${HOST_IP}:8080:8080 \`
+`-p ${HOST_IP}:8022:22 --name="tempro" <my tag>`
+
+You can adjust the first port number in the `-p` switch values to change the port on your host system that will listen for requests and forward them to the docker container. You can SSH to the container from your host machine by specifying the port on localhost that you have selected as port to forward to SSH on the container, e.g.
+
+`ssh -i ~/.ssh/<private key file> -p 8022 root@localhost`
+
 #### Development Team
 
 The tempro team includes members from Department of Computing, Imperial College
