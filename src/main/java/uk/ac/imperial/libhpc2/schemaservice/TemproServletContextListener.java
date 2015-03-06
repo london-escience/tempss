@@ -106,7 +106,7 @@ public class TemproServletContextListener implements ServletContextListener {
             return;
         }
 
-        String templatePath = path.toString().substring(0, path.toString().indexOf("WEB-INF/classes/")+16) + "META-INF/Template";
+        String templatePath = path.toString().substring(0,path.toString().indexOf("WEB-INF/classes/") + 16) + "META-INF/Template";
         sLog.info("templatePath: " + templatePath);
 
         URI templatePathURI = null;
@@ -126,10 +126,12 @@ public class TemproServletContextListener implements ServletContextListener {
 
         // Now process the template metadata files to generate instances
         // of TemplateObject that can be stored in the application context
-        for(File f : templateMetadataFiles) {
+        for (File f : templateMetadataFiles) {
             Properties props = new Properties();
-            String resourcePath = f.getAbsolutePath().substring(f.getAbsolutePath().indexOf("META-INF/Template"));
-            sLog.info("Template file: " + f.getAbsolutePath() + "\nGetting resource: " + resourcePath);
+            String absolutePath = f.getAbsolutePath();
+            sLog.info("Template absolute path: " + absolutePath);
+            String resourcePath = absolutePath.substring(absolutePath.indexOf("META-INF" + File.separator + "Template"));
+            sLog.info("Template file: " + absolutePath + "\nGetting resource: " + resourcePath);
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
             if(resourceStream != null) {
                 try {
