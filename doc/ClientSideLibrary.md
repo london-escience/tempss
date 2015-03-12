@@ -1,6 +1,6 @@
-# TemPro Client-side Library
+# TemPSS Client-side Library
 
-The TemPro client-side library is a JavaScript library that provides third-party developers with access to common client-side template/profile management tasks. Some of the functions supported by the library can be accessed directly in the REST API and the JavaScript functions are provided as higher-level helper functions to simplify API access.
+The TemPSS client-side library is a JavaScript library that provides third-party developers with access to common client-side template/profile management tasks. Some of the functions supported by the library can be accessed directly in the REST API and the JavaScript functions are provided as higher-level helper functions to simplify API access.
 
 ## API Functionality
 The main tasks supported by the client-side API are:
@@ -8,7 +8,7 @@ The main tasks supported by the client-side API are:
 * Loading XML profile data into a template
 * Extract a profile from data entered into a template
 * Profile validation
-* Submitting a profile to the TemPro service for conversion to job input data
+* Submitting a profile to the TemPSS service for conversion to job input data
 
 ## Using the API
 

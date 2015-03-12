@@ -26,7 +26,7 @@ TODO
 
 Once the template schema and transformation files have been constructed, a
 simple properties file must be created so that the new template is detected by
-TemPro. The format of these files is straightforward:
+TemPSS. The format of these files is straightforward:
 
 ```
 component.id=simple-example

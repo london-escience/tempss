@@ -1,11 +1,11 @@
-# TemPro REST API
+# TemPSS REST API
 
-This document outlines the REST API for the TemPro service, which can be
+This document outlines the REST API for the TemPSS service, which can be
 accessed through the `/api` base URL from your installation. When running
 locally through a development server, API functions are available from the
 address
 
-  http://localhost:8080/temproservice/api
+  http://localhost:8080/tempss-service/api
 
 ## Template operations
 
@@ -46,7 +46,7 @@ GET /api/template
 ##### Test using `curl`:
 
 ```bash
-curl -i -H "Accept: application/json" -X GET http://localhost:8080/temproservice/api/template
+curl -i -H "Accept: application/json" -X GET http://localhost:8080/tempss-service/api/template
 ```
 
 ##### Returns:
@@ -98,7 +98,7 @@ GET /api/template/ids
 ##### Test using `curl`:
 
 ```bash
-curl -i -H "Accept: application/json" -X GET http://localhost:8080/temproservice/api/template/ids
+curl -i -H "Accept: application/json" -X GET http://localhost:8080/tempss-service/api/template/ids
 ```
 
 ##### Returns:
@@ -134,7 +134,7 @@ GET /api/template/names
 ##### Test using `curl`:
 
 ```bash
-curl -i -H "Accept: application/json" -X GET http://localhost:8080/temproservice/api/template/names
+curl -i -H "Accept: application/json" -X GET http://localhost:8080/tempss-service/api/template/names
 ```
 
 ##### Returns:
@@ -177,7 +177,7 @@ GET /api/template/id/:templateId
 ##### Test using `curl`:
 
 ```bash
-curl -i -H "Accept: text/html" -X GET http://localhost:8080/temproservice/api/template/id/incompressiblenavierstokes
+curl -i -H "Accept: text/html" -X GET http://localhost:8080/tempss-service/api/template/id/incompressiblenavierstokes
 ```
 
 ##### Returns:
@@ -202,7 +202,7 @@ Converts the provided XML profile into the required format for the target
 application, as defined by the transform that is registered in the metadata for
 the template represented by `templateId`. This operation returns JSON data that
 provides the result of the conversion and URLs to a set of resulting files. The
-client-side JavaScript library for the tempro service provides support for
+client-side JavaScript library for the tempss service provides support for
 generating profile XML content from a tree and for sending this to the server
 for conversion.
 
@@ -269,16 +269,16 @@ Navier-Stokes solver, and have a file `IncNSProfile.xml` containing your XML
 profile which in turn references a geometry file named CylinderGeometry.xml:
 
 ```bash
-curl -i -H "Accept: application/json" -F xmlupload=@IncNSProfile.xml -F xmlupload_file=@CylinderGeometry.xml -X POST http://localhost:8080/temproservice/api/profile/incompressiblenavierstokes/convert
+curl -i -H "Accept: application/json" -F xmlupload=@IncNSProfile.xml -F xmlupload_file=@CylinderGeometry.xml -X POST http://localhost:8080/tempss-service/api/profile/incompressiblenavierstokes/convert
 ```
 
 ##### Returns:
 
 ```html
 {
-  "TransformedXml": "http://localhost:8080/temproservice/temp/output_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
-  "BasicXmlInputs": "http://localhost:8080/temproservice/temp/basic_input_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
-  "FullXmlInputs": "http://localhost:8080/temproservice/temp/full_input_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
+  "TransformedXml": "http://localhost:8080/tempss-service/temp/output_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
+  "BasicXmlInputs": "http://localhost:8080/tempss-service/temp/basic_input_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
+  "FullXmlInputs": "http://localhost:8080/tempss-service/temp/full_input_xml_9BBAAC8B8B82A483F816763444D7407A.xml",
   "TransformFailed": "false",
   "TransformErrorMessages": "",
   "status": "OK"

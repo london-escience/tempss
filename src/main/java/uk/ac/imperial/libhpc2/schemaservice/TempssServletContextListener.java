@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -65,7 +66,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
- * This class handles the initialisation of the tempro servlet,
+ * This class handles the initialisation of the tempss servlet,
  * reading in details of all the available schemas and creating
  * a map of them that is stored in the application context.
  *
@@ -74,17 +75,17 @@ import javax.servlet.ServletContextListener;
  *
  * @author jhc02
  */
-public class TemproServletContextListener implements ServletContextListener {
+public class TempssServletContextListener implements ServletContextListener {
 
-    private static final Logger sLog = Logger.getLogger(TemproServletContextListener.class.getName());
+    private static final Logger sLog = Logger.getLogger(TempssServletContextListener.class.getName());
 
     /**
      * Search for all the properties files in the "Template" directory
-     * and read in the details from them, creating a TemproObject instance
+     * and read in the details from them, creating a TempssObject instance
      * for each and storing this in the component map.
      */
     public void contextInitialized(ServletContextEvent pContext) {
-        Map<String, TemproObject> componentMap = new HashMap<String, TemproObject>();
+        Map<String, TempssObject> componentMap = new HashMap<String, TempssObject>();
 
         // Now search for the available properties files describing components
         // These are placed in the META-INF/Template directory in the classpath
@@ -152,7 +153,7 @@ public class TemproServletContextListener implements ServletContextListener {
                 String name = props.getProperty(comp+".name");
                 String schema = props.getProperty(comp+".schema");
                 String transform = props.getProperty(comp+".transform");
-                TemproObject obj = new TemproObject(comp, name, schema, transform);
+                TempssObject obj = new TempssObject(comp, name, schema, transform);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
                 componentMap.put(comp, obj);
             }

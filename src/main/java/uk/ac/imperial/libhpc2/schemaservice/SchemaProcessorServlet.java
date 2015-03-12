@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -43,7 +44,7 @@
  */
 
 /**
- * This is the main servlet of the libhpc TemPro template and profile service.
+ * This is the main servlet of the libhpc TemPSS template and profile service.
  * This servlet handles requests related to the processing and use of templates
  * and profiles.
  */
@@ -165,7 +166,7 @@ public class SchemaProcessorServlet extends HttpServlet {
             throws ServletException, IOException {
 
         // Get the component info from the application context
-        Map<String, TemproObject> components = (Map<String, TemproObject>)getServletContext().getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)getServletContext().getAttribute("components");
 
         try {
             // Setup session to hold state.
@@ -236,7 +237,7 @@ public class SchemaProcessorServlet extends HttpServlet {
      * @throws Exception
      */
     private void processSchemaUpload(List<FileItem> fileItems,
-            HttpServletResponse resp, HttpSession session, Map<String, TemproObject> components)
+            HttpServletResponse resp, HttpSession session, Map<String, TempssObject> components)
                     throws Exception {
 
         for (FileItem item : fileItems) {
@@ -299,7 +300,7 @@ public class SchemaProcessorServlet extends HttpServlet {
                                   HttpServletRequest req,
                                   HttpServletResponse resp,
                                   HttpSession session,
-                                  Map<String, TemproObject> components)
+                                  Map<String, TempssObject> components)
             throws UnknownTemplateException, IOException {
 
         // The list of file items should contain the main xml string plus
@@ -399,7 +400,7 @@ public class SchemaProcessorServlet extends HttpServlet {
      */
     private void processComponentSelector(List<FileItem> fileItems,
             HttpServletResponse resp, HttpSession session,
-            Map<String, TemproObject> components) throws IOException {
+            Map<String, TempssObject> components) throws IOException {
 
         // Need to check which component has been set using a form field
         String componentName = "";
@@ -421,7 +422,7 @@ public class SchemaProcessorServlet extends HttpServlet {
         //String schemaPath = getServletContext().getRealPath("WEB-INF/classes") + File.separator;
         String verboseName = "";
         //String schemaName = "";
-        TemproObject componentMetadata = null;
+        TempssObject componentMetadata = null;
         if(components.containsKey(componentName)) {
             componentMetadata = components.get(componentName);
         } else {

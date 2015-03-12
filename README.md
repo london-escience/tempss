@@ -1,8 +1,8 @@
-# TemPro
+# TemPSS - Templates and Profiles for Scientific Software
 
-### A template and profile editor for managing application inputs
+### A template and profile manager and editor for handling application inputs for HPC software
 
-TemPro is a web service for managing application parameter templates and
+TemPSS is a web service for managing application parameter templates and
 profiles which are used for collaboratively generating input files for
 scientific HPC applications.
 
@@ -32,22 +32,22 @@ valid profile and can be used to generate an input for for a job.
 
 #### Building and Running the Service
 
-TemPro is a Java Web Service. The service can be built using
+TemPSS is a Java Web Service. The service can be built using
 [Apache Maven](http://maven.apache.org) and requires Java 1.7+. To build, clone
 the repository, and run `mvn package` in the project base directory.
 
 If the build completes successfully, output files will be generated in the
 `target` directory.
 
-The service is contained within `target/temproservice.war`.
+The service is contained within `target/tempss-service.war`.
 
 The service can be deployed in [Apache Tomcat](http://tomcat.apache.org/). Copy
-the `temproservice.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
+the `tempss-service.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
 the service. If your Tomcat server is configured to run on port 8080, the
-service will be accessible at `http://localhost:8080/temproservice`.
+service will be accessible at `http://localhost:8080/tempss-service`.
 
 ###### Using Docker
-A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPro service. To build the image, clone the repository and change into the base repository directory, `tempro`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
+A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPSS service. To build the image, clone the repository and change into the base repository directory, `tempss`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
 
 `sudo docker build --rm=true -t <my tag> .`
 
@@ -57,7 +57,7 @@ Assuming the image builds successfully, `sudo docker images` should show the new
 
 You can now start a container based on this image. Network ports for the running services will be mapped to ports on the host system and these mappings are configured in the run command. `${HOST_IP}` should be the IP of the interface on the host server that will receive requests to forward to the container. Currently the image is configured to run SSH on port 22 and Apache Tomcat on port 8080. To be able to SSH to the container, you will need to uncomment the line in the Dockerfile that creates an authorized_keys file and paste your public key into this line. The container is run as follows:
 
-`sudo docker run -t -d -p ${HOST_IP}:8080:8080 -p ${HOST_IP}:8022:22 --name="tempro" <my tag>`
+`sudo docker run -t -d -p ${HOST_IP}:8080:8080 -p ${HOST_IP}:8022:22 --name="tempss" <my tag>`
 
 You can adjust the first port number in the `-p` switch values to change the port on your host system that will listen for requests and forward them to the docker container. You can SSH to the container from your host machine by specifying the port on localhost that you have selected as port to forward to SSH on the container, e.g.
 
@@ -65,9 +65,9 @@ You can adjust the first port number in the `-p` switch values to change the por
 
 #### Development Team
 
-The tempro team includes members from Department of Computing, Imperial College
+The TemPSS team includes members from Department of Computing, Imperial College
 London and EPCC, University of Edinburgh. Current and former developers and
-contributors to the TemPro project include:
+contributors to the TemPSS project include:
 
  * Peter Austing
  * Chris Cantwell
@@ -82,7 +82,7 @@ file in the source tree for full details.
 
 #### Acknowledgements
 
-TemPro and the template/profile methodology have been developed as part of the
+TemPSS and the template/profile methodology have been developed as part of the
 Engineering and Physical Sciences Research Council (EPSRC)-funded libhpc stage I
 (EP/I030239/1) and II (EP/K038788/1) projects which are a collaboration between
 Imperial College London and The University of Edinburgh.

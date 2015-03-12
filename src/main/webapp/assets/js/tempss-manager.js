@@ -1,6 +1,6 @@
 /**
- * JavaScript functions for the tempro template manager sample
- * application distributed along with the tempro web service. 
+ * JavaScript functions for the tempss template manager sample
+ * application distributed along with the tempss web service. 
  */
 
 
@@ -11,27 +11,60 @@ function templateChanged(selectedValue, selectedText) {
 	updateProfileList(selectedValue);
 }
 
+/**
+ * Used by the TemPSS web interface to update its list of
+ * available templates. To access raw template metadata from 
+ * the TemPSS service, see getTemplateMetadata 
+ */
 function updateTemplateList() {
 	$('#template-loading').show();
 	
+	getTemplateMetadata(null, null, 
+			function(data) {
+				// Remove current content excluding the placeholder
+		    	$('#template-select option:gt(0)').remove();
+		    	var templateSelect = $('#template-select');
+		    	for(var i = 0; i < data.components.length; i++) {
+		    		var item = data.components[i];
+		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+		    	}
+		        $("#template-loading").hide(0);
+			},
+			function(data) {
+				$("#template-loading").hide(0);
+			}
+	);
+}
+
+/**
+ * Get the template metadata from the TemPSS service. Success
+ * and failure callbacks should be provided to handle the 
+ * returned data or any error. The callbacks accept a data
+ * parameter that will contain a JSON object containing either
+ * the metadata, also in JSON format, or error info.
+ * 
+ * @param host The host of a remote tempss instance or null to use the current local instance
+ * @param port The port of a remote tempss instance or null to use the current local instance
+ * @param successCallback A function that accepts a data parameter to receive the service's response
+ * @param errorCallback A function that accepts a data parameter to receive an error response
+ */
+function getTemplateMetadata(host, port, successCallback, errorCallback) {
+	var url = '';
+	if(host != null) {
+		url = 'htp://' + host;
+		if(port != null) {
+			url += ':' + port;
+		}
+	}
+	url += '/tempss-service/api/template';
+	
 	$.ajax({
         method:   'get',
-        url:      '/temproservice/api/template',
+        url:      url,
         dataType: 'json',
-        success:  function(data){
-        	// Remove current content excluding the placeholder
-        	$('#template-select option:gt(0)').remove();
-        	var templateSelect = $('#template-select');
-        	for(var i = 0; i < data.components.length; i++) {
-        		var item = data.components[i];
-        		templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
-        	}
-            $("#template-loading").hide(0);
-        },
-        error: function() {
-            $("#template-loading").hide(0);
-        }
-    });
+        success:  successCallback,
+        error: errorCallback,
+	});
 }
 
 // Display the tree for the template with the specified ID in the
@@ -49,14 +82,14 @@ function displayTemplate(templateId, templateText) {
 	$("#template-tree-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/temproservice/api/template/id/' + templateId,
+        url:      '/tempss-service/api/template/id/' + templateId,
         success:  function(data){
         	// Data that comes back is the raw HTML to place into the page
         	$("#template-container").html(data)
         	// Add the javascript handlers to this HTML to enable
         	// clicking of the nodes, etc.
         	attachClickHandlers(); // Currently this function resides in bootstrap-tree.js.
-        	attachChangeHandlers(); // Part of tempro manager js
+        	attachChangeHandlers(); // Part of tempss manager js
         	collapseTree();
         	setLeavesWithoutInputsToValid();
 
@@ -85,6 +118,24 @@ function displayTemplate(templateId, templateText) {
     });
 }
 
+function getTemplateHtml(host, port, templateId, templateText, successCallback, errorCallback) {
+	var url = '';
+	if(host != null) {
+		url = 'htp://' + host;
+		if(port != null) {
+			url += ':' + port;
+		}
+	}
+	url += '/tempss-service/api/template/id/' + templateId,
+	
+	$.ajax({
+        method:   'get',
+        url:      url,
+        success:  successCallback,
+        error: errorCallback
+    });
+}
+
 // Update the contents of the list of profiles
 // If a template is selected, display the relevant profiles
 // or a message saying none are available. If no template
@@ -101,7 +152,7 @@ function updateProfileList(templateId) {
 	$("#profiles-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/temproservice/api/profile/' + templateId + '/names',
+        url:      '/tempss-service/api/profile/' + templateId + '/names',
         dataType: 'json',
         success:  function(data){
         	log('Profile name data received from server: ' + data.profile_names);
@@ -184,7 +235,7 @@ function saveProfile(templateId, profileName) {
 	$('#profile-save-errors').html("");
 	$.ajax({
         method:   'POST',
-        url:      '/temproservice/api/profile/' + templateId + '/' + profileName,
+        url:      '/tempss-service/api/profile/' + templateId + '/' + profileName,
         dataType: 'json',
         contentType: 'application/json',
         data:     JSON.stringify(profileObject),
@@ -238,7 +289,7 @@ function loadProfile(templateId, profileId) {
 	$("#template-profile-loading").show();
 	$.ajax({
         method:   'GET',
-        url:      '/temproservice/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded
@@ -310,7 +361,7 @@ function deleteProfile(templateId, profileId) {
 	$('#profile-delete-errors').html("");
 	$.ajax({
         method:   'DELETE',
-        url:      '/temproservice/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded
@@ -373,7 +424,7 @@ function clearProfileContentInTemplate() {
 // Process the job profile currently displayed in the template,
 // running it through the profile XSLT that transforms the 
 // profile into a job input file.
-function temproProcessProfile() {
+function tempssProcessProfile() {
 	var treeRootNode = $("ul[role='tree']").children("li");
 	var templateId = $('input[name=componentname]').val();
 	processJobProfile(treeRootNode, templateId);

@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -89,7 +90,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
-import uk.ac.imperial.libhpc2.schemaservice.TemproObject;
+import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
@@ -147,7 +148,7 @@ public class ProfileRestResource {
         SchemaProcessor proc = new SchemaProcessor(_context);
 		
         // Get the component metadata from the servletcontext and check the name is valid
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         JSONObject jsonResponse = new JSONObject();
 		
@@ -285,10 +286,10 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Check the specified template exists
-		TemproObject templateMetadata = components.get(templateId);
+		TempssObject templateMetadata = components.get(templateId);
 		if(templateMetadata == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
 					"\"The specified template <" + templateId + "> does not exist.\"}";
@@ -339,11 +340,11 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
-    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Check the specified template exists, if so, save the 
 		// profile data to the database with the provided name
-		TemproObject templateMetadata = components.get(templateId);
+		TempssObject templateMetadata = components.get(templateId);
 		if(templateMetadata == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
 					"\"The specified template <" + templateId + "> does not exist.\"}";
@@ -412,11 +413,11 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Undertake sme validation checks...
     	// Check the specified template exists
-		TemproObject templateMetadata = components.get(templateId);
+		TempssObject templateMetadata = components.get(templateId);
 		if(templateMetadata == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
 					"\"The specified template <" + templateId + "> does not exist.\"}";
@@ -558,7 +559,7 @@ public class ProfileRestResource {
 		};
 		
 		// Create the content disposition object for the file download
-		ContentDisposition cd = ContentDisposition.type("attachment").creationDate(new Date()).fileName("tempro_input_file_" + pFileId).build();
+		ContentDisposition cd = ContentDisposition.type("attachment").creationDate(new Date()).fileName("tempss_input_file_" + pFileId).build();
 		
 		NewCookie c = new NewCookie("fileDownload","true", "/",null, null, NewCookie.DEFAULT_MAX_AGE, false);
 		return Response.status(Status.OK).header("Content-Disposition", cd).cookie(c).entity(so).build();

@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -48,14 +49,14 @@ package uk.ac.imperial.libhpc2.schemaservice;
  * A metadata object containing details of a component for which
  * a template and associated profile mappings have been made.
  */
-public class TemproObject {
+public class TempssObject {
 
     private String _id;
     private String _name;
     private String _schema;
     private String _transform;
 
-    public TemproObject(String id, String name, String schema, String transform) {
+    public TempssObject(String id, String name, String schema, String transform) {
         this._id = id;
         this._name = name;
         this._schema = schema;
@@ -90,7 +91,7 @@ public class TemproObject {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("Tempro Template: " + getId());
+        s.append("TemPSS Template: " + getId());
         s.append("\n\tName: " + getName());
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());

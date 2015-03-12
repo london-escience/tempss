@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -67,7 +68,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
-import uk.ac.imperial.libhpc2.schemaservice.TemproObject;
+import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 
 /**
  * Jersey REST class representing the template endpoint
@@ -99,10 +100,10 @@ public class TemplateRestResource {
     @Produces("application/json")
     @SuppressWarnings("unchecked")
     public Response listTemplatesJson() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         JSONArray componentList = new JSONArray();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             JSONObject componentObj = new JSONObject();
             try {
                 componentObj.put("id", component.getId());
@@ -131,10 +132,10 @@ public class TemplateRestResource {
     @Produces("text/plain")
     @SuppressWarnings("unchecked")
     public Response listTemplatesText() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         StringBuilder sb = new StringBuilder();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             sb.append("[" + component.getId() + ", "
                       + component.getName() + ", "
                       + component.getSchema() + ", "
@@ -148,10 +149,10 @@ public class TemplateRestResource {
     @Path("names")
     @SuppressWarnings("unchecked")
     public String listTemplatesNames() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         StringBuilder sb = new StringBuilder();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             sb.append(component.getName() + "\n");
         }
         return sb.toString();
@@ -162,10 +163,10 @@ public class TemplateRestResource {
     @Path("names")
     @SuppressWarnings("unchecked")
     public String listTemplatesNamesJson() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         JSONArray componentNames = new JSONArray();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             componentNames.put(component.getName());
         }
         return componentNames.toString();
@@ -176,10 +177,10 @@ public class TemplateRestResource {
     @Path("ids")
     @SuppressWarnings("unchecked")
     public String listTemplatesIds() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         StringBuilder sb = new StringBuilder();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             sb.append(component.getId() + "\n");
         }
         return sb.toString();
@@ -190,10 +191,10 @@ public class TemplateRestResource {
     @Path("ids")
     @SuppressWarnings("unchecked")
     public String listTemplatesIdsJson() {
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         JSONArray componentNames = new JSONArray();
-        for(TemproObject component : components.values()) {
+        for(TempssObject component : components.values()) {
             componentNames.put(component.getId());
         }
         return componentNames.toString();
@@ -205,7 +206,7 @@ public class TemplateRestResource {
     @SuppressWarnings("unchecked")
     public Response getTemplatesHtmlTree(@PathParam("templateId") String templateId) {
         // Get the component metadata from the servletcontext and check the name is valid
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         // If we don't have a template of this name then throw an error
         if(!components.containsKey(templateId)) {
@@ -217,7 +218,7 @@ public class TemplateRestResource {
         // the template schema to an HTML tree for display in
         // a web page
         SchemaProcessor proc = new SchemaProcessor(_context);
-        TemproObject metadata = components.get(templateId);
+        TempssObject metadata = components.get(templateId);
         String htmlTree = "";
         try {
             htmlTree = proc.processComponentSelector(metadata);

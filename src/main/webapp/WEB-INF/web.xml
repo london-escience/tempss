@@ -30,7 +30,7 @@
   </listener>
    
   <listener>
-    <listener-class>uk.ac.imperial.libhpc2.schemaservice.TemproServletContextListener</listener-class>
+    <listener-class>uk.ac.imperial.libhpc2.schemaservice.TempssServletContextListener</listener-class>
   </listener>
   
   <servlet>
@@ -53,7 +53,7 @@
     </init-param>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
-      <param-value>uk.ac.imperial.libhpc2.schemaservice.api.TemProMultipartConfig</param-value>
+      <param-value>uk.ac.imperial.libhpc2.schemaservice.api.TemPSSMultipartConfig</param-value>
     </init-param>
     <load-on-startup>2</load-on-startup>
   </servlet>

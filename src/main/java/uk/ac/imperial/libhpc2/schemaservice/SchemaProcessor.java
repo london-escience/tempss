@@ -31,8 +31,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPro template and profile service, developed as
- * part of the libhpc projects (http://www.imperial.ac.uk/lesc/projects/libhpc).
+ * This file is part of the TemPSS - Templates and Profiles for Scientific 
+ * Software - service, developed as part of the libhpc projects 
+ * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
  * Council (EPSRC) for their support of the projects:
@@ -107,7 +108,7 @@ public class SchemaProcessor {
      * @throws ParseException
      * @throws TransformerException
      */
-    public String processComponentSelector(TemproObject pComponentMetadata)
+    public String processComponentSelector(TempssObject pComponentMetadata)
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
         sLog.fine("ServletContext: " + _context);
@@ -261,10 +262,10 @@ public class SchemaProcessor {
         // Now we need to convert the completed xml profile into form that is
         // expected as input by the component. Look up the component metadata to
         // get the path to the XSLT transform for this component.
-        Map<String, TemproObject> components = (Map<String, TemproObject>)_context.getAttribute("components");
+        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
         String transformPath = "";
         if(components.containsKey(pComponentName)) {
-            TemproObject componentMetadata = components.get(pComponentName);
+            TempssObject componentMetadata = components.get(pComponentName);
             transformPath = _context.getRealPath("WEB-INF/classes") + File.separator + componentMetadata.getTransform();
         } else {
             throw new UnknownTemplateException("Unhandled component name while transforming xml:" + pComponentName);
