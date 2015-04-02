@@ -12,6 +12,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <commandline>
 -f <xsl:value-of select="Inputs/MandatoryInputs/InputStructureFile"/>
 -o <xsl:value-of select="Outputs/MandatoryOutputs/OutputStructureFile"/>
+-p <xsl:value-of select="Outputs/MandatoryOutputs/OutputTopologyFile"/>
 -water <xsl:value-of select="ProblemSetup/WaterModel"/>
 -ff <xsl:value-of select="ProblemSetup/ForceField"/>
 </commandline>

@@ -147,6 +147,20 @@
     </xs:simpleContent>
   </xs:complexType>
 
+  <xs:complexType name="topologyFileOutput">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileTypeOutput" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="top"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:complexType name="gromppInputFile">
     <xs:simpleContent>
       <xs:extension base="xs:string">
