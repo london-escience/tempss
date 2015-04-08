@@ -203,7 +203,7 @@ public class ProfileRestResource {
         // files that have been uploaded, then we need to get these files
         // from the multipart request and put their content into the baseXml
         // in place of the filename to create the completeXml.
-        if(fileFields.size() > 0) {
+        if((fileFields != null) && (fileFields.size() > 0)) {
             for(int i = 0; i < fileFields.size(); i++) {
                 try {
                     FormDataBodyPart fileData = fileFields.get(i);

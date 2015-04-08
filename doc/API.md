@@ -207,7 +207,7 @@ generating profile XML content from a tree and for sending this to the server
 for conversion.
 
 ```
-POST /api/profile/:templateId/convert
+POST /api/profile/[templateId]/convert
 ```
 
 ##### Parameters:
