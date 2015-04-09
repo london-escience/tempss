@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0"?>
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <xsl:output method="text" indent="yes"/>
+  <xsl:output method="xml" indent="no"/>
   <xsl:strip-space elements="*"/>
-
+  
+  <xsl:template match="Inputs/MandatoryInputs">
+    -s <xsl:value-of select="SimulationInput"/>
+  </xsl:template>
+  
+  <xsl:template match="Outputs/MandatoryOutputs">
+    -e <xsl:value-of select="EnergyFile"/>
+  </xsl:template>
+  
   <xsl:template match="/GROMACS_mdrun">
-<!-- 
-    <xsl:if test="not(ProblemSpecification/Geometry/GeometryAndBoundaryConditions/GEOMETRY)">
-      <Error>
-        Transform error: Geometry has not been supplied or is not in correct format.
-      </Error>
-      <xsl:message terminate="yes">
-        Transform error: Geometry has not been supplied or is not in correct format.
-      </xsl:message>
-    </xsl:if>
--->
--s <xsl:value-of select="Inputs/MandatoryInputs/SimulationInput"/>
--e <xsl:value-of select="Outputs/MandatoryOutputs/EnergyFile"/>
+    <commandline>
+      <xsl:apply-templates select="Inputs/MandatoryInputs"/>
+      <xsl:apply-templates select="Outputs/MandatoryOutputs"/>
+    </commandline>
   </xsl:template>
 </xsl:stylesheet>

@@ -186,13 +186,13 @@ Options not used:
               <xs:element name="OptionalInputs">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="PotentialFunctionsTable" type="functionsTable">
+                    <xs:element name="PotentialFunctionsTable" type="optionalFunctionsTable">
                       <!-- -table: xvgr/xmgr file -->
                     </xs:element>
-                    <xs:element name="PairInteractionFunctionsTable" type="functionsTable">
+                    <xs:element name="PairInteractionFunctionsTable" type="optionalFunctionsTable">
                       <!-- -tablep: xvgr/xmgr file -->
                     </xs:element>
-                    <xs:element name="BondedFunctionsTable" type="functionsTable">
+                    <xs:element name="BondedFunctionsTable" type="optionalFunctionsTable">
                       <!-- -tableb: xvgr/xmgr file -->
                       <!-- Note this refers to several files so needs fixing -->
                     </xs:element>
