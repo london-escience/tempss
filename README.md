@@ -46,6 +46,9 @@ the `tempss-service.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
 the service. If your Tomcat server is configured to run on port 8080, the
 service will be accessible at `http://localhost:8080/tempss-service`.
 
+Whilst it is strongly recommended to package the service as a .war archive for production use, the service can be also run locally by simply invoking the command `mvn jetty:run-war` in the project base directory. In this case the
+service will be accessible at `http://localhost:8080/`.
+
 ###### Using Docker
 A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPSS service. To build the image, clone the repository and change into the base repository directory, `tempss`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
 
