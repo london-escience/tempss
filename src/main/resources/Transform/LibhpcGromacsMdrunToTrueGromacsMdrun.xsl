@@ -9,6 +9,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   </xsl:template>
   
   <xsl:template match="Outputs/MandatoryOutputs">
+    -g <xsl:value-of select="LogFile"/>
+    -o <xsl:value-of select="TrajectoryFile"/>
+    -c <xsl:value-of select="StructureFile"/>
     -e <xsl:value-of select="EnergyFile"/>
   </xsl:template>
   

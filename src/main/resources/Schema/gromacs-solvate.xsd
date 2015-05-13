@@ -35,7 +35,7 @@
               <xs:element name="OptionalInputs">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="SoluteStructureFile" type="structureFile">
+                    <xs:element name="SoluteStructureFile" type="optionalStructureFile">
                     <!-- -cp [<.gro/.g96/...>] (protein.gro) (Input, Optional)
                               Structure file: gro g96 pdb brk ent esp tpr tpb tpa  -->
                       <xs:annotation>
@@ -44,7 +44,7 @@
                         </xs:appinfo>
                       </xs:annotation>
                     </xs:element>
-                    <xs:element name="TopologyFile" type="topologyFile">
+                    <xs:element name="TopologyFile" type="optionalTopologyFile">
                       <!-- -p [<.top>] (topol.top) (Input/Output, Optional)
                               Topology file  -->
                       <xs:annotation>
