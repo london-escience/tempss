@@ -217,6 +217,7 @@
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="cpi"/>
+              <xs:enumeration value="cpt"/>
             </xs:restriction>
           </xs:simpleType>
         </xs:attribute>
@@ -239,10 +240,17 @@
     </xs:simpleContent>
   </xs:complexType>
 
+  <xs:complexType name="optionalOutputCheckpointFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="xs:string"/>
+    </xs:choice>
+  </xs:complexType>
+  
   <xs:complexType name="optionalCompressedTrajectoryFile">
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
-      <xs:element name="FileName" type="trajectoryFile"/>
+      <xs:element name="FileName" type="xs:string"/>
     </xs:choice>
   </xs:complexType>
 
@@ -264,6 +272,13 @@
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
       <xs:element name="FileName" type="functionsTable"/>
+    </xs:choice>
+  </xs:complexType>
+  
+  <xs:complexType name="optionalTrajectoryFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="trajectoryFile"/>
     </xs:choice>
   </xs:complexType>
 

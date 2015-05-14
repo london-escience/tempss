@@ -50,6 +50,21 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              <xs:element name="OptionalInputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="InputTrajectoryFile" type="optionalTrajectoryFile">
+                      <!-- -t [<.trr/.trj/.cpt>] (Input, Optional)
+                              Trajectory file   -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Optional trajectory file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

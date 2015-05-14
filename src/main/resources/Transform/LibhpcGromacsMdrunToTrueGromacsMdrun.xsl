@@ -15,6 +15,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     -e <xsl:value-of select="EnergyFile"/>
   </xsl:template>
   
+  <xsl:template match="Outputs/OptionalOutputs">
+    -cpo <xsl:value-of select="OutputCheckpointFile/FileName"/>
+  </xsl:template>
+  
   <xsl:template match="/GROMACS_mdrun">
     <commandline>
       <xsl:apply-templates select="Inputs/MandatoryInputs"/>

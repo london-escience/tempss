@@ -270,6 +270,9 @@ Options not used:
               <xs:element name="OptionalOutputs">
                 <xs:complexType>
                   <xs:sequence>
+                    <xs:element name="OutputCheckpointFile" type="optionalOutputCheckpointFile">
+                      <!-- -cpo: Output checkpoint file (cpt format) -->
+                    </xs:element>
                     <xs:element name="CompressedTrajectoryFile" type="optionalCompressedTrajectoryFile">
                       <!-- -x: Compressed trajectory (portable xdr format) -->
                     </xs:element>
