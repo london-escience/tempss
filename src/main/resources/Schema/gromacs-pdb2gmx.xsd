@@ -111,6 +111,20 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              <xs:element name="OptionalOutputs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="IndexFile" type="optionalOutputIndexFile">
+                      <!-- -n [<.ndx>] (clean.ndx) (Output, Optional) -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Output index file</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

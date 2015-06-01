@@ -37,6 +37,15 @@
         <xs:element name="ProblemSetup">
           <xs:complexType>
             <xs:sequence>
+              <!-- TODO: This should be a vector -->
+              <xs:element name="BoxLength" type="DefaultOrPositiveReal">
+                <!-- -box <vector> (0 0 0) Box vector lengths (a,b,c)  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Box vector length</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
               <xs:element name="CentreMoleculeInBox" type="boolean">
                 <!-- [no]c (no): Center molecule in box (implied by -box and -d) -->
                 <xs:annotation>

@@ -167,7 +167,21 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  
+
+  <xs:complexType name="indexFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="ndx"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:complexType name="tableFile">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -246,7 +260,7 @@
       <xs:element name="FileName" type="xs:string"/>
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="optionalCompressedTrajectoryFile">
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
@@ -260,25 +274,32 @@
       <xs:element name="FileName" type="topologyFile"/>
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="optionalStructureFile">
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
       <xs:element name="FileName" type="structureFile"/>
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="optionalFunctionsTable">
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
       <xs:element name="FileName" type="functionsTable"/>
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="optionalTrajectoryFile">
     <xs:choice>
       <xs:element name="NotProvided" type="NotProvided"/>
       <xs:element name="FileName" type="trajectoryFile"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="optionalOutputIndexFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="xs:string"/>
     </xs:choice>
   </xs:complexType>
 

@@ -18,6 +18,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <xsl:template match="ProblemSetup">
     <xsl:choose>
+      <xsl:when test="BoxLength/Default"></xsl:when>
+      <xsl:otherwise> -box <xsl:value-of select="BoxLength/Specified"/></xsl:otherwise>
+    </xsl:choose>
+    <xsl:choose>
       <xsl:when test="DistanceBetweenSoluteAndBox/Default"></xsl:when>
       <xsl:otherwise> -d <xsl:value-of select="DistanceBetweenSoluteAndBox/Specified"/></xsl:otherwise>
     </xsl:choose>
