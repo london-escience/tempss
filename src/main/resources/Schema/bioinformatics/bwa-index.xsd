@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="BWA_index">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FASTAFile" type="fastaFile">
+                <!-- in.fasta: FATSA input file: fa, fasta, fas, fna, frn, ffn, faa -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Protein Structure File, in Protein Data Bank (pdb) format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="IndexConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BWTAlgorithm">
+                <!-- -a <STR>: BWT construction algorithm - bwtsw, is (auto) -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The BWT construction algorithm to use. 
+                      NOTE: 'bwtsw' does not work for short genomes, while 'is' 
+                      does not work not for long genomes. Automatically 
+                      determined if the parameter is not specified.  
+                      Please choose this value according to the length of the 
+                      genome or select auto.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="auto"/>
+                    <xs:enumeration value="is"/>
+                    <xs:enumeration value="bwtsw"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="OutputFilePrefix" type="DefaultOrString">
+                <!-- -p <STR> - A prefix for the output file name. Defaults to 
+                     the same as the DB filename  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>A prefix for the output file name. 
+                      Defaults to the same as the DB filename
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FileName64" type="boolean">
+                <!-- -6 - index files named as <in.fasta>.64.* instead of <in.fasta>.* -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>This property should be set to yes 
+                      to denote that index files are named as &lt;in.fasta&gt;.64.* 
+                      instead of &lt;in.fasta&gt;.* </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="AmbOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: amb -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.amb output file, automatically 
+                      generated, does not need to be specified.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="AnnOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: ann -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.ann output file, automatically 
+                      generated, does not need to be specified.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="BwtOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: bwt -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.bwt output file, automatically 
+                      generated, does not need to be specified.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="PacOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: pac -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.pac output file, automatically 
+                      generated, does not need to be specified.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SaOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: sa -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.sa output file, automatically 
+                      generated, does not need to be specified.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:simpleType name="positiveDouble">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="boolean">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Default"/>
+
+  <xs:complexType name="DefaultOrString">
+    <xs:choice>
+      <xs:element name="Default" type="Default"/>
+      <xs:element name="Specified" type="xs:string"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="DefaultOrPositiveReal">
+    <xs:choice>
+      <xs:element name="Default" type="Default"/>
+      <xs:element name="Specified" type="positiveDouble"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="DefaultOrPositiveInteger">
+    <xs:choice>
+      <xs:element name="Default" type="Default"/>
+      <xs:element name="Specified" type="xs:positiveInteger"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="GuessOrPositiveInteger">
+    <xs:choice>
+      <xs:element name="Guess" type="Default"/>
+      <xs:element name="Specified" type="xs:positiveInteger"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="NotProvided"/>
+  <xs:complexType name="Provided"/>
+  
+  <xs:complexType name="NotProvidedOrProvided">
+    <xs:choice>
+      <xs:element name="NotSpecified" type="NotProvided"/>
+      <xs:element name="Specified" type="Provided"/>
+    </xs:choice>
+  </xs:complexType>
+<!--
+  <xs:complexType name="fileName">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileType" type="xs:string" fixed="XML" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+-->
+
+  <xs:complexType name="fastaFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="fa"/>
+              <xs:enumeration value="fasta"/>
+              <xs:enumeration value="fas"/>
+              <xs:enumeration value="fna"/>
+              <xs:enumeration value="ffn"/>
+              <xs:enumeration value="faa"/>
+              <xs:enumeration value="frn"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="fastqFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="fq"/>
+              <xs:enumeration value="fastq"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+<!--
+  <xs:complexType name="optionalOutputCheckpointFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="xs:string"/>
+    </xs:choice>
+  </xs:complexType>
+ -->
+
+</xs:schema>
