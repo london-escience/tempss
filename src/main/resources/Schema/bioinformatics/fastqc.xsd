@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Command line parameters and documentation info provided here is 
+       based on the Ubuntu manpage for fastqc:
+       http://manpages.ubuntu.com/manpages/trusty/man1/fastqc.1.html
+       More information on FASTQC can be found on the tool's web page:
+       http://www.bioinformatics.babraham.ac.uk/projects/fastqc/ -->
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="FASTQC">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SequenceFiles" type="xs:string">
+                <!-- A space-separated list of input sequence files. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>A space-separated list of input sequence files.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Configuration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CasavaFiles" type="boolean">
+                <!-- \-\-casava: Files come from raw casava output.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Casava output files provided as input. Names should be unchanged from the original casava output.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="UnzipOutput" type="boolean">
+                <!-- \-\-extract: Unzip output files.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Unzip the output files.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="DisableGrouping" type="boolean">
+                <!-- \-\-nogroup: Disable grouping of bases for reads that are greater than 50 base pairs in length.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Disable grouping of bases for reads that are greater than 50 base pairs in length.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="InputFileFormat">
+                <!-- -f: Set the input file format, auto causes it to be detected by the tool -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Set the input file format, auto causes it to be detected by the tool.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="auto"/>
+                    <xs:enumeration value="bam"/>
+                    <xs:enumeration value="sam"/>
+                    <xs:enumeration value="bam_mapped"/>
+                    <xs:enumeration value="sam_mapped"/>
+                    <xs:enumeration value="fastq"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="NumThreads" type="DefaultOrPositiveInteger">
+                <!-- -t INT - Number of threads to use - 1 file processed per thread  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Number of threads to use - 1 file processed per thread.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutputDirectory" type="xs:string">
+                <!-- -o: Directory in which to place the output files. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The directory in which to place the output files.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

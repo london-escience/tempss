@@ -38,7 +38,7 @@
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="FASTQAlignmentIndex1" type="saiFile">
+              <xs:element name="FASTQAlignmentIndex2" type="saiFile">
                 <!-- in2.sai: Alignment index file from bwa aln for second read in pair: sai -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -86,7 +86,7 @@
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="LoadFMIndexToMemory" type="xs:boolean">
+              <xs:element name="LoadFMIndexToMemory" type="boolean">
                 <!-- -P: Load the entire FM-index into memory to reduce disk operations. -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -128,7 +128,7 @@
         <xs:element name="Outputs">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="OutputSamFile" type="samFile">
+              <xs:element name="OutputSamFile" type="samOutputFile">
                 <!-- .sam: Output file -->
                 <xs:annotation>
                   <xs:appinfo>

@@ -10,28 +10,25 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <xsl:template match="Inputs">
      <xsl:text> </xsl:text><xsl:value-of select="FASTAFile"/>
+     <xsl:text> </xsl:text><xsl:value-of select="FASTQAlignmentIndex1"/>
+     <xsl:text> </xsl:text><xsl:value-of select="FASTQAlignmentIndex2"/>
+     <xsl:text> </xsl:text><xsl:value-of select="FASTQFile1"/>
+     <xsl:text> </xsl:text><xsl:value-of select="FASTQFile2"/>
+  </xsl:template>
+  
+  <xsl:template match="Configuration">
+
+  </xsl:template>
+    
+  <xsl:template match="Outputs">
+    <xsl:text disable-output-escaping="yes"> &gt; </xsl:text><xsl:value-of select="OutputSamFile"/>
   </xsl:template>
 
-  <xsl:template match="IndexConfiguration">
-    <xsl:choose>
-      <xsl:when test="BWTAlgorithm!='auto'">
-         -a <xsl:value-of select="BWTAlgorithm"/>
-       </xsl:when>
-       <xsl:otherwise></xsl:otherwise>
-    </xsl:choose>
-    <xsl:choose>
-      <xsl:when test="OutputFilePrefix/Default"></xsl:when>
-      <xsl:otherwise> -p <xsl:value-of select="OutputFilePrefix/Specified"/></xsl:otherwise>
-    </xsl:choose>
-    <xsl:choose>
-      <xsl:when test="FileName64='yes'"> -6 </xsl:when>
-    </xsl:choose>
-  </xsl:template>
-
-  <xsl:template match="/BWA_index">
+  <xsl:template match="/BWA_sampe">
     <commandline>
-      <xsl:apply-templates select="IndexConfiguration"/>
+      <xsl:apply-templates select="Configuration"/>
       <xsl:apply-templates select="Inputs"/>
+      <xsl:apply-templates select="Outputs"/>
     </commandline>
   </xsl:template>
 </xsl:stylesheet>

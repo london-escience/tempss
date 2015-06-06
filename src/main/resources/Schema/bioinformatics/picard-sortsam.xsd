@@ -19,8 +19,6 @@
            Data Processing Subgroup (2009) The Sequence alignment/map (SAM) 
            format and SAMtools. Bioinformatics, 25, 2078-9. [PMID: 19505943] -->
 
-
-
   <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
 
   <xs:element name="PICARD_SortSam">
