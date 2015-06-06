@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the BWA man page:
+       http://bio-bwa.sourceforge.net/bwa.shtml
+       See the manpage for more detailed information. -->
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="BWA_sampe">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FASTAFile" type="fastaFile">
+                <!-- in.fasta: FATSA input file: fa, fasta, fas, fna, frn, ffn, faa -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input reference genome file in FASTA format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FASTQAlignmentIndex1" type="saiFile">
+                <!-- in1.sai: Alignment index file from bwa aln for first read in pair: sai -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>in1.sai: Alignment index file from bwa aln for first read in pair: sai</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FASTQAlignmentIndex1" type="saiFile">
+                <!-- in2.sai: Alignment index file from bwa aln for second read in pair: sai -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>in1.sai: Alignment index file from bwa aln for second read in pair: sai</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FASTQFile1" type="fastqFile">
+                <!-- in1.fq: FASTQ input file 1 - first read in pair: fq, fastq -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>FASTQ input file 1 - first read in pair</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FASTQFile2" type="fastqFile">
+                <!-- in2.fq: FASTQ input file 2 - second read in pair: fq, fastq -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>FASTQ input file 2 - second read in pair</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Configuration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MaxInsertSize" type="DefaultOrPositiveInteger">
+                <!-- -a INT: Maximum insert size for a read pair to be considered being mapped properly. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum insert size for a read pair to be considered being mapped properly. Since 0.4.5, this option is only used when there are not enough good alignment to infer the distribution of insert sizes. [500]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MaxPairingOccurrences" type="DefaultOrPositiveInteger">
+                <!-- -o INT: Maximum occurrences of a read for pairing. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum occurrences of a read for pairing. A read with more occurrneces will be treated as a single-end read. Reducing this parameter helps faster pairing. [100000]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="LoadFMIndexToMemory" type="xs:boolean">
+                <!-- -P: Load the entire FM-index into memory to reduce disk operations. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Load the entire FM-index into memory to reduce disk operations (base-space reads only). With this option, at least 1.25N bytes of memory are required, where N is the length of the genome.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MaxOutputsCorrectPairs" type="DefaultOrPositiveInteger">
+                <!-- -n INT: Maximum number of alignments to output in the XA tag for reads paired properly. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum number of alignments to output in the XA tag for reads paired properly. If a read has more than INT hits, the XA tag will not be written. [3]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MaxOutputsDiscordantPairs" type="DefaultOrPositiveInteger">
+                <!-- -N INT: Maximum number of alignments to output in the XA tag for disconcordant read pairs. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum number of alignments to output in the XA tag for disconcordant read pairs (excluding singletons). If a read has more than INT hits, the XA tag will not be written. [10]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SpecifyReadGroup" type="DefaultOrString">
+                <!-- -r STR: Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’. [null]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutputSamFile" type="samFile">
+                <!-- .sam: Output file -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.sam output file. You should include the .sam extension with your filename.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

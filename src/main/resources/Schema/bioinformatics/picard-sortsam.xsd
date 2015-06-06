@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the Picard.SortSam [1] man page:
+       https://www.broadinstitute.org/cancer/software/genepattern/modules/docs/Picard.SortSam
+       See the manpage for more detailed information. 
+       
+       [1] Li H.*, Handsaker B.*, Wysoker A., Fennell T., Ruan J., Homer N., 
+           Marth G., Abecasis G., Durbin R. and 1000 Genome Project 
+           Data Processing Subgroup (2009) The Sequence alignment/map (SAM) 
+           format and SAMtools. Bioinformatics, 25, 2078-9. [PMID: 19505943] -->
+
+
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="PICARD_SortSam">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SamOrBamInputFile" type="samOrBamFile">
+                <!-- Input file in sam or bam format -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input file in SAM or BAM format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Configuration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SortOrder">
+                <!-- The sort order of the input data. May be coordinate (default), queryname or unsorted. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The sort order of the input data. May be coordinate (default), queryname or unsorted.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="coordinate (default)"/>
+                    <xs:enumeration value="queryname"/>
+                    <xs:enumeration value="unsorted"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="OutputFileFormat">
+                <!-- Specify whether output should be in the SAM or BAM format. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify whether output should be in the SAM or BAM format.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="BAM (default)"/>
+                    <xs:enumeration value="SAM"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SortedOutputFile" type="samOrBamFile">
+                <!-- .sam or .bam: Sorted output file -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The output file should be named prefix.sorted.sam or prefix.sorted.bam where prefix is some string. An additional index file with the name of this file and an additional .bai extension will also be created.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

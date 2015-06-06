@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the SAMTOOLS man page:
+       http://samtools.sourceforge.net/samtools.shtml
+       See the manpage for more detailed information. -->
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="SAMTOOLS_index">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BAMFile" type="bamFile">
+                <!-- aln.bam: Input bam file -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Index sorted alignment for fast random access. Index file &lt;aln.bam&gt;.bai will be created.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BaiOutputFile" type="DefaultOrString">
+                <!-- Automatically generated output file: bam -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>This is an automatically generated
+                      output file. If you need to specify the file name, it 
+                      should be the name of the input file with ".bai" added
+                      to the end - e.g. aln.bam.bai
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the BWA man page:
+       http://bio-bwa.sourceforge.net/bwa.shtml
+       See the manpage for more detailed information. -->
+       
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="BWA_aln">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FASTAFile" type="fastaFile">
+                <!-- in.fasta: FATSA input file: fa, fasta, fas, fna, frn, ffn, faa -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input reference genome file in FASTA format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FASTQFile" type="fastqFile">
+                <!-- in.fastq: FASTQ input file: fq, fastq -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input reads in FASTQ format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="InputConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="IlluminaFormattedInput" type="xs:boolean">
+                <!-- -I - Is the input in Illumina 1.3+ format  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The input is in the Illumina 1.3+ 
+                    read format (quality equals ASCII-64).</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="BarcodeLength" type="DefaultOrPositiveInteger">
+                <!-- -B INT - Length of barcode starting from the 5’-end  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Length of barcode starting from the 5’-end. When INT is positive, the barcode of each read will be trimmed before mapping and will be written at the BC SAM tag. For paired-end reads, the barcode from both ends are concatenated. [0]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="BamInput">
+                <!-- -b -0 -1 -2 - Specify BAM input format and read-pair usage  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify the input read sequence file is in BAM format. For paired-end data, two ends in a pair must be grouped together. You can specify which end should be mapped by selecting the "BAM format (first read in pair)" "BAM format (second read in pair)" corresponding to the -1 and -2 command line options. The "BAM format (single-end reads)" specifies to use only single end reads in the mapping process and equates to the -b0 command line option.
+                    </libhpc:documentation>
+                    <xs:simpleType>
+	                  <xs:restriction base="xs:string">
+	                    <xs:enumeration value="no"/>
+	                    <xs:enumeration value="BAM format (single-end reads)"/>
+	                    <xs:enumeration value="BAM format (first read in pair)"/>
+	                    <xs:enumeration value="BAM format (second read in pair)"/>
+	                  </xs:restriction>
+	                </xs:simpleType>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="ReadTrimming" type="DefaultOrPositiveInteger">
+                <!-- -q INT - Read trimming parameter  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Parameter for read trimming. BWA trims a read down to argmax_x{\sum_{i=x+1}^l(INT-q_i)} if q_l &lt; INT where l is the original read length. [0]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="AlignmentConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="EditDistanceOrMissingAlignments" type="DefaultOrPositiveReal">
+                <!-- -n <STR>: Maximum edit distance (INT) or fraction of 
+                     missing alignments (FLOAT) -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum edit distance if the value is INT, or the fraction of missing alignments given 2% uniform base error rate if FLOAT. In the latter case, the maximum edit distance is automatically chosen for different read lengths. [0.04]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="DisallowLongDeletion" type="DefaultOrPositiveInteger">
+                <!-- -d INT - Disallow a long deletion  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Disallow a long deletion within INT bp towards the 3’-end [16].
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="DisallowIndel" type="DefaultOrPositiveInteger">
+                <!-- -i INT - Disallow an indel  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Disallow an indel within INT bp towards the ends [5].
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Seeding" type="DefaultOrPositiveInteger">
+                <!-- -l INT - Take the first INT subsequence as seed.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Take the first INT subsequence as seed. If INT is larger than the query sequence, seeding will be disabled. For long reads, this option is typically ranged from 25 to 35 for ‘-k 2’. [inf]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SeedMaxEditDistance" type="DefaultOrPositiveInteger">
+                <!-- -k INT - Maximum edit distance in the seed [2]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Maximum edit distance in the seed [2]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              
+              <xs:element name="MismatchPenalty" type="DefaultOrPositiveInteger">
+                <!-- -M INT - Mismatch penalty  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Mismatch penalty. BWA will not search for suboptimal hits with a score lower than (bestScore-misMsc). [3]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SuboptimalAlignments" type="DefaultOrPositiveInteger">
+                <!-- -R INT - Proceed with suboptimal alignments if there are 
+                     no more than INT equally best hits.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Proceed with suboptimal alignments if there are no more than INT equally best hits. This option only affects paired-end mapping. Increasing this threshold helps to improve the pairing accuracy at the cost of speed, especially for short reads (~32bp).
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="DisableIterativeSearch" type="xs:boolean">
+                <!-- -N - Disable iterative search.   -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Disable iterative search. All hits with no more than maxDiff differences will be found. This mode is much slower than the default.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Gaps">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="MaxGapOpens" type="DefaultOrPositiveInteger">
+                      <!-- -o INT - Maximum number of gap opens  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Maximum number of gap opens [1]
+                          </libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="MaxGapExtensions" type="DefaultOrInteger">
+                      <!-- -e INT - Maximum number of gap extensions  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Maximum number of gap opens [1]
+                          </libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="GapOpenPenalty" type="DefaultOrPositiveInteger">
+                      <!-- -O INT - Gap open penalty  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Gap open penalty [11]
+                          </libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="GapExtensionPenalty" type="DefaultOrPositiveInteger">
+                      <!-- -E INT - Gap extension penalty  -->
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Gap extension penalty [4]
+                          </libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RuntimeConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="NumThreads" type="DefaultOrPositiveInteger">
+                <!-- -t INT - Number of threads (multi-threading mode) [1]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Number of threads (multi-threading mode) [1]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutputIndexFile" type="xs:string">
+                <!-- .sai: Output index file -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>.sai output index file. You should include the .sai extension with your filename.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

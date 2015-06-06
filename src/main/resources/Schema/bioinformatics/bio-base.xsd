@@ -44,6 +44,13 @@
       <xs:element name="Specified" type="xs:positiveInteger"/>
     </xs:choice>
   </xs:complexType>
+  
+  <xs:complexType name="DefaultOrInteger">
+    <xs:choice>
+      <xs:element name="Default" type="Default"/>
+      <xs:element name="Specified" type="xs:integer"/>
+    </xs:choice>
+  </xs:complexType>
 
   <xs:complexType name="GuessOrPositiveInteger">
     <xs:choice>
@@ -106,6 +113,91 @@
     </xs:simpleContent>
   </xs:complexType>
 
+  <xs:complexType name="saiFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="sai"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="samFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="sam"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="baiFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="bai"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="bamFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="bam"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="samOrBamFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="bam"/>
+              <xs:enumeration value="sam"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="gzipFile">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="multipleFileType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="gz"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
 <!--
   <xs:complexType name="optionalOutputCheckpointFile">
     <xs:choice>
@@ -114,5 +206,19 @@
     </xs:choice>
   </xs:complexType>
  -->
+
+  <xs:complexType name="optionalRefListFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="xs:string"/>
+    </xs:choice>
+  </xs:complexType>
+  
+  <xs:complexType name="optionalReadGroupListFile">
+    <xs:choice>
+      <xs:element name="NotProvided" type="NotProvided"/>
+      <xs:element name="FileName" type="xs:string"/>
+    </xs:choice>
+  </xs:complexType>
 
 </xs:schema>

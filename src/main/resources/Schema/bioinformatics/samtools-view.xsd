@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the SAMTOOLS man page:
+       http://samtools.sourceforge.net/samtools.shtml
+       See the manpage for more detailed information. -->
+
+  <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
+
+  <xs:element name="SAMTOOLS_view">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Inputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SAMorBAMFile" type="samOrBamFile">
+                <!-- in.sam or in.bam: Input file in SAM or BAM format -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input file in SAM or BAM format</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OptionalRefListFile" type="optionalRefListFile">
+                <!-- Optional reference list file -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>This file is TAB-delimited. Each line must contain the reference name and the length of the reference, one line for each distinct reference; additional fields are ignored. This file also defines the order of the reference sequences in sorting. If you run ‘samtools faidx &lt;ref.fa&gt;’, the resultant index file &lt;ref.fa&gt;.fai can be used as this &lt;in.ref_list&gt; file.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OptionalOutputReadGroupListFile" type="optionalReadGroupListFile">
+                <!---R: Output reads in read groups listed in FILE [null] -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Output reads in read groups listed in FILE [null]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FormatConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="InputFileFormat">
+                <!-- -S: Specifies sam input format, otherwise bam -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Input file format. If input is in SAM format, if @SQ header lines are absent, a reference list input file must be provided.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="auto"/>
+                    <xs:enumeration value="SAM"/>
+                    <xs:enumeration value="BAM"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ForceOutputBAMFormat" type="xs:boolean">
+                <!-- -b: Specifies output in BAM format -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>If yes, then the -b switch will be set to request bam format output, otherwise output will be in the same format as the input data.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutputUncompressedBAM" type="xs:boolean">
+                <!-- -u: Output uncompressed BAM -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Output uncompressed BAM. This option saves time spent on compression/decomprssion and is thus preferred when the output is piped to another samtools command.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="GeneralConfiguration">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="IncludeHeaderInOutput" type="xs:boolean">
+                <!-- -h - Include the header in the output. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Include the header in the output.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="HeaderOnlyOutput" type="xs:boolean">
+                <!-- -H - Output the header only. -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Output the header only.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="AlignmentOutputSelection" type="DefaultOrPositiveInteger">
+                <!-- -f INT - Only output alignments with all bits in INT present in the FLAG field.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Only output alignments with all bits in INT present in the FLAG field. INT can be in hex in the format of /^0x[0-9A-F]+/ [0]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SkipAlignmentsByBits" type="DefaultOrPositiveInteger">
+                <!-- -F INT - Skip alignments with bits present in INT [0]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Skip alignments with bits present in INT [0]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SkipAlignmentsByMAPQ" type="DefaultOrPositiveInteger">
+                <!-- -q INT - Skip alignments with MAPQ smaller than INT [0]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Skip alignments with MAPQ smaller than INT [0]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutputOnlyReadsInLibrary" type="DefaultOrString">
+                <!-- -l STR - Only output reads in library STR [null]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Only output reads in library STR [null]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutputOnlyReadsInGroup" type="DefaultOrString">
+                <!-- -r STR - Only output reads in read group STR [null]  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Only output reads in read group STR [null]
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutputOnlyCounts" type="xs:boolean">
+                <!-- -c - Instead of printing the alignments, only count them and print the total number.  -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Instead of printing the alignments, only count them and print the total number. All filter options, such as output alignment configuration settings, are taken into account.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Outputs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutputFile" type="samOrBamFile">
+                <!-- Output file, SAM or BAM format -->
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Output file (in SAM or BAM format).
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

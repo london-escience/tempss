@@ -8,7 +8,12 @@
            xmlns="http://www.libhpc.imperial.ac.uk"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
-
+  
+  <!-- Documentation strings provided to describe parameters in this file are
+       based on the documentation provided in the BWA man page:
+       http://bio-bwa.sourceforge.net/bwa.shtml
+       See the manpage for more detailed information. -->
+  
   <xs:include schemaLocation="bioinformatics/bio-base.xsd" />
 
   <xs:element name="BWA_index">
@@ -21,7 +26,7 @@
                 <!-- in.fasta: FATSA input file: fa, fasta, fas, fna, frn, ffn, faa -->
                 <xs:annotation>
                   <xs:appinfo>
-                    <libhpc:documentation>Protein Structure File, in Protein Data Bank (pdb) format</libhpc:documentation>
+                    <libhpc:documentation>Input reference genome file in FASTA format</libhpc:documentation>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
