@@ -705,4 +705,8 @@ $(document).ready(function () {
     $('#xmlsubmission').hide();
     $('#libraryload').hide();
 
+    // Set up tooltips for validation help and tree expand/collapse buttons
+    $('body').tooltip({
+        selector: ".val-help, .tree-control-btn"
+    });
 });
