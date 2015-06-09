@@ -567,19 +567,20 @@ function submitXML() {
     });
 }
 
-// Generate an XML profile document for the specified template with 
-// values entered into it. This function extracts data currently 
-// entered into the template and builds a profile document for it.
-function getProfileXML(templateRoot) {
-    var xmlString = "";
-    var root = $(templateRoot).children("li");
-    var thisName = $.trim(root.children("span").text());
-    var indentation = "    ";
+//Get the profile XML data from the specified element
+//This function must be provided with the ul element
+//with the role "tree" at the root of a template tree.
+function getProfileXml(treeElement) {
+	// Get the XML for the tree
+	var indentation = "    ";
+	var treeRoot = treeElement.children("li");
+	var thisName = $.trim(treeRoot.children("span").text());
 
-    xmlString += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    xmlString += "<" + thisName + ">\n";
-    xmlString += generateChildXML(root, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
-    xmlString += "</" + thisName + ">\n";
+	xmlString = "<" + thisName + ">\n";
+	xmlString += generateChildXML(treeRoot, indentation, false);
+	xmlString += "</" + thisName + ">\n";
+
+	return xmlString;
 }
 
 // Process the job profile data currently in the template tree
@@ -661,7 +662,8 @@ function collapseTree() {
     // Hide all ul nodes that are choices (i.e. have choice-id attribute).
     // This ensures when we click on a choice bubble which has been selected, nothing will show.
     // This is a trick. We are using the fact that the tree javascript only acts on li nodes.
-    $("ul[choice-id]").hide();
+    // $("ul[choice-id]").hide();
+    $("#schema-tree ul[choice-id]").hide();
 
     // Show the root.
     $("[role='tree']").children().show();

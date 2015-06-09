@@ -430,22 +430,6 @@ function tempssProcessProfile() {
 	processJobProfile(treeRootNode, templateId);
 }
 
-// Get the profile XML data from the specified element
-// This function must be provided with the ul element
-// with the role "tree" at the root of a template tree.
-function getProfileXml(treeElement) {
-	// Get the XML for the tree
-	var indentation = "    ";
-	var treeRoot = treeElement.children("li");
-	var thisName = $.trim(treeRoot.children("span").text());
-
-	xmlString = "<" + thisName + ">\n";
-	xmlString += generateChildXML(treeRoot, indentation, false);
-	xmlString += "</" + thisName + ">\n";
-
-	return xmlString;
-}
-
 // Function to attach click handlers to all the clickable nodes
 // in a template tree. This ensures that if a user has opened up
 // nodes in a tree, they are prompted before browsing to another
