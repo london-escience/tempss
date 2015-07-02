@@ -68,7 +68,7 @@ You can adjust the first port number in the `-p` switch values to change the por
 
 #### Documentation
 
-[API Documenation](doc/API.md)
+[API Documentation](doc/API.md)
 
 [Client-side JavaScript Library](doc/ClientSideLibrary.md)
 
