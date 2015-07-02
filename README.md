@@ -66,6 +66,12 @@ You can adjust the first port number in the `-p` switch values to change the por
 
 `ssh -i ~/.ssh/<private key file> -p 8022 root@localhost`
 
+#### Documentation
+
+[API Documenation](doc/API.md)
+
+[Client-side JavaScript Library](doc/ClientSideLibrary.md)
+
 #### Development Team
 
 The TemPSS team includes members from Department of Computing, Imperial College
