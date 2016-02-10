@@ -49,6 +49,8 @@ service will be accessible at `http://localhost:8080/tempss-service`.
 Whilst it is strongly recommended to package the service as a .war archive for production use, the service can be also run locally by simply invoking the command `mvn jetty:run-war` in the project base directory. The
 service again will be accessible at `http://localhost:8080/tempss-service`.
 
+The interface at `http://localhost:8080/tempss-service` is an example of a simple interface to display template trees. A more advanced example of a profile manager tool is also provided and can be accessed at `http://localhost:8080/tempss-service/profiles/`.
+
 ###### Using Docker
 A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPSS service. To build the image, clone the repository and change into the base repository directory, `tempss`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
 
