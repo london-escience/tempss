@@ -56,7 +56,7 @@ function getTemplateMetadata(host, port, successCallback, errorCallback) {
 			url += ':' + port;
 		}
 	}
-	url += '/tempss-service/api/template';
+	url += '/tempss/api/template';
 	
 	$.ajax({
         method:   'get',
@@ -82,7 +82,7 @@ function displayTemplate(templateId, templateText) {
 	$("#template-tree-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/tempss-service/api/template/id/' + templateId,
+        url:      '/tempss/api/template/id/' + templateId,
         success:  function(data){
         	// Data that comes back is the raw HTML to place into the page
         	$("#template-container").html(data)
@@ -126,7 +126,7 @@ function getTemplateHtml(host, port, templateId, templateText, successCallback, 
 			url += ':' + port;
 		}
 	}
-	url += '/tempss-service/api/template/id/' + templateId,
+	url += '/tempss/api/template/id/' + templateId,
 	
 	$.ajax({
         method:   'get',
@@ -152,7 +152,7 @@ function updateProfileList(templateId) {
 	$("#profiles-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/tempss-service/api/profile/' + templateId + '/names',
+        url:      '/tempss/api/profile/' + templateId + '/names',
         dataType: 'json',
         success:  function(data){
         	log('Profile name data received from server: ' + data.profile_names);
@@ -235,7 +235,7 @@ function saveProfile(templateId, profileName) {
 	$('#profile-save-errors').html("");
 	$.ajax({
         method:   'POST',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileName,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileName,
         dataType: 'json',
         contentType: 'application/json',
         data:     JSON.stringify(profileObject),
@@ -289,7 +289,7 @@ function loadProfile(templateId, profileId) {
 	$("#template-profile-loading").show();
 	$.ajax({
         method:   'GET',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded
@@ -361,7 +361,7 @@ function deleteProfile(templateId, profileId) {
 	$('#profile-delete-errors').html("");
 	$.ajax({
         method:   'DELETE',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded

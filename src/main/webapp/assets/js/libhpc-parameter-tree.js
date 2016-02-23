@@ -463,7 +463,7 @@ function submitComponentRequest() {
 
     // Load the html tree representing the component interface from the server.
     $.ajax({
-        url: '/tempss-service/process',
+        url: '/tempss/process',
         data: formData,
         processData: false,
         contentType: false,
@@ -527,7 +527,7 @@ function submitXML() {
 
 
     $.ajax({
-        url: '/tempss-service/process',
+        url: '/tempss/process',
         data: formData,
         processData: false,
         contentType: false,
@@ -616,7 +616,7 @@ function processJobProfile(treeRootNode, templateId) {
     // formData.append('componentname', componentName);
 
     $.ajax({
-        url: '/tempss-service/api/profile/' + templateId + '/convert',
+        url: '/tempss/api/profile/' + templateId + '/convert',
         data: formData,
         processData: false,
         contentType: false,
@@ -635,7 +635,7 @@ function processJobProfile(treeRootNode, templateId) {
         	
         	// Trigger a download request to get the transformed XML
         	// and prompt the user to save the file.
-        	$.fileDownload('/tempss-service/api/profile/inputFile/' + fileId);
+        	$.fileDownload('/tempss/api/profile/inputFile/' + fileId);
         	
         	// If a loading element is displayed, hide it
         	if($('#process-profile-loading').length > 0) {
