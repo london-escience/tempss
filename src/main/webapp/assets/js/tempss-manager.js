@@ -182,31 +182,30 @@ function updateProfileList(templateId) {
     });
 }
 
-// Disable the buttons used for saving a profile or 
-// clearing profile content. These should only be enabled
-// when a template is selected.
+// Disable the button used for clearing profile content 
+// These should only be enabled when a template is selected.
 function disableProfileButtons(disable) {
 	if(disable) {
-		$('#clear-profile-btn').prop('disabled', true);
-		$('#save-as-profile-btn').prop('disabled', true);	
+		$('#clear-profile-btn').prop('disabled', true);	
 	}
 	else {
 		$('#clear-profile-btn').removeProp('disabled');
-		$('#save-as-profile-btn').removeProp('disabled');
 	}
 	
 }
 
-// Hide the buttons used for expanding or collapsing a  
-// template tree shown in the profile editor.
+// Hide the buttons used for expanding or collapsing a template tree  
+// and saving a profile which are shown in the profile editor.
 function hideTreeExpandCollapseButtons(hide) {
 	if(hide) {
 		$('#tree-expand').hide();
-		$('#tree-collapse').hide();	
+		$('#tree-collapse').hide();
+		$('#save-as-profile-btn').hide();
 	}
 	else {
 		$('#tree-expand').show();
 		$('#tree-collapse').show();
+		$('#save-as-profile-btn').show();
 	}
 	
 }
