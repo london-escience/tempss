@@ -62,6 +62,13 @@ public class TempssObject {
         this._schema = schema;
         this._transform = transform;
     }
+    
+    public TempssObject(TempssObject pObj) {
+    	this._id = pObj.getId();
+        this._name = pObj.getName();
+        this._schema = pObj.getSchema();
+        this._transform = pObj.getTransform();
+    }
 
     public String getId() {
         return _id;
