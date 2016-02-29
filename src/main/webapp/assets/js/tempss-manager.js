@@ -24,9 +24,17 @@ function updateTemplateList() {
 				// Remove current content excluding the placeholder
 		    	$('#template-select option:gt(0)').remove();
 		    	var templateSelect = $('#template-select');
-		    	for(var i = 0; i < data.components.length; i++) {
-		    		var item = data.components[i];
-		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+		    	
+		    	// Set up a sort function and sort the list of components
+		    	// based on ID
+		    	var components = data.components;
+		    	components.sort(function(item1, item2) {
+		    		return item1.name.localeCompare(item2.name);
+		    	});
+		    	components.sort();
+		    	for(var i = 0; i < components.length; i++) {
+		    		var item = components[i];
+		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.name + " (id: " + item.id + ")</option>");
 		    	}
 		        $("#template-loading").hide(0);
 			},

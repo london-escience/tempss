@@ -45,11 +45,16 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -65,6 +70,8 @@ import javax.xml.transform.TransformerException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
@@ -82,7 +89,7 @@ public class TemplateRestResource {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(TemplateRestResource.class.getName());
+    private static final Logger sLog = LoggerFactory.getLogger(TemplateRestResource.class.getName());
 
     /**
      * ServletContext obejct used to access template data
@@ -93,15 +100,44 @@ public class TemplateRestResource {
     @Context
     public void setServletContext(ServletContext pContext) {
         this._context = pContext;
-        sLog.fine("Servlet context injected: " + pContext);
+        sLog.debug("Servlet context injected: " + pContext);
     }
 
     @GET
     @Produces("application/json")
     @SuppressWarnings("unchecked")
     public Response listTemplatesJson() {
-        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
-
+        Map<String, TempssObject> contextComponents = (Map<String, TempssObject>)_context.getAttribute("components");
+        // Clone the map so we're working with a copy in case we need to 
+        // remove elements from it
+        Map<String, TempssObject> components = 
+        		new HashMap<String, TempssObject>(contextComponents);
+        for(String key : contextComponents.keySet()) {
+        	TempssObject tObj = contextComponents.get(key);
+        	components.put(key, new TempssObject(tObj));
+        }
+        
+        // See if we have a ~/.libhpc/tempss-ignore file listing template IDs
+        // that should be ignored. If we do, then filter out the templates that
+        // we don't want to show.
+        File userHome = new File(System.getProperty("user.home"));
+        File libhpcDir = new File(userHome, ".libhpc");
+        File templateIgnore = new File(libhpcDir, "tempss-ignore");
+        if(templateIgnore.exists()) {
+        	sLog.debug("Found a template ignore file, updating visible " +
+        			"templates");        	
+        	try {
+        		_updateTemplateList(components, templateIgnore);
+        	} catch(FileNotFoundException e) {
+        		
+        	} catch(IOException e) {
+        		
+        	}
+        }
+        else {
+        	sLog.debug("No templates to ignore, returning full template list.");
+        }
+        
         JSONArray componentList = new JSONArray();
         for(TempssObject component : components.values()) {
             JSONObject componentObj = new JSONObject();
@@ -111,7 +147,7 @@ public class TemplateRestResource {
                 componentObj.put("schema", component.getSchema());
                 componentObj.put("transform", component.getTransform());
             } catch (JSONException e) {
-                sLog.severe("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
+                sLog.error("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage()).build();
             }
 
@@ -121,7 +157,7 @@ public class TemplateRestResource {
         try {
             componentArray.put("components", componentList);
         } catch (JSONException e) {
-            sLog.severe("Unable to add component array to component object: " + e.getMessage());
+            sLog.error("Unable to add component array to component object: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component array to component object: " + e.getMessage()).build();
         }
 
@@ -223,19 +259,46 @@ public class TemplateRestResource {
         try {
             htmlTree = proc.processComponentSelector(metadata);
         } catch (FileNotFoundException e) {
-            sLog.severe("File not found when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("File not found when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("File not found when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (IOException e) {
-            sLog.severe("IO error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("IO error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (ParseException e) {
-            sLog.severe("XML parse error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("XML parse error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XML parse error when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (TransformerException e) {
-            sLog.severe("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to generate HTML tree: " + e.getMessage()).build();
         }
 
         return Response.ok(htmlTree, MediaType.TEXT_HTML).build();
+    }
+    
+    private void _updateTemplateList(
+    		Map<String, TempssObject> pComponents, File pIgnoreFile) 
+    				throws FileNotFoundException, IOException {
+    	
+    	BufferedReader reader = new BufferedReader(new FileReader(pIgnoreFile));
+    	String line = null;
+    	Set<String> removeSet = new HashSet<String>();
+    	Set<String> keys = pComponents.keySet();
+    	while((line = reader.readLine()) != null) {
+    		sLog.debug("Processing ignore pattern: <{}>", line);
+    		if(line.endsWith("*")) {
+    			String searchValue = line.substring(0, line.length()-1);
+    			sLog.debug("Ignoring components beginning with <{}>", searchValue);
+    			for(String key : keys) {
+    				if(key.startsWith(searchValue)) {
+    					removeSet.add(key);
+    				}
+    			}
+    		}
+    		else {
+    			removeSet.add(line);
+    		}
+    	}
+    	reader.close();
+    	keys.removeAll(removeSet);
     }
 }
