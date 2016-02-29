@@ -29,12 +29,12 @@ function updateTemplateList() {
 		    	// based on ID
 		    	var components = data.components;
 		    	components.sort(function(item1, item2) {
-		    		return item1.id.localeCompare(item2.id);
+		    		return item1.name.localeCompare(item2.name);
 		    	});
 		    	components.sort();
 		    	for(var i = 0; i < components.length; i++) {
 		    		var item = components[i];
-		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.name + " (id: " + item.id + ")</option>");
 		    	}
 		        $("#template-loading").hide(0);
 			},
