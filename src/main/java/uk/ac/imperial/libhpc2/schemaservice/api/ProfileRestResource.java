@@ -559,10 +559,13 @@ public class ProfileRestResource {
 		};
 		
 		// Create the content disposition object for the file download
-		ContentDisposition cd = ContentDisposition.type("attachment").creationDate(new Date()).fileName("tempss_input_file_" + pFileId).build();
+		ContentDisposition cd = ContentDisposition.type("attachment").creationDate(new Date()).fileName("tempss_input_file_" + pFileId + ".xml").build();
 		
 		NewCookie c = new NewCookie("fileDownload","true", "/",null, null, NewCookie.DEFAULT_MAX_AGE, false);
-		return Response.status(Status.OK).header("Content-Disposition", cd).cookie(c).entity(so).build();
+		return Response.status(Status.OK).
+				header("Content-Disposition", cd).
+				header("Content-Type", "application/xml").
+				cookie(c).entity(so).build();
     }
 
 }

@@ -111,6 +111,16 @@ function displayTemplate(templateId, templateText) {
                     treeRoot.data('schema',$('#id_profile').find(':selected').data('name'));
             }
             */
+            
+    		// Add valid/invalid listeners to the root node
+    		// so we can enable/disable the "Generate input file" button
+            // when the tree is fully valid and vice versa.
+    		$('ul[role=tree]').on('nodeValid', function() {
+    			disableGenerateInputButton(false);
+    		});
+    		$('ul[role=tree]').on('nodeInvalid', function() {
+    			disableGenerateInputButton(true);
+    		});
 
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
