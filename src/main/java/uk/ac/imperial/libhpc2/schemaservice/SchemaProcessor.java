@@ -31,8 +31,8 @@
  *
  * -----------------------------------------------------------------------------
  *
- * This file is part of the TemPSS - Templates and Profiles for Scientific 
- * Software - service, developed as part of the libhpc projects 
+ * This file is part of the TemPSS - Templates and Profiles for Scientific
+ * Software - service, developed as part of the libhpc projects
  * (http://www.imperial.ac.uk/lesc/projects/libhpc).
  *
  * We gratefully acknowledge the Engineering and Physical Sciences Research
@@ -45,27 +45,24 @@
 
 package uk.ac.imperial.libhpc2.schemaservice;
 
+import org.apache.commons.io.FileUtils;
+import org.dom4j.DocumentException;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -75,10 +72,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
-import org.dom4j.DocumentException;
-import org.json.JSONObject;
+import net.sf.saxon.TransformerFactoryImpl;
 
 public class SchemaProcessor {
     /**
@@ -109,11 +103,10 @@ public class SchemaProcessor {
      * @throws TransformerException
      */
     public String processComponentSelector(TempssObject pComponentMetadata)
-        throws FileNotFoundException, IOException, ParseException, TransformerException {
+            throws FileNotFoundException, IOException, ParseException, TransformerException {
 
         sLog.fine("ServletContext: " + _context);
         String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
-        String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
 
         // Construct full path to file
@@ -222,7 +215,8 @@ public class SchemaProcessor {
         String outputHTML = "";
         Transformer transformer = null;
         try {
-            transformer = TransformerFactory.newInstance().newTransformer(xsl);
+            TransformerFactory factory = new TransformerFactoryImpl();
+            transformer = factory.newTransformer(xsl);
         } catch (TransformerConfigurationException e) {
             throw new TransformerException("Error creating transformer for the specified XSLT document <" + transformPath + ">", e);
         } catch (TransformerFactoryConfigurationError e) {
@@ -251,20 +245,33 @@ public class SchemaProcessor {
         return htmlToReturn;
     }
 
+    /**
+     * Convert an XML profile for a component into an application
+     * input file.
+     *
+     * @param pComponentName Name of component to transform XML for
+     * @param pBasicXml XML input with no extra input files included
+     * @param pXml Full XML input
+     * @param pSessionId Servlet session ID
+     * @return Map<String, String> containing input and ouput files
+     * @throws UnknownTemplateException
+     * @throws TransformerException
+     * @throws IOException
+     */
     @SuppressWarnings("unchecked")
     public Map<String,String> convertProfileToInputData(
-        String pComponentName,
-        String pBasicXml,
-        String pXml,
-        String pSessionId)
-        throws UnknownTemplateException, TransformerException, IOException
+            String pComponentName,
+            String pBasicXml,
+            String pXml,
+            String pSessionId)
+                    throws UnknownTemplateException, TransformerException, IOException
     {
         // Now we need to convert the completed xml profile into form that is
         // expected as input by the component. Look up the component metadata to
         // get the path to the XSLT transform for this component.
         Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
         String transformPath = "";
-        if(components.containsKey(pComponentName)) {
+        if (components.containsKey(pComponentName)) {
             TempssObject componentMetadata = components.get(pComponentName);
             transformPath = _context.getRealPath("/WEB-INF/classes") + File.separator + componentMetadata.getTransform();
         } else {
@@ -277,11 +284,12 @@ public class SchemaProcessor {
         StringReader reader = new StringReader(pXml);
         Source xmlInput = new StreamSource(reader);
         StreamResult xmlOutput = new StreamResult(new StringWriter());
-        String outputXml = "";
+        String outputString = "";
         Transformer transformer;
 
         try {
-            transformer = TransformerFactory.newInstance().newTransformer(xsl);
+            TransformerFactory factory = new TransformerFactoryImpl();
+            transformer = factory.newTransformer(xsl);
         } catch (TransformerConfigurationException e) {
             throw new TransformerException("Error creating transformer for the specified XSLT document <" + xslFile + ">", e);
         } catch (TransformerFactoryConfigurationError e) {
@@ -296,11 +304,18 @@ public class SchemaProcessor {
         } catch (TransformerException e) {
             throw new TransformerException("Error carrying out XSLT transform: " + errorHandler.getErrorMessages().toString(), e);
         }
-        outputXml = xmlOutput.getWriter().toString();
+        outputString = xmlOutput.getWriter().toString();
+
+        // Need to cope with non-xml output (eg CP2K)
+        String outputFileName;
         try {
-            outputXml = SchemaProcessorUtils.prettyPrintXml(outputXml);
+            outputString = SchemaProcessorUtils.prettyPrintXml(outputString);
+            // Output is XML
+            sLog.fine("Output is XML");
+            outputFileName = "output_" + pSessionId + ".xml";
         } catch (DocumentException e) {
-            throw new IOException("Document error formatting XML output data: " + e.getMessage(), e);
+            sLog.fine("Output is not XML, processing as string");
+            outputFileName = "output_" + pSessionId + ".txt";
         } catch (IOException e) {
             throw new IOException("IO error formatting XML output data: " + e.getMessage(), e);
         }
@@ -308,7 +323,7 @@ public class SchemaProcessor {
         // Save the xml as files
         String basicXmlFileName = "basic_input_xml_" + pSessionId + ".xml";
         String fullXmlFileName = "full_input_xml_" + pSessionId + ".xml";
-        String outputXmlFileName = "output_xml_" + pSessionId + ".xml";
+        //String outputXmlFileName = "output_xml_" + pSessionId + ".xml";
 
         // TODO: Fix this:
         // Get temporary directory for storing output files
@@ -317,7 +332,21 @@ public class SchemaProcessor {
         // Get path to web-inf folder
         String filePath = _context.getRealPath("/temp");
         File tempDir = new File(filePath);
-        boolean isSuccess = tempDir.mkdirs();
+
+        // Create temporary directory if not already existing
+
+        if (!tempDir.exists()) {
+            boolean directoryCreated;
+            try {
+                directoryCreated = tempDir.mkdirs();
+            } catch (SecurityException e) {
+                throw new IOException("Problem creating temporary directory: " + e.getMessage(), e);
+            }
+
+            if (!directoryCreated) {
+                throw new IOException("Unable to create temporary directory");
+            }
+        }
 
         try {
             File file = new File(tempDir, basicXmlFileName);
@@ -331,9 +360,9 @@ public class SchemaProcessor {
             output2.write(pXml);
             output2.close();
 
-            File file3 = new File(tempDir, outputXmlFileName);
+            File file3 = new File(tempDir, outputFileName);
             BufferedWriter output3 = new BufferedWriter(new FileWriter(file3));
-            output3.write(outputXml);
+            output3.write(outputString);
             output3.close();
         } catch (IOException e) {
             throw new IOException("IO error when writing temporary output files: " + e.getMessage(), e);
@@ -345,7 +374,7 @@ public class SchemaProcessor {
         transformOutputMap.put("FullXmlFile", fullXmlFileName);
         transformOutputMap.put("TransformStatus", (errorHandler.errorsEncounteredDuringTransform() == true) ? "true" : "false");
         transformOutputMap.put("TransformErrors", errorHandler.getErrorMessages().toString());
-        transformOutputMap.put("TransformedDataFile", outputXmlFileName);
+        transformOutputMap.put("TransformedDataFile", outputFileName);
 
         return transformOutputMap;
     }
