@@ -68,6 +68,13 @@ You can adjust the first port number in the `-p` switch values to change the por
 
 `ssh -i ~/.ssh/<private key file> -p 8022 root@localhost`
 
+#### Configuration
+
+A configuration file `tempss.conf` can be used to provide static configuration information to the TemPSS service. This file is read once at startup. The file is an [INI-style](https://en.wikipedia.org/wiki/INI_file) configuration file. The file can be placed in `/etc/` or in the home directory of the user running the TemPSS service in the `.libhpc` directory, e.g. `/home/myuser/.libhpc/tempss.conf`. A configuration file placed in `~/.libhpc/tempss.conf` takes precedence over a `tempss.conf` file placed in `/etc`.
+
+###### Section: [tempss-ignore]
+The configuration file currently supports only one section `[template-ignore]` which is used for hiding the display of certain templates. In cases where an administrator does not want all the default TemPSS templates to appear as options in the user interface, template IDs can be added to the template-ignore section of the configuration file. Each entry should appear on a separate line and can be a full template ID, or a partial ID followed by a wildcard `*` character. Note that, at present, the wildcard character can only appear at the end of a string. For example, to hide all templates that have an id beginning with `bio-`, enter a line into the `[tempss-ignore]` section of `tempss.conf` containing `bio-*`.
+
 #### Documentation
 
 [API Documentation](doc/API.md)

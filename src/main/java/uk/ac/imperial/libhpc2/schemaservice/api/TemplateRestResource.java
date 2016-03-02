@@ -107,38 +107,9 @@ public class TemplateRestResource {
     @Produces("application/json")
     @SuppressWarnings("unchecked")
     public Response listTemplatesJson() {
-        Map<String, TempssObject> contextComponents = (Map<String, TempssObject>)_context.getAttribute("components");
-        // Clone the map so we're working with a copy in case we need to 
-        // remove elements from it
-        Map<String, TempssObject> components = 
-        		new HashMap<String, TempssObject>(contextComponents);
-        for(String key : contextComponents.keySet()) {
-        	TempssObject tObj = contextComponents.get(key);
-        	components.put(key, new TempssObject(tObj));
-        }
-        
-        // See if we have a ~/.libhpc/tempss-ignore file listing template IDs
-        // that should be ignored. If we do, then filter out the templates that
-        // we don't want to show.
-        File userHome = new File(System.getProperty("user.home"));
-        File libhpcDir = new File(userHome, ".libhpc");
-        File templateIgnore = new File(libhpcDir, "tempss-ignore");
-        if(templateIgnore.exists()) {
-        	sLog.debug("Found a template ignore file, updating visible " +
-        			"templates");        	
-        	try {
-        		_updateTemplateList(components, templateIgnore);
-        	} catch(FileNotFoundException e) {
-        		
-        	} catch(IOException e) {
-        		
-        	}
-        }
-        else {
-        	sLog.debug("No templates to ignore, returning full template list.");
-        }
-        
-        JSONArray componentList = new JSONArray();
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
+
+    	JSONArray componentList = new JSONArray();
         for(TempssObject component : components.values()) {
             JSONObject componentObj = new JSONObject();
             try {
@@ -273,32 +244,5 @@ public class TemplateRestResource {
         }
 
         return Response.ok(htmlTree, MediaType.TEXT_HTML).build();
-    }
-    
-    private void _updateTemplateList(
-    		Map<String, TempssObject> pComponents, File pIgnoreFile) 
-    				throws FileNotFoundException, IOException {
-    	
-    	BufferedReader reader = new BufferedReader(new FileReader(pIgnoreFile));
-    	String line = null;
-    	Set<String> removeSet = new HashSet<String>();
-    	Set<String> keys = pComponents.keySet();
-    	while((line = reader.readLine()) != null) {
-    		sLog.debug("Processing ignore pattern: <{}>", line);
-    		if(line.endsWith("*")) {
-    			String searchValue = line.substring(0, line.length()-1);
-    			sLog.debug("Ignoring components beginning with <{}>", searchValue);
-    			for(String key : keys) {
-    				if(key.startsWith(searchValue)) {
-    					removeSet.add(key);
-    				}
-    			}
-    		}
-    		else {
-    			removeSet.add(line);
-    		}
-    	}
-    	reader.close();
-    	keys.removeAll(removeSet);
     }
 }
