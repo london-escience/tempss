@@ -1,4 +1,4 @@
 <%
-    String redirectURL = "/tempss/profiles";
+    String redirectURL = "/tempss-service/profiles";
     response.sendRedirect(redirectURL);
 %>
