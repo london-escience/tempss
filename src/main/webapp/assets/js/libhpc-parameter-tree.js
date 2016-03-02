@@ -150,15 +150,15 @@ function validateEntries(caller, validationtype, restrictions_json) {
 
     try {
         // Start by assuming it's not valid, but remove any "invalid" class
-    	// signifying a previous validation error since this will be re-added
-    	// below if validation has still failed. Also remove validation data
-    	// error strings.
-    	// TODO: Check if we need to fire the nodeInvalid event here
-    	caller.closest("ul").removeClass('invalid');
+      // signifying a previous validation error since this will be re-added
+      // below if validation has still failed. Also remove validation data
+      // error strings.
+      // TODO: Check if we need to fire the nodeInvalid event here
+      caller.closest("ul").removeClass('invalid');
         caller.closest("ul").removeClass('valid').trigger('nodeInvalid',caller.closest("ul"));
         var ul = $(caller.closest("ul"));
         ul.find('.val-help').remove();
-        
+
 
         switch (validationtype) {
             case "xs:double":
@@ -167,16 +167,16 @@ function validateEntries(caller, validationtype, restrictions_json) {
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 else {
-                	// Add the invalid class to display a red X for this node
-                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
-                	caller.closest("ul").children().first().append(
-                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
-                			'style="padding-left: 10px;" ' +
-                			'title="A double value is required for this property." ' +
-                			'data-toggle="tooltip" data-placement="right"></i>');
-                	//caller.closest("ul").attr('data-val-error','A double value is required for this property.');
-                	//caller.closest("ul").attr('title','A double value is required for this property.');
-                	//alert(caller.closest("ul").data('val-error'));
+                  // Add the invalid class to display a red X for this node
+                  caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                  caller.closest("ul").children().first().append(
+                      '<i class="glyphicon glyphicon-question-sign val-help" ' +
+                      'style="padding-left: 10px;" ' +
+                      'title="A double value is required for this property." ' +
+                      'data-toggle="tooltip" data-placement="right"></i>');
+                  //caller.closest("ul").attr('data-val-error','A double value is required for this property.');
+                  //caller.closest("ul").attr('title','A double value is required for this property.');
+                  //alert(caller.closest("ul").data('val-error'));
                 }
                 break;
             case "xs:positiveInteger":
@@ -186,13 +186,13 @@ function validateEntries(caller, validationtype, restrictions_json) {
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 else {
-                	// Add the invalid class to display a red X for this node
-                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
-                	caller.closest("ul").children().first().append(
-                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
-                			'style="padding-left: 10px;" ' +
-                			'title="A positive integer value is required for this property." ' +
-                			'data-toggle="tooltip" data-placement="right"></i>');
+                  // Add the invalid class to display a red X for this node
+                  caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                  caller.closest("ul").children().first().append(
+                      '<i class="glyphicon glyphicon-question-sign val-help" ' +
+                      'style="padding-left: 10px;" ' +
+                      'title="A positive integer value is required for this property." ' +
+                      'data-toggle="tooltip" data-placement="right"></i>');
                 }
 
                 break;
@@ -201,13 +201,13 @@ function validateEntries(caller, validationtype, restrictions_json) {
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 else {
-                	// Add the invalid class to display a red X for this node
-                	caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
-                	caller.closest("ul").children().first().append(
-                			'<i class="glyphicon glyphicon-question-sign val-help" ' +
-                			'style="padding-left: 10px;" ' +
-                			'title="A boolean value ("true" or "false") is required for this property. ' +
-                			'data-toggle="tooltip" data-placement="right"></i>');
+                  // Add the invalid class to display a red X for this node
+                  caller.closest("ul").attr('class', 'invalid').trigger('validationError',caller.closest("ul"));
+                  caller.closest("ul").children().first().append(
+                      '<i class="glyphicon glyphicon-question-sign val-help" ' +
+                      'style="padding-left: 10px;" ' +
+                      'title="A boolean value ("true" or "false") is required for this property. ' +
+                      'data-toggle="tooltip" data-placement="right"></i>');
                 }
                 break;
             case "xs:file":
@@ -370,7 +370,7 @@ function loadChildXML(obj, path, $xml) {
 // loadlibrary function to retain compatibility
 // with legacy applications
 function loadLibhpcProfile(profileXML, targetTemplate) {
-	loadlibrary(profileXML, targetTemplate);
+  loadlibrary(profileXML, targetTemplate);
 }
 
 function loadlibrary() {
@@ -463,7 +463,7 @@ function submitComponentRequest() {
 
     // Load the html tree representing the component interface from the server.
     $.ajax({
-        url: '/tempss/process',
+        url: '/tempss-service/process',
         data: formData,
         processData: false,
         contentType: false,
@@ -527,7 +527,7 @@ function submitXML() {
 
 
     $.ajax({
-        url: '/tempss/process',
+        url: '/tempss-service/process',
         data: formData,
         processData: false,
         contentType: false,
@@ -571,28 +571,28 @@ function submitXML() {
 //This function must be provided with the ul element
 //with the role "tree" at the root of a template tree.
 function getProfileXml(treeElement) {
-	// Get the XML for the tree
-	var indentation = "    ";
-	var treeRoot = treeElement.children("li");
-	var thisName = $.trim(treeRoot.children("span").text());
+  // Get the XML for the tree
+  var indentation = "    ";
+  var treeRoot = treeElement.children("li");
+  var thisName = $.trim(treeRoot.children("span").text());
 
-	xmlString = "<" + thisName + ">\n";
-	xmlString += generateChildXML(treeRoot, indentation, false);
-	xmlString += "</" + thisName + ">\n";
+  xmlString = "<" + thisName + ">\n";
+  xmlString += generateChildXML(treeRoot, indentation, false);
+  xmlString += "</" + thisName + ">\n";
 
-	return xmlString;
+  return xmlString;
 }
 
 // Process the job profile data currently in the template tree
 // identified by treeRootNode. Send this data to the TemPSS REST
 // API and return the JSON response to the caller.
 function processJobProfile(treeRootNode, templateId) {
-	
+
     var profileXml = "";
     //var rootNode = $("[role='tree']").children("li");
     var templateName = $.trim(treeRootNode.children("span").text());
     var indentation = "    ";
-    
+
     profileXml += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     profileXml += "<" + templateName + ">\n";
     profileXml += generateChildXML(treeRootNode, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
@@ -616,37 +616,37 @@ function processJobProfile(treeRootNode, templateId) {
     // formData.append('componentname', componentName);
 
     $.ajax({
-        url: '/tempss/api/profile/' + templateId + '/convert',
+        url: '/tempss-service/api/profile/' + templateId + '/convert',
         data: formData,
         processData: false,
         contentType: false,
         type: 'POST',
         dataType: 'json',
         success: function (data) {
-        	// If the request returns successfully we'll
-        	// have some JSON data containing a group of URLs
-        	// The TransformedXml parameter will contain a 
-        	// link to the required data.
-        	log('Location of transformed XML: ' + data.TransformedXml);
-        	
-        	var inputFileUrl = data.TransformedXml;
-        	var fileId = inputFileUrl.substring(inputFileUrl.lastIndexOf('_') +1, inputFileUrl.length - 4);
-        	log('Using fileId <' + fileId + '>');
-        	
-        	// Trigger a download request to get the transformed XML
-        	// and prompt the user to save the file.
-        	$.fileDownload('/tempss/api/profile/inputFile/' + fileId);
-        	
-        	// If a loading element is displayed, hide it
-        	if($('#process-profile-loading').length > 0) {
-        		$('#process-profile-loading').hide();
-        	}
+          // If the request returns successfully we'll
+          // have some JSON data containing a group of URLs
+          // The TransformedXml parameter will contain a
+          // link to the required data.
+          log('Location of transformed XML: ' + data.TransformedXml);
+
+          var inputFileUrl = data.TransformedXml;
+          var fileId = inputFileUrl.substring(inputFileUrl.lastIndexOf('_') +1, inputFileUrl.length - 4);
+          log('Using fileId <' + fileId + '>');
+
+          // Trigger a download request to get the transformed XML
+          // and prompt the user to save the file.
+          $.fileDownload('/tempss-service/api/profile/inputFile/' + fileId);
+
+          // If a loading element is displayed, hide it
+          if($('#process-profile-loading').length > 0) {
+            $('#process-profile-loading').hide();
+          }
         },
         error: function(data) {
-        	log('An error occured downloading the application input file for templateId ' + templateId);
-        	if($('#process-profile-loading').length > 0) {
-        		$('#process-profile-loading').hide();
-        	}
+          log('An error occured downloading the application input file for templateId ' + templateId);
+          if($('#process-profile-loading').length > 0) {
+            $('#process-profile-loading').hide();
+          }
         }
     });
 }
@@ -696,7 +696,7 @@ function collapseTree() {
 }
 
 function expandTree() {
-	$("#schema-tree li").show();
+  $("#schema-tree li").show();
 }
 
 $(document).ready(function () {

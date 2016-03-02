@@ -111,7 +111,7 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>tempss</finalName>
+    <finalName>tempss-service</finalName>
     <resources>
       <resource>
         <targetPath>META-INF/Template</targetPath>
