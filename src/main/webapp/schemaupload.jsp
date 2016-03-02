@@ -14,7 +14,7 @@
         <h1>Libhpc Schema Upload</h1>
       </div>
       <div class="jumbotron">
-        <form class="form-horizontal" method="POST" action="/tempss-service/process" enctype="multipart/form-data">
+        <form class="form-horizontal" method="POST" action="/tempss/process" enctype="multipart/form-data">
           <div class="form-group">
             <label class="col-md-3 control-label" for="schemaupload">
               Schema:

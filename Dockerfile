@@ -38,7 +38,7 @@ ADD . /home/tempss/tempss
 WORKDIR /home/tempss/tempss
 RUN ["pwd"]
 RUN ["mvn", "package"]
-RUN ["cp", "-p", "target/tempss-service.war", "/var/lib/tomcat6/webapps/"]
+RUN ["cp", "-p", "target/tempss.war", "/var/lib/tomcat6/webapps/"]
 
 USER root
 

@@ -45,11 +45,16 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -65,6 +70,8 @@ import javax.xml.transform.TransformerException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
@@ -82,7 +89,7 @@ public class TemplateRestResource {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(TemplateRestResource.class.getName());
+    private static final Logger sLog = LoggerFactory.getLogger(TemplateRestResource.class.getName());
 
     /**
      * ServletContext obejct used to access template data
@@ -93,16 +100,16 @@ public class TemplateRestResource {
     @Context
     public void setServletContext(ServletContext pContext) {
         this._context = pContext;
-        sLog.fine("Servlet context injected: " + pContext);
+        sLog.debug("Servlet context injected: " + pContext);
     }
 
     @GET
     @Produces("application/json")
     @SuppressWarnings("unchecked")
     public Response listTemplatesJson() {
-        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
-        JSONArray componentList = new JSONArray();
+    	JSONArray componentList = new JSONArray();
         for(TempssObject component : components.values()) {
             JSONObject componentObj = new JSONObject();
             try {
@@ -111,7 +118,7 @@ public class TemplateRestResource {
                 componentObj.put("schema", component.getSchema());
                 componentObj.put("transform", component.getTransform());
             } catch (JSONException e) {
-                sLog.severe("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
+                sLog.error("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage()).build();
             }
 
@@ -121,7 +128,7 @@ public class TemplateRestResource {
         try {
             componentArray.put("components", componentList);
         } catch (JSONException e) {
-            sLog.severe("Unable to add component array to component object: " + e.getMessage());
+            sLog.error("Unable to add component array to component object: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component array to component object: " + e.getMessage()).build();
         }
 
@@ -223,16 +230,16 @@ public class TemplateRestResource {
         try {
             htmlTree = proc.processComponentSelector(metadata);
         } catch (FileNotFoundException e) {
-            sLog.severe("File not found when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("File not found when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("File not found when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (IOException e) {
-            sLog.severe("IO error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("IO error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (ParseException e) {
-            sLog.severe("XML parse error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("XML parse error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XML parse error when trying to generate HTML tree: " + e.getMessage()).build();
         } catch (TransformerException e) {
-            sLog.severe("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
+            sLog.error("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to generate HTML tree: " + e.getMessage()).build();
         }
 

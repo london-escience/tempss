@@ -39,15 +39,17 @@ the repository, and run `mvn package` in the project base directory.
 If the build completes successfully, output files will be generated in the
 `target` directory.
 
-The service is contained within `target/tempss-service.war`.
+The service is contained within `target/tempss.war`.
 
 The service can be deployed in [Apache Tomcat](http://tomcat.apache.org/). Copy
-the `tempss-service.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
+the `tempss.war` to your `${CATALINA_HOME}/webapps/` directory to deploy
 the service. If your Tomcat server is configured to run on port 8080, the
-service will be accessible at `http://localhost:8080/tempss-service`.
+service will be accessible at `http://localhost:8080/tempss`.
 
 Whilst it is strongly recommended to package the service as a .war archive for production use, the service can be also run locally by simply invoking the command `mvn jetty:run-war` in the project base directory. The
-service again will be accessible at `http://localhost:8080/tempss-service`.
+service again will be accessible at `http://localhost:8080/tempss`.
+
+The interface at `http://localhost:8080/tempss/component.jsp` is an example of a simple interface to display template trees. The interface available at `http://localhost:8080/tempss` is an example of a more advance profile manager tool.
 
 ###### Using Docker
 A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPSS service. To build the image, clone the repository and change into the base repository directory, `tempss`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
@@ -65,6 +67,13 @@ You can now start a container based on this image. Network ports for the running
 You can adjust the first port number in the `-p` switch values to change the port on your host system that will listen for requests and forward them to the docker container. You can SSH to the container from your host machine by specifying the port on localhost that you have selected as port to forward to SSH on the container, e.g.
 
 `ssh -i ~/.ssh/<private key file> -p 8022 root@localhost`
+
+#### Configuration
+
+A configuration file `tempss.conf` can be used to provide static configuration information to the TemPSS service. This file is read once at startup. The file is an [INI-style](https://en.wikipedia.org/wiki/INI_file) configuration file. The file can be placed in `/etc/` or in the home directory of the user running the TemPSS service in the `.libhpc` directory, e.g. `/home/myuser/.libhpc/tempss.conf`. A configuration file placed in `~/.libhpc/tempss.conf` takes precedence over a `tempss.conf` file placed in `/etc`.
+
+###### Section: [tempss-ignore]
+The configuration file currently supports only one section `[template-ignore]` which is used for hiding the display of certain templates. In cases where an administrator does not want all the default TemPSS templates to appear as options in the user interface, template IDs can be added to the template-ignore section of the configuration file. Each entry should appear on a separate line and can be a full template ID, or a partial ID followed by a wildcard `*` character. Note that, at present, the wildcard character can only appear at the end of a string. For example, to hide all templates that have an id beginning with `bio-`, enter a line into the `[tempss-ignore]` section of `tempss.conf` containing `bio-*`.
 
 #### Documentation
 

@@ -24,9 +24,17 @@ function updateTemplateList() {
 				// Remove current content excluding the placeholder
 		    	$('#template-select option:gt(0)').remove();
 		    	var templateSelect = $('#template-select');
-		    	for(var i = 0; i < data.components.length; i++) {
-		    		var item = data.components[i];
-		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+		    	
+		    	// Set up a sort function and sort the list of components
+		    	// based on ID
+		    	var components = data.components;
+		    	components.sort(function(item1, item2) {
+		    		return item1.name.localeCompare(item2.name);
+		    	});
+		    	components.sort();
+		    	for(var i = 0; i < components.length; i++) {
+		    		var item = components[i];
+		    		templateSelect.append("<option value=\"" + item.id + "\">" + item.name + " (id: " + item.id + ")</option>");
 		    	}
 		        $("#template-loading").hide(0);
 			},
@@ -56,7 +64,7 @@ function getTemplateMetadata(host, port, successCallback, errorCallback) {
 			url += ':' + port;
 		}
 	}
-	url += '/tempss-service/api/template';
+	url += '/tempss/api/template';
 	
 	$.ajax({
         method:   'get',
@@ -82,7 +90,7 @@ function displayTemplate(templateId, templateText) {
 	$("#template-tree-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/tempss-service/api/template/id/' + templateId,
+        url:      '/tempss/api/template/id/' + templateId,
         success:  function(data){
         	// Data that comes back is the raw HTML to place into the page
         	$("#template-container").html(data)
@@ -103,6 +111,16 @@ function displayTemplate(templateId, templateText) {
                     treeRoot.data('schema',$('#id_profile').find(':selected').data('name'));
             }
             */
+            
+    		// Add valid/invalid listeners to the root node
+    		// so we can enable/disable the "Generate input file" button
+            // when the tree is fully valid and vice versa.
+    		$('ul[role=tree]').on('nodeValid', function() {
+    			disableGenerateInputButton(false);
+    		});
+    		$('ul[role=tree]').on('nodeInvalid', function() {
+    			disableGenerateInputButton(true);
+    		});
 
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
@@ -126,7 +144,7 @@ function getTemplateHtml(host, port, templateId, templateText, successCallback, 
 			url += ':' + port;
 		}
 	}
-	url += '/tempss-service/api/template/id/' + templateId,
+	url += '/tempss/api/template/id/' + templateId,
 	
 	$.ajax({
         method:   'get',
@@ -152,7 +170,7 @@ function updateProfileList(templateId) {
 	$("#profiles-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/tempss-service/api/profile/' + templateId + '/names',
+        url:      '/tempss/api/profile/' + templateId + '/names',
         dataType: 'json',
         success:  function(data){
         	log('Profile name data received from server: ' + data.profile_names);
@@ -182,31 +200,30 @@ function updateProfileList(templateId) {
     });
 }
 
-// Disable the buttons used for saving a profile or 
-// clearing profile content. These should only be enabled
-// when a template is selected.
+// Disable the button used for clearing profile content 
+// These should only be enabled when a template is selected.
 function disableProfileButtons(disable) {
 	if(disable) {
-		$('#clear-profile-btn').prop('disabled', true);
-		$('#save-as-profile-btn').prop('disabled', true);	
+		$('#clear-profile-btn').prop('disabled', true);	
 	}
 	else {
 		$('#clear-profile-btn').removeProp('disabled');
-		$('#save-as-profile-btn').removeProp('disabled');
 	}
 	
 }
 
-// Hide the buttons used for expanding or collapsing a  
-// template tree shown in the profile editor.
+// Hide the buttons used for expanding or collapsing a template tree  
+// and saving a profile which are shown in the profile editor.
 function hideTreeExpandCollapseButtons(hide) {
 	if(hide) {
 		$('#tree-expand').hide();
-		$('#tree-collapse').hide();	
+		$('#tree-collapse').hide();
+		$('#save-as-profile-btn').hide();
 	}
 	else {
 		$('#tree-expand').show();
 		$('#tree-collapse').show();
+		$('#save-as-profile-btn').show();
 	}
 	
 }
@@ -235,7 +252,7 @@ function saveProfile(templateId, profileName) {
 	$('#profile-save-errors').html("");
 	$.ajax({
         method:   'POST',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileName,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileName,
         dataType: 'json',
         contentType: 'application/json',
         data:     JSON.stringify(profileObject),
@@ -289,7 +306,7 @@ function loadProfile(templateId, profileId) {
 	$("#template-profile-loading").show();
 	$.ajax({
         method:   'GET',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded
@@ -361,7 +378,7 @@ function deleteProfile(templateId, profileId) {
 	$('#profile-delete-errors').html("");
 	$.ajax({
         method:   'DELETE',
-        url:      '/tempss-service/api/profile/' + templateId + '/' + profileId,
+        url:      '/tempss/api/profile/' + templateId + '/' + profileId,
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded

@@ -112,7 +112,7 @@ public class SchemaProcessor {
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
         sLog.fine("ServletContext: " + _context);
-        String schemaPath = _context.getRealPath("WEB-INF/classes") + File.separator;
+        String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
         String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
 
@@ -211,7 +211,7 @@ public class SchemaProcessor {
         }
 
         // Get the schema -> HTML transform
-        String transformPath = _context.getRealPath("WEB-INF/classes") + File.separator + "XsdToHtmlTransform.xsl";
+        String transformPath = _context.getRealPath("/WEB-INF/classes") + File.separator + "XsdToHtmlTransform.xsl";
         File xslFile = new File(transformPath);
         Source xsl = new StreamSource(xslFile);
 
@@ -266,7 +266,7 @@ public class SchemaProcessor {
         String transformPath = "";
         if(components.containsKey(pComponentName)) {
             TempssObject componentMetadata = components.get(pComponentName);
-            transformPath = _context.getRealPath("WEB-INF/classes") + File.separator + componentMetadata.getTransform();
+            transformPath = _context.getRealPath("/WEB-INF/classes") + File.separator + componentMetadata.getTransform();
         } else {
             throw new UnknownTemplateException("Unhandled component name while transforming xml:" + pComponentName);
         }
@@ -315,7 +315,7 @@ public class SchemaProcessor {
         // File tempDir = (File) getServletContext().getAttribute("javax.servlet.context.tmpdir");
 
         // Get path to web-inf folder
-        String filePath = _context.getRealPath("temp");
+        String filePath = _context.getRealPath("/temp");
         File tempDir = new File(filePath);
         boolean isSuccess = tempDir.mkdirs();
 

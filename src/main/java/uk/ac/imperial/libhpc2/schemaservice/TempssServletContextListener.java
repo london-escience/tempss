@@ -49,21 +49,24 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.logging.Logger;
+import java.util.Set;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles the initialisation of the tempss servlet,
@@ -77,7 +80,7 @@ import javax.servlet.ServletContextListener;
  */
 public class TempssServletContextListener implements ServletContextListener {
 
-    private static final Logger sLog = Logger.getLogger(TempssServletContextListener.class.getName());
+    private static final Logger sLog = LoggerFactory.getLogger(TempssServletContextListener.class.getName());
 
     /**
      * Search for all the properties files in the "Template" directory
@@ -96,25 +99,25 @@ public class TempssServletContextListener implements ServletContextListener {
         // META-INF/Template where we can search for our files.
         Class<?> clazz = this.getClass();
         String className = clazz.getSimpleName() + ".class";
-        sLog.info("Class name: " + className);
+        sLog.debug("Class name: " + className);
         URL path = null;
         try {
-            sLog.info("Class URL: " + clazz.getResource(className).toString());
+            sLog.debug("Class URL: " + clazz.getResource(className).toString());
             path = new URL(clazz.getResource(className).toString());
         } catch (MalformedURLException e1) {
-            sLog.severe("Unable to get class URL to search for component property files.");
+            sLog.error("Unable to get class URL to search for component property files.");
             pContext.getServletContext().setAttribute("components", componentMap);
             return;
         }
 
         String templatePath = path.toString().substring(0,path.toString().indexOf("WEB-INF/classes/") + 16) + "META-INF/Template";
-        sLog.info("templatePath: " + templatePath);
+        sLog.debug("templatePath: " + templatePath);
 
         URI templatePathURI = null;
         try {
             templatePathURI = new URI(templatePath);
         } catch (URISyntaxException e1) {
-            sLog.severe("Unable to construct URI for template path to search for property files.");
+            sLog.error("Unable to construct URI for template path to search for property files.");
             pContext.getServletContext().setAttribute("components", componentMap);
             return;
         }
@@ -125,29 +128,34 @@ public class TempssServletContextListener implements ServletContextListener {
             }
         });
 
+        // We now need to check if there's a configuration file present that
+        // specifies some templates that are to be ignored
+        TempssConfig config = TempssConfig.getInstance();
+        List<String> ignorePatterns = config.getIgnorePatterns();
+        
         // Now process the template metadata files to generate instances
         // of TemplateObject that can be stored in the application context
         for (File f : templateMetadataFiles) {
             Properties props = new Properties();
             String absolutePath = f.getAbsolutePath();
-            sLog.info("Template absolute path: " + absolutePath);
+            sLog.debug("Template absolute path: " + absolutePath);
             String resourcePath = absolutePath.substring(absolutePath.indexOf("META-INF" + File.separator + "Template"));
-            sLog.info("Template file: " + absolutePath + "\nGetting resource: " + resourcePath);
+            sLog.debug("Template file: " + absolutePath + "\nGetting resource: " + resourcePath);
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
             if(resourceStream != null) {
                 try {
                     props.load(resourceStream);
                 } catch (IOException e) {
-                    sLog.severe("Unable to load resource metadata for <" + resourcePath + ">");
+                    sLog.error("Unable to load resource metadata for <" + resourcePath + ">");
                     continue;
                 }
             }
             else {
-                sLog.severe("Input stream for resource <" + resourcePath + "> is null.");
+                sLog.error("Input stream for resource <" + resourcePath + "> is null.");
                 continue;
             }
 
-            String[] components = props.getProperty("component.id").split(",");
+            String[] components = props.getProperty("component.id").split(",");            
             for(String comp : components) {
                 comp = comp.trim();
                 String name = props.getProperty(comp+".name");
@@ -158,11 +166,40 @@ public class TempssServletContextListener implements ServletContextListener {
                 componentMap.put(comp, obj);
             }
         }
-
+        
+        // Now compare the IDs to the ignore patterns obtained from the 
+        // tempss configuration and remove any components to be ignored.
+		_updateComponentMap(componentMap.keySet(), ignorePatterns);
         pContext.getServletContext().setAttribute("components", componentMap);
+        
     }
 
     public void contextDestroyed(ServletContextEvent pContext) {
         pContext.getServletContext().setAttribute("components", null);
+    }
+    
+    private void _updateComponentMap(
+    			Set<String> pComponents, List<String> pIgnorePatterns) {
+    	
+    	Set<String> removeSet = new HashSet<String>();
+    	for(String pattern : pIgnorePatterns) {
+    		sLog.debug("Processing ignore pattern: <{}>", pattern);
+    		if(pattern.endsWith("*")) {
+    			String searchValue = pattern.substring(0, pattern.length()-1);
+    			sLog.debug("Ignoring components beginning with <{}>", searchValue);
+    			for(String id : pComponents) {
+    				if(id.startsWith(searchValue)) {
+    					removeSet.add(id);
+    				}
+    			}
+    		}
+    		else {
+    			removeSet.add(pattern);
+    		}
+    	}
+    	// The component IDs are a keySet obtained from the component Map. They
+    	// maintain a two-way binding with the component map so calling
+    	// removeAll on the keySet removes 
+    	pComponents.removeAll(removeSet);
     }
 }
