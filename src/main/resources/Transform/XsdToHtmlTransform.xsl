@@ -1,16 +1,14 @@
-﻿<?xml version="1.0"?>
-<xsl:stylesheet version="1.0"
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           xmlns:xalan="http://xml.apache.org/xslt"
+           xmlns:saxon="http://saxon.sf.net/"
            exclude-result-prefixes="xs"
-
 >
 
-  <!-- PA trying to get Greek letter my displaying properly -->
-  <!--xsl:output encoding="ISO-8859-1"/-->
-
-  <xsl:output method="html"/>
+  <xsl:output method="html" indent="yes" xalan:indent-amount="2"/>
   <!-- ignore white space. Otherwise you get a great long html output full of new lines -->
   <xsl:strip-space elements="xs:schema xs:element xs:complexType xs:simpleType xs:restriction"/>
   <xsl:strip-space elements="xs:sequence xs:choice xs:minExclusive xs:simpleContent xs:extension"/>
