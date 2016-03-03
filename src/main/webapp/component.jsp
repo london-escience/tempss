@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Job Configuration</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
-    <link href="./assets/css/style.css" rel="stylesheet" media="all" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+      crossorigin="anonymous">
+    <link href="./assets/css/style.css" rel="stylesheet" media="all" >
   </head>
   <body>
     <div class="container">
@@ -72,10 +73,28 @@
     <!-- ==============================================
          JavaScript below!                                 -->
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+    <script>
+    // Fallback to loading jQuery from a local path if the CDN is unavailable
+    (window.jQuery || document.write('<script src="./assets/js/jquery-1.12.1.min.js"><\/script>'));
+    </script>
     <script type="text/javascript" src="./assets/js/bootstrap-tree.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+      crossorigin="anonymous"></script>
+    <!-- Fallback for bootstrap -->
+    <script>
+    (window.jQuery.fn.modal || document.write('<script src="./assets/js/bootstrap-3.3.6.min.js"><\/script>'))
+    </script>
+    <script>
+    (function($) {
+        $(function() {
+            if ($('body').css('color') !== 'rgb(51, 51, 51)') {
+                $('head').prepend('<link rel="stylesheet" href="./assets/css/bootstrap-3.3.6.min.css">');
+            }
+        });
+    })(window.jQuery);
+    </script>
     <script type="text/javascript" src="./assets/js/bootstrap-fileinput.js"></script>
     <script type="text/javascript" src="./assets/js/libhpc-parameter-tree.js"></script>
   </body>

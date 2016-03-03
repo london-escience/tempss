@@ -5,7 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Job Configuration</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+      crossorigin="anonymous">
     <link href="./assets/css/style.css" rel="stylesheet" media="all" />
   </head>
   <body>
@@ -34,10 +35,23 @@
     <!-- ==============================================
          JavaScript below!                                -->
     <!-- jQuery via CDN + local fallback, see h5bp.com -->
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script>window.jQuery || document.write('<script src="./assets/js/jquery-1.11.1.min.js"><\/script>')</script>
+    <script src="//code.jquery.com/jquery-1.21.1.min.js"></script>
+    <script>window.jQuery || document.write('<script src="./assets/js/jquery-1.12.1.min.js"><\/script>')</script>
     <!-- Bootstrap JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+      crossorigin="anonymous"></script>
+    <script>
+    (window.jQuery.fn.modal || document.write('<script src="./assets/js/bootstrap-3.3.6.min.js"><\/script>'))
+    </script>
+    <script>
+    (function($) {
+        $(function() {
+            if ($('body').css('color') !== 'rgb(51, 51, 51)') {
+                $('head').prepend('<link rel="stylesheet" href="./assets/css/bootstrap-3.3.6.min.css">');
+            }
+        });
+    })(window.jQuery);
+    </script>
     <script type="text/javascript" src="./assets/js/bootstrap-fileinput.js"></script>
   </body>
 </html>
