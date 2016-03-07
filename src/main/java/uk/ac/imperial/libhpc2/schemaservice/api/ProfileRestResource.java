@@ -536,7 +536,7 @@ public class ProfileRestResource {
     	
     	sLog.fine("Request to get application input file with ID: " + pFileId);
     	
-    	String fileDirPath = _context.getRealPath("temp");
+        String fileDirPath = _context.getRealPath("/temp");
     	final File dataFile = new File(fileDirPath + File.separator + "output_xml_" + pFileId + ".xml");
     	if(!dataFile.exists()) {
     		return Response.status(Status.NOT_FOUND).entity("Request app input data file could not be found.").build();
