@@ -17,9 +17,21 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <!--xsl:template match="xs:element[@type]" mode="findChildNodes"-->
   <xsl:template match="xs:element" mode="findChildNodes">
     <xsl:param name="path" />
-    <xsl:param name="node" select="@name"/>
+    <xsl:param name="nodeName" select="@name"/>
+    <!-- libhpc:trueName can be used to define true parameter name if it needed
+         to be sanitised to produce correct XML in the schema node name -->
+    <xsl:param name="trueNodeName">
+      <xsl:choose>
+        <xsl:when test="@libhpc:trueName">
+          <xsl:value-of select="@libhpc:trueName"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$nodeName"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:param>
     <xsl:param name="type" select="@type"/>
-    <xsl:param name="this_path" select="concat($path,concat('.',$node))"/>
+    <xsl:param name="this_path" select="concat($path,concat('.',$nodeName))"/>
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
     <xsl:param name="units" select="xs:annotation/xs:appinfo/libhpc:units"/>
     <xsl:param name="badge_type">
@@ -29,7 +41,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:otherwise>badge badge-info</xsl:otherwise>
       </xsl:choose>
     </xsl:param>
-    <ul role="group">
+    <xsl:element name="ul">
+      <xsl:attribute name="role">group</xsl:attribute>
       <xsl:if test="../../xs:choice">
         <xsl:attribute name="choice-id">
           <xsl:value-of select="@name" />
@@ -43,18 +56,20 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:if test="$badge_type = 'badge badge-info'">
         <xsl:attribute name="leaf">true</xsl:attribute>
       </xsl:if>
-      <li class="parent_li" role="treeitem">
+      <xsl:element name="li">
+        <xsl:attribute name="class">parent_li</xsl:attribute>
+        <xsl:attribute name="role">treeitem</xsl:attribute>
         <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
           <xsl:attribute name="documentation">
             <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
           </xsl:attribute>
         </xsl:if>
-        <span>
+        <xsl:element name="span">
           <xsl:attribute name="class">
             <xsl:value-of select="$badge_type"/>
           </xsl:attribute>
           <xsl:attribute name="data-fqname">
-            <xsl:value-of select="$node"/>
+            <xsl:value-of select="$nodeName"/>
           </xsl:attribute>
           <xsl:attribute name="title">
             <xsl:value-of select="$documentation"/>
@@ -72,8 +87,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:locationInFile"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:value-of select="$node"/>
-        </span>
+          <xsl:value-of select="$trueNodeName"/>
+        </xsl:element><!-- </span> -->
         <xsl:text> </xsl:text>
         <xsl:if test="substring($type,1,3)='xs:'">
           <xsl:variable name="apos">'</xsl:variable>
@@ -99,8 +114,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:with-param name="path" select="$this_path"/>
         </xsl:apply-templates>
         <xsl:text> </xsl:text><xsl:value-of select="$units" disable-output-escaping="yes"/>
-      </li>
-    </ul>
+      </xsl:element><!-- </li> -->
+    </xsl:element><!-- </ul> -->
   </xsl:template>
 
   <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='fileType']" mode="findChildNodes">
