@@ -43,6 +43,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:param>
     <!-- Test to work out whether an element is optional or not -->
     <xsl:param name="optional" select="@minOccurs = '0'"/>
+    <!-- Test to see if element is repeatable, based on maxOccurs -->
+    <xsl:param name="repeatable" select="@maxOccurs and @maxOccurs != '1'"/>
     <xsl:element name="ul">
       <xsl:attribute name="role">group</xsl:attribute>
       <xsl:if test="../../xs:choice">
@@ -61,6 +63,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:when>
         <xsl:otherwise>
           <xsl:attribute name="data-optional">false</xsl:attribute>
+        </xsl:otherwise>
+      </xsl:choose>
+      <!-- If multiple copies of the element are allowed add data attribute-->
+      <xsl:choose>
+        <xsl:when test="$repeatable">
+          <xsl:attribute name="data-max-occurs">
+            <xsl:value-of select="@maxOccurs"/>
+          </xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="data-max-occurs">1</xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
       <!-- Test if it's a leaf by looking at the badge colour ... -->
@@ -91,6 +104,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               </xsl:attribute>
             </xsl:otherwise>
           </xsl:choose>
+          <!-- Test to see if multiple copies of the element are allowed -->
+          <xsl:if test="$repeatable">
+            <xsl:attribute name="data-max-occurs">
+              <xsl:value-of select="@maxOccurs"/>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:attribute name="data-fqname">
             <xsl:value-of select="$nodeName"/>
           </xsl:attribute>
@@ -117,6 +136,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:element name="span">
             <xsl:attribute name="class">toggle-button enable-button glyphicon glyphicon-off</xsl:attribute>
             <xsl:attribute name="title">Optional branch disabled - click to activate</xsl:attribute>
+            <xsl:attribute name="aria-hidden">true</xsl:attribute>
+          </xsl:element>
+        </xsl:if>
+        <!-- Add repeatable add section button here, javascript addition is too slow -->
+        <xsl:if test="$repeatable">
+          <xsl:element name="span">
+            <xsl:attribute name="class">repeat-button glyphicon glyphicon-plus</xsl:attribute>
+            <xsl:attribute name="title">This branch is repeatable - click to add another</xsl:attribute>
             <xsl:attribute name="aria-hidden">true</xsl:attribute>
           </xsl:element>
         </xsl:if>

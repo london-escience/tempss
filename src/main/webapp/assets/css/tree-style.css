@@ -175,3 +175,17 @@ span.enable-button {
 span.disable-button {
   color: #46A939;
 }
+
+span.repeat-button {
+  font-size: 0.8em;
+  background-color: #ededed;
+  color: #46A939;
+  margin-left: 0.5em;
+}
+
+span.remove-button {
+  font-size: 0.8em;
+  background-color: #ededed;
+  color: #E52638;
+  margin-left: 0.5em;
+}
