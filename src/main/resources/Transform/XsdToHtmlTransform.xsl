@@ -41,6 +41,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:otherwise>badge badge-info</xsl:otherwise>
       </xsl:choose>
     </xsl:param>
+    <!-- Test to work out whether an element is optional or not -->
+    <xsl:param name="optional" select="@minOccurs = '0'"/>
     <xsl:element name="ul">
       <xsl:attribute name="role">group</xsl:attribute>
       <xsl:if test="../../xs:choice">
@@ -52,6 +54,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:attribute>
         <xsl:attribute name="chosen">false</xsl:attribute>
       </xsl:if>
+      <xsl:choose>
+        <xsl:when test="$optional">
+          <!-- Add optional data attribute -->
+          <xsl:attribute name="data-optional">true</xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="data-optional">false</xsl:attribute>
+        </xsl:otherwise>
+      </xsl:choose>
       <!-- Test if it's a leaf by looking at the badge colour ... -->
       <xsl:if test="$badge_type = 'badge badge-info'">
         <xsl:attribute name="leaf">true</xsl:attribute>
@@ -65,9 +76,21 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           </xsl:attribute>
         </xsl:if>
         <xsl:element name="span">
-          <xsl:attribute name="class">
-            <xsl:value-of select="$badge_type"/>
-          </xsl:attribute>
+          <!-- Add optional class if required, and optional data attribute -->
+          <xsl:choose>
+            <xsl:when test="$optional">
+              <xsl:attribute name="data-optional">true</xsl:attribute>
+              <xsl:attribute name="class">
+                <xsl:value-of select="concat($badge_type, ' ', 'optional')"></xsl:value-of>
+              </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:attribute name="data-optional">false</xsl:attribute>
+              <xsl:attribute name="class">
+                <xsl:value-of select="$badge_type"></xsl:value-of>
+              </xsl:attribute>
+            </xsl:otherwise>
+          </xsl:choose>
           <xsl:attribute name="data-fqname">
             <xsl:value-of select="$nodeName"/>
           </xsl:attribute>
@@ -89,7 +112,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           </xsl:if>
           <xsl:value-of select="$trueNodeName"/>
         </xsl:element><!-- </span> -->
-        <xsl:text> </xsl:text>
+        <!-- Add optional toggle button here, javascript addition is too slow -->
+        <xsl:if test="$optional">
+          <xsl:element name="span">
+            <xsl:attribute name="class">toggle-button enable-button glyphicon glyphicon-off</xsl:attribute>
+            <xsl:attribute name="title">Optional branch disabled - click to activate</xsl:attribute>
+            <xsl:attribute name="aria-hidden">true</xsl:attribute>
+          </xsl:element>
+        </xsl:if>
         <xsl:if test="substring($type,1,3)='xs:'">
           <xsl:variable name="apos">'</xsl:variable>
           <xsl:variable name="onchange" select="concat('validateEntries($(this), ', $apos, $type, $apos, ');')"/>

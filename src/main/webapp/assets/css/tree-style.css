@@ -126,6 +126,11 @@ h2 {
   color: #000000;
 }
 
+.disabled .badge {
+  color: #000000;
+  background-color: #ededed;
+}
+
 /* ul.valid {
   background-image:url('../img/valid.png');
   background-repeat:no-repeat;
@@ -155,4 +160,18 @@ ul.invalid > li > span:first-child::before {
   left: -14px;
   color: #E52638;
   font-size: 1.2em;
+}
+
+span.toggle-button {
+  font-size: 0.8em;
+  background-color: #ededed;
+  margin-left: 0.5em;
+}
+
+span.enable-button {
+  color: #E52638;
+}
+
+span.disable-button {
+  color: #46A939;
 }
