@@ -1,22 +1,22 @@
 @CHARSET "UTF-8";
 /*
 body {
-	padding: 10px 20px;
+  padding: 10px 20px;
 }
 */
 
 h2 {
-	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-	font-size: 14pt;
-	color: #444;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 14pt;
+  color: #444;
 }
 
 .schemaitem {
-	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-	font-size: 14pt;
-	color: #444;
-	font-weight: bold;
-	padding: 20px 50px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 14pt;
+  color: #444;
+  font-weight: bold;
+  padding: 20px 50px;
 }
 
 .tree {
@@ -72,13 +72,17 @@ h2 {
 .tree>ul>li::before, .tree>ul>li::after {
     border:0
 }
-.tree li:last-child::before {
-    /* height:30px */
+.tree li:last-child>li::before {
+    height:25px
 }
 .tree li.parent_li>span:hover, .tree li.parent_li>span:hover+ul li span {
     background:#eee;
     border:1px solid #94a0b4;
     color:#000
+}
+
+.tree input, .tree select {
+  margin-left: 0.5em;
 }
 
 .badge:hover {
@@ -119,7 +123,7 @@ h2 {
 }
 
 .badge select {
-	color: #000000;
+  color: #000000;
 }
 
 /* ul.valid {
@@ -130,10 +134,10 @@ h2 {
 } */
 
 ul {
-	position: relative;
+  position: relative;
 }
 
-ul.valid li span:first-child:before {
+ul.valid > li > span:first-child::before {
   content:"\e089";
   font-family:"Glyphicons Halflings";
   position: absolute;
@@ -143,7 +147,7 @@ ul.valid li span:first-child:before {
   font-size: 1.2em;
 }
 
-ul.invalid li span:first-child:before {
+ul.invalid > li > span:first-child::before {
   content:"\e088";
   font-family:"Glyphicons Halflings";
   position: absolute;
