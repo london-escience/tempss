@@ -78,16 +78,19 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       </xsl:choose>
       <!-- Test if it's a leaf by looking at the badge colour ... -->
       <xsl:if test="$badge_type = 'badge badge-info'">
-        <xsl:attribute name="leaf">true</xsl:attribute>
+        <xsl:attribute name="data-leaf">true</xsl:attribute>
       </xsl:if>
       <xsl:element name="li">
         <xsl:attribute name="class">parent_li</xsl:attribute>
         <xsl:attribute name="role">treeitem</xsl:attribute>
         <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
-          <xsl:attribute name="documentation">
+          <xsl:attribute name="data-documentation">
             <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
           </xsl:attribute>
         </xsl:if>
+        <xsl:attribute name="data-fqname">
+          <xsl:value-of select="$nodeName"/>
+        </xsl:attribute>
         <xsl:element name="span">
           <!-- Add optional class if required, and optional data attribute -->
           <xsl:choose>
