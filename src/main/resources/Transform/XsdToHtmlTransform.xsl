@@ -188,12 +188,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:call-template>
         <xsl:text>]}');</xsl:text>
       </xsl:attribute>
-      <option value="">Select from list</option>
+      <option value="Select from list">Select from list</option>
       <xsl:for-each select="xs:enumeration">
         <option>
           <xsl:attribute name="value">
             <xsl:value-of select="@value"/>
           </xsl:attribute>
+          <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
+            <xsl:attribute name="title">
+              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation"/>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:value-of select="@value"/>
         </option>
       </xsl:for-each>
@@ -247,9 +252,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
       </xsl:attribute>
-      <option>Select from list</option>
+      <option value="Select from list">Select from list</option>
       <xsl:for-each select="xs:element">
         <option>
+          <xsl:attribute name="value">
+            <xsl:value-of select="@name"/>
+          </xsl:attribute>
+          <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
+            <xsl:attribute name="title">
+              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
+            </xsl:attribute>
+          </xsl:if>
           <xsl:value-of select="@name"/>
         </option>
       </xsl:for-each>
@@ -294,7 +307,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:message terminate="no">
       WARNING: Unmatched element: <xsl:value-of select="name()"/>
     </xsl:message>
-
     <xsl:apply-templates/>
   </xsl:template>
 
