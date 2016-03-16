@@ -7,7 +7,8 @@
     <title>Job Configuration</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
       crossorigin="anonymous">
-    <link href="./assets/css/style.css" rel="stylesheet" media="all" >
+    <link href="./assets/css/style.css" rel="stylesheet" media="all" />
+    <link href="./assets/css/tree-style.css" rel="stylesheet" media="all" >
   </head>
   <body>
     <div class="container">
