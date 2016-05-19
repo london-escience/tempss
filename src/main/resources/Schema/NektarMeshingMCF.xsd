@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+A TemPSS schema defining a tree structure for building a Mesh Configuration 
+File (MCF) for NekMesh.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+
+<xs:complexType name="stepFileName">
+  <xs:simpleContent>
+    <xs:extension base="xs:string">
+      <xs:attribute name="fileType" type="xs:string" fixed="STEP" use="required"/>
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+  
+<xs:complexType name="EulerMesh"/>
+
+<xs:complexType name="BoundaryLayerMesh">
+    <xs:sequence>
+      <xs:element name="BoundaryLayerSurfaces" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the boundary layer surfaces using this format: ...
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+      </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MeshParameters">
+  <xs:sequence>
+    <xs:element name="MinimumDelta" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Smallest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="MaximumDelta" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Largest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="CurvatureSensitivity" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Value (n) must be 0&lt;n&lt;=1 Sensivity to curvature, smaller value will make more elements.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Order" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Polynomial order of the nodal mesh to be made.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="BoundaryLayerThickness" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>  
+  </xs:sequence>
+</xs:complexType>
+
+
+<xs:complexType name="MeshConfiguration">
+    <xs:sequence>
+    <xs:element name="CADFile" type="stepFileName">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+      <xs:element name="MeshType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+The type of mesh to generate -- Euler: An Euler mesh without boundary layer surfaces.
+BoundaryLayer: A mesh with boundary layer surfaces specified.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:choice>
+      <xs:element name="Euler" type="EulerMesh">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Euler mesh without boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayer" type="BoundaryLayerMesh">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Mesh with boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+      </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+  <!-- Mesh Configuration File root node    -->
+  <xs:element name="NektarMeshing">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>
+The base element for a NekMesh mesh configuration that is used to provide the parameters to generate a Nektar++ input file from a CAD model.
+        </libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MeshConfiguration" type="MeshConfiguration">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the core configuration data including the model to be meshed, the type of mesh to generate and the boundary layer surfaces.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="MeshParameters" type="MeshParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the meshing metadata describing the specific properties of the mesh to be generated from the CAD model.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>  
+</xs:schema>
+
