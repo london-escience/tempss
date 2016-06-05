@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+PA notes on name spaces etc:
+Namespaces exist to help software pick up the appropriate xml tags to do its job. 
+See http://www.xml.com/pub/a/1999/01/namespaces.html
+
+xmlns:xs="http://www.w3.org/2001/XMLSchema" tells software capable of validating xml that this is an xsd schema.
+It also tells an xml editor (e.g. visual studio, emacs, ...) what suggestions to offer for auto-completion when writing the xsd.
+
+targetNamespace="http://www.libhpc.imperial.ac.uk": As the current XML document is a schema this attribute defines the namespace that this schema is intended to target, or validate.
+
+xmlns="http://www.libhpc.imperial.ac.uk" - Defines the default namespace within the current document for all non-prefixed elements (i.e no xx: in  <xx:elementName>)
+PA: why is this necessary?
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:include schemaLocation="NektarCommon.xsd" />
+
+  <xs:complexType name="boundary">
+    <xs:sequence>
+      <xs:element name="Comment" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:locationInFile>@COMMENT</libhpc:locationInFile>
+            <!-- This must not be editable in the HTML form because it identifies the boundary in the geometry file-->
+            <libhpc:editDisabled/>
+            <libhpc:documentation>Boundaries in the geometry file must have an attribute "COMMENT" describing the boundary. This is used by nekkloud/libhpc to associate boundary conditions with the appropriate boundary.
+            
+This field is not editable.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="u">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the velocity field in the x-direction.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='u']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='u']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='u']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="v">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the velocity field in the y-direction.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='v']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='v']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='v']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="p">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Boundary condition for the pressure field.
+            
+For the problem to be well posed, at least one boundary must have a Dirichlet condition for the pressure field.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name ="Type">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:locationInFile>*[@VAR='p']/name()</libhpc:locationInFile>
+                  <libhpc:documentation>
+D: (Dirichlet) specify the value of the field on the boundary
+N: (Neumann) specify the value of the derivative of the field on the boundary
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="D"/>
+                  <xs:enumeration value="N"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Value" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='p']@VALUE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name ="UserDefinedType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+NotProvided: Neither time dependent nor higher order
+TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
+H: Higher order. This is only applicable to the pressure field in the Navier-Stokes model, to maintain consistency with the splitting scheme. It should only be used with Neumann boundary conditions.
+                  </libhpc:documentation>
+                  <libhpc:locationInFile>*[@VAR='p']@USERDEFINEDTYPE</libhpc:locationInFile>
+                </xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="H"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="geometryFileAndBoundaryConditions">
+    <xs:sequence>
+      <xs:element name="Geometry" type="fileName">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryCondition" type="boundary" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:refersToFile>
+              <libhpc:fileTreePath>AdvectionDiffusion.ProblemSpecification.GeometryAndBoundaryConditions.Geometry</libhpc:fileTreePath>
+              <libhpc:dataXPath>GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION</libhpc:dataXPath>
+            </libhpc:refersToFile>
+            <libhpc:documentation>
+Specify the solution at the boundaries of the geometry.
+
+These parameters auto-populate from the geometry file, and may be over-ridden for individual runs.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="VelocityType">
+    <xs:sequence>
+      <xs:element name="VelocityX" type="xs:string"/>
+      <xs:element name="VelocityY" type="xs:string"/>
+      <xs:element name="VelocityZ" type="xs:string"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <!--***********************************************************
+    *                                                          **
+    *  Equation type specifications for ADR solver equations   **
+    *                                                          **
+    *************************************************************-->
+  <xs:complexType name="LaplaceEqnType">  
+  </xs:complexType>
+  
+  <xs:complexType name="PoissonEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="HelmholtzEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+      <xs:element name="Lambda" type="xs:double"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="SteadyAdvectionDiffusionEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+      <xs:element name="Epsilon" type="xs:double"/>
+      <xs:element name="Velocity" type="VelocityType"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="SteadyDiffusionReactionEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+      <xs:element name="Epsilon" type="xs:double"/>
+      <xs:element name="Lambda" type="xs:double"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="SteadyAdvectionDiffusionReactionEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+      <xs:element name="Epsilon" type="xs:double"/>
+      <xs:element name="Velocity" type="VelocityType"/>
+      <xs:element name="Lambda" type="xs:double"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="UnsteadyAdvectionEqnType">
+    <xs:sequence>
+      <xs:element name="ForcingFunction" type="xs:string"/>
+      <xs:element name="InitialConditions" type="xs:string"/>
+      <xs:element name="Velocity" type="VelocityType"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="UnsteadyDiffusionEqnType">
+    <xs:sequence>
+      <xs:element name="InitialConditions" type="xs:string"/>
+      <xs:element name="Epsilon" type="xs:double"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="UnsteadyAdvectionDiffusionEqnType">
+    <xs:sequence>
+      <xs:element name="InitialConditions" type="xs:string"/>
+      <xs:element name="Velocity" type="VelocityType"/>
+      <xs:element name="Epsilon" type="xs:double"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="UnsteadyInviscidBurgerEqnType">
+    <xs:sequence>
+      <xs:element name="InitialConditions" type="xs:string"/>
+    </xs:sequence>  
+  </xs:complexType>
+  
+<xs:complexType name="TimeIntegrationType">
+    <xs:sequence>
+      <!--xs:element name="TimeIntegrationMethod" type="xs:string"/-->
+      <xs:element name="TimeIntegrationMethod">
+        <xs:annotation>
+          <xs:appinfo>
+              <libhpc:documentation>Method of time stepping. See: http://www.nektar.info/wiki/3.2/Reference/TimeStepping
+
+- Formally Explicit Methods: These types of methods are considered explicit from an ODE point of view. They are characterised by a lower triangular coefficient matrix formula, i.e. formula for formula. To avoid confusion, we make a further distinction:
+  -direct explicit method: Only forward operators are required.
+  -indirect explicit method: The inverse operator is required.
+- Diagonally Implicit Methods': Compared to explicit methods, the coefficient matrix formula has now non-zero entries on the diagonal. This means that each stage value depend on the stage derivative at the same stage, requiring an implicit step. However, the calculation of the different stage values is still uncoupled. Best known are the DIRK schemes.
+- IMEX schemes: These schemes support the concept of being able to split right hand forcing term into an explicit and implicit component. This is useful in advection diffusion type problems where the advection is handled explicity and the diffusion is handled implicit.
+
+Choices supported by libhpc/nekkloud:
+                
+"ForwardEuler"	Forward-Euler scheme
+"BackwardEuler"	Backward Euler scheme
+"IMEXOrder1"	IMEX 1st order scheme using Euler Backwards Euler Forwards
+"IMEXOrder2"	IMEX 2nd order scheme using Backward Different Formula and Extrapolation
+"IMEXOrder3"	IMEX 3rd order scheme using Backward Different Formula and Extrapolation
+"DIRKOrder1"	Diagonally Implicit Runge-Kutta scheme of order 1
+"ClassicalRungeKutta4" 4th order Runge Kutta scheme
+              </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="IMEXOrder1"/>
+            <xs:enumeration value="IMEXOrder2"/>
+            <xs:enumeration value="IMEXOrder3"/>
+            <xs:enumeration value="DIRKOrder1"/>
+            <xs:enumeration value="ForwardEuler"/>
+            <xs:enumeration value="BackwardEuler"/>
+            <xs:enumeration value="ClassicalRungeKutta4"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="DiffusionAdvancement">
+        <xs:annotation>
+          <xs:appinfo>
+              <libhpc:documentation>
+Specifies whether diffusion is handled implicitly or explicitly in the time integration scheme. 
+              </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Implicit"/>
+            <xs:enumeration value="Explicit"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <!-- 
+      <xs:element name="AdvectionAdvancement">
+        <xs:annotation>
+          <xs:appinfo>
+              <libhpc:documentation>
+This specifies how to treat the advection term and is restricted by the choice of time integration scheme.
+              </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Implicit"/>
+            <xs:enumeration value="Explicit"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+       -->
+      </xs:sequence>
+  </xs:complexType>
+ 
+ 
+  <xs:complexType name="NumericalAlgorithmType">
+    <xs:sequence>
+      <xs:element name="Projection">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+ContinuousGalerkin: enforces continuity of solution across element boundaries
+DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shocks in solution
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ContinuousGalerkin"/>
+            <xs:enumeration value="DiscontinuousGalerkin"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="AdvectionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+            This specifies how to treat the advection term and is restricted 
+based on the selected projection type.
+NonConservative: Select this with ContinuousGalerkin projection
+WeakDG: Select this with DiscontinuousGalerkin projection
+FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="NonConservative"/>
+            <xs:enumeration value="WeakDG"/>
+            <xs:enumeration value="FRDG"/>
+            <xs:enumeration value="FRHU"/>
+            <xs:enumeration value="FRSD"/>
+            <xs:enumeration value="FRcmin"/>
+            <xs:enumeration value="FRcinf"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="DiffusionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+            This specifies how to treat the advection term and is restricted 
+based on the selected projection type.
+NonConservative: Select this with ContinuousGalerkin projection
+WeakDG: Select this with DiscontinuousGalerkin projection
+FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="LDG"/>
+            <xs:enumeration value="LFRDG"/>
+            <xs:enumeration value="LFRHU"/>
+            <xs:enumeration value="LFRSD"/>
+            <xs:enumeration value="LFRcmin"/>
+            <xs:enumeration value="LFRcinf"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TimeIntegration" type="TimeIntegrationType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters setting the method for time integration.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MatrixInversion" type="MatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="AdvectionDiffusion">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>
+          The Nektar++ advection diffusion solver models the transfer of physical properties through some medium by advection and diffusion.
+          Full details of the solver can be found in chapter 6 of the Nektar++ user guide (http://doc.nektar.info/userguide/latest).
+        </libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ProblemSpecification">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Specification of the particular problem to solve, including the equation type, geometry, etc.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="EquationType">                
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The type of equation to be used for
+                    the computation. Some of the options have restrictions on 
+                    the dimensionality of the problems that they can be used 
+                    with: 1D only: UnsteadyInviscidBurger; 2D only: SteadyAdvectionDiffusion, 
+                    SteadyDiffusionReaction, SteadyAdvectionDiffusionReaction.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:choice>
+                  <xs:element name="Laplace" type="LaplaceEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Laplace equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="Poisson" type="PoissonEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Poisson equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="Helmholtz" type="HelmholtzEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Helmholtz equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="SteadyAdvectionDiffusion" type="SteadyAdvectionDiffusionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Steady advection diffusion equation. 2D only.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="SteadyDiffusionReaction" type="SteadyDiffusionReactionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Steady diffusion reaction equation. 2D only.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="SteadyAdvectionDiffusionReaction" type="SteadyAdvectionDiffusionReactionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Steady advection diffusion reaction equation. 2D only.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="UnsteadyAdvection" type="UnsteadyAdvectionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Unsteady advection equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="UnsteadyDiffusion" type="UnsteadyDiffusionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Unsteady diffusion equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="UnsteadyAdvectionDiffusion" type="UnsteadyAdvectionDiffusionEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Unsteady advection diffusion equation. Applicable in all dimensions.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+			      <xs:element name="UnsteadyInviscidBurger" type="UnsteadyInviscidBurgerEqnType">
+			        <xs:annotation>
+			          <xs:appinfo>
+			            <libhpc:documentation>Unsteady Inviscid Burger equation. 1D only.</libhpc:documentation>
+			            <libhpc:units></libhpc:units>
+			          </xs:appinfo>
+			        </xs:annotation>
+			      </xs:element>
+                </xs:choice>
+              </xs:element>
+              
+              <xs:element name="GeometryAndBoundaryConditions" type="geometryFileAndBoundaryConditions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Geometry and boundary conditions are loaded from a single xml file.
+The boundary conditions may be overridden on a per-run basis, but this will not save them into the geometry xml file.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="InitialConditions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Provide the initial solution at time 0.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="u" type="xs:double">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="v" type="xs:double">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="p" type="xs:double">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The initial condition for the pressure.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Expansion" type ="Expansion">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify details of how the solution function will be approximated.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FinalTime" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>
+                      The time over which the simulation occurs.
+                    </libhpc:documentation>
+                    <libhpc:units></libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TimeStep" type="positiveDouble">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Length of time step</libhpc:documentation>
+                    <libhpc:units></libhpc:units>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NumericalAlgorithm" type="NumericalAlgorithmType">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains all the parameters that specify the numerical algorithm for solving the problem.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Admin" type ="Admin">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
