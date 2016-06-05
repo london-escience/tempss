@@ -93,119 +93,6 @@ TimeDependent: Select this if the boundary condition is time dependent to force 
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="v">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Boundary condition for the velocity field in the y-direction.</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name ="Type">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:locationInFile>*[@VAR='v']/name()</libhpc:locationInFile>
-                  <libhpc:documentation>
-D: (Dirichlet) specify the value of the field on the boundary
-N: (Neumann) specify the value of the derivative of the field on the boundary
-                  </libhpc:documentation>
-                </xs:appinfo>
-              </xs:annotation>
-              <xs:simpleType>
-                <xs:restriction base="xs:string">
-                  <xs:enumeration value="D"/>
-                  <xs:enumeration value="N"/>
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:element>
-            <xs:element name="Value" type="xs:string">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
-                  <libhpc:locationInFile>*[@VAR='v']@VALUE</libhpc:locationInFile>
-                </xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name ="UserDefinedType">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:documentation>
-NotProvided: Neither time dependent nor higher order
-TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
-                  </libhpc:documentation>
-                  <libhpc:locationInFile>*[@VAR='v']@USERDEFINEDTYPE</libhpc:locationInFile>
-                </xs:appinfo>
-              </xs:annotation>
-              <xs:simpleType>
-                <xs:restriction base="xs:string">
-                  <xs:enumeration value="NotProvided"/>
-                  <xs:enumeration value="TimeDependent"/>
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="p">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Boundary condition for the pressure field.
-            
-For the problem to be well posed, at least one boundary must have a Dirichlet condition for the pressure field.
-            </libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name ="Type">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:locationInFile>*[@VAR='p']/name()</libhpc:locationInFile>
-                  <libhpc:documentation>
-D: (Dirichlet) specify the value of the field on the boundary
-N: (Neumann) specify the value of the derivative of the field on the boundary
-                  </libhpc:documentation>
-                </xs:appinfo>
-              </xs:annotation>
-              <xs:simpleType>
-                <xs:restriction base="xs:string">
-                  <xs:enumeration value="D"/>
-                  <xs:enumeration value="N"/>
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:element>
-            <xs:element name="Value" type="xs:string">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:documentation>Value at the boundary</libhpc:documentation>
-                  <libhpc:locationInFile>*[@VAR='p']@VALUE</libhpc:locationInFile>
-                </xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name ="UserDefinedType">
-              <xs:annotation>
-                <xs:appinfo>
-                  <libhpc:documentation>
-NotProvided: Neither time dependent nor higher order
-TimeDependent: Select this if the boundary condition is time dependent to force the PDE solver to re-evaluate the boundary condition at each time step
-H: Higher order. This is only applicable to the pressure field in the Navier-Stokes model, to maintain consistency with the splitting scheme. It should only be used with Neumann boundary conditions.
-                  </libhpc:documentation>
-                  <libhpc:locationInFile>*[@VAR='p']@USERDEFINEDTYPE</libhpc:locationInFile>
-                </xs:appinfo>
-              </xs:annotation>
-              <xs:simpleType>
-                <xs:restriction base="xs:string">
-                  <xs:enumeration value="NotProvided"/>
-                  <xs:enumeration value="TimeDependent"/>
-                  <xs:enumeration value="H"/>
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
     </xs:sequence>
   </xs:complexType>
 
@@ -243,6 +130,29 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       <xs:element name="VelocityY" type="xs:string"/>
       <xs:element name="VelocityZ" type="xs:string"/>
     </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="TimeParamsType">
+    <xs:sequence>
+      <xs:element name="FinalTime" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              The time over which the simulation occurs.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="TimeStep" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Length of time step</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
   
   <!--***********************************************************
@@ -296,6 +206,7 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       <xs:element name="ForcingFunction" type="xs:string"/>
       <xs:element name="InitialConditions" type="xs:string"/>
       <xs:element name="Velocity" type="VelocityType"/>
+      <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
     </xs:sequence>  
   </xs:complexType>
   
@@ -303,6 +214,7 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     <xs:sequence>
       <xs:element name="InitialConditions" type="xs:string"/>
       <xs:element name="Epsilon" type="xs:double"/>
+      <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
     </xs:sequence>  
   </xs:complexType>
   
@@ -311,12 +223,14 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       <xs:element name="InitialConditions" type="xs:string"/>
       <xs:element name="Velocity" type="VelocityType"/>
       <xs:element name="Epsilon" type="xs:double"/>
+      <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
     </xs:sequence>  
   </xs:complexType>
   
   <xs:complexType name="UnsteadyInviscidBurgerEqnType">
     <xs:sequence>
       <xs:element name="InitialConditions" type="xs:string"/>
+      <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
     </xs:sequence>  
   </xs:complexType>
   
@@ -605,60 +519,10 @@ The boundary conditions may be overridden on a per-run basis, but this will not 
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="InitialConditions">
-                <xs:annotation>
-                  <xs:appinfo>
-                    <libhpc:documentation>Provide the initial solution at time 0.</libhpc:documentation>
-                  </xs:appinfo>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="u" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                    <xs:element name="v" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                    <xs:element name="p" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the pressure.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                  </xs:sequence>
-                </xs:complexType>
-              </xs:element>
               <xs:element name="Expansion" type ="Expansion">
                 <xs:annotation>
                   <xs:appinfo>
                     <libhpc:documentation>Specify details of how the solution function will be approximated.</libhpc:documentation>
-                  </xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="FinalTime" type="positiveDouble">
-                <xs:annotation>
-                  <xs:appinfo>
-                    <libhpc:documentation>
-                      The time over which the simulation occurs.
-                    </libhpc:documentation>
-                    <libhpc:units></libhpc:units>
-                  </xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="TimeStep" type="positiveDouble">
-                <xs:annotation>
-                  <xs:appinfo>
-                    <libhpc:documentation>Length of time step</libhpc:documentation>
-                    <libhpc:units></libhpc:units>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
