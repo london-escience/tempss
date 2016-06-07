@@ -217,6 +217,13 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       <xs:element name="InitialConditions" type="xs:string"/>
       <xs:element name="Velocity" type="VelocityType"/>
       <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
+      <xs:element name="Variables" type ="kVariableType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Additional variables used in the forcing function/initial conditions. If a variable is not used, enter a dash '-'.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>  
   </xs:complexType>
   
@@ -264,6 +271,7 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
        </xs:annotation>
        <xs:simpleType>
          <xs:restriction base="xs:string">
+           <xs:enumeration value="Not Provided"/>
            <xs:enumeration value="LDG"/>
            <xs:enumeration value="LFRDG"/>
            <xs:enumeration value="LFRHU"/>
@@ -324,6 +332,7 @@ Specifies whether diffusion is handled implicitly or explicitly in the time inte
         </xs:annotation>
         <xs:simpleType>
           <xs:restriction base="xs:string">
+            <xs:enumeration value="Not Provided"/>
             <xs:enumeration value="Implicit"/>
             <xs:enumeration value="Explicit"/>
           </xs:restriction>
@@ -408,6 +417,22 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
+      <xs:element name="UpwindType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+            Upwind type specification. If this is not applicable for your problem, select Not Provided.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Not Provided"/>
+            <xs:enumeration value="Upwind"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
       <xs:element name="TimeIntegration" type="TimeIntegrationType">
         <xs:annotation>
           <xs:appinfo>
@@ -425,6 +450,21 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
         </xs:annotation>
       </xs:element>
 
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="kVariableType">
+    <xs:sequence>
+      <xs:element name="k" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+			Optional k parameter that may be used in the forcing function/initial conditions - enter a '-' if this is unused. 
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
   
