@@ -53,6 +53,7 @@ This field is not editable.</libhpc:documentation>
                 <xs:appinfo>
                   <libhpc:locationInFile>*[@VAR='u']/name()</libhpc:locationInFile>
                   <libhpc:documentation>
+Not Provided: For boundary condition cases where we have a currently unsupported value
 D: (Dirichlet) specify the value of the field on the boundary
 N: (Neumann) specify the value of the derivative of the field on the boundary
                   </libhpc:documentation>
@@ -60,6 +61,7 @@ N: (Neumann) specify the value of the derivative of the field on the boundary
               </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:string">
+                  <xs:enumeration value="NotProvided"/>
                   <xs:enumeration value="D"/>
                   <xs:enumeration value="N"/>
                 </xs:restriction>
