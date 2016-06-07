@@ -180,7 +180,17 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     <xs:sequence>
       <xs:element name="ForcingFunction" type="xs:string"/>
       <xs:element name="Epsilon" type="xs:double"/>
-      <xs:element name="Velocity" type="VelocityType"/>
+      <xs:element name="Velocity" type="VelocityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              Velocities in the x, y and z directions. If a value is not required, 
+              enter a dash "-" into the field.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>  
   </xs:complexType>
   
@@ -232,6 +242,38 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       <xs:element name="InitialConditions" type="xs:string"/>
       <xs:element name="SimulationTimeParams" type="TimeParamsType"/>
     </xs:sequence>  
+  </xs:complexType>
+  
+  <xs:complexType name="ContinuousGalerkinType">
+  </xs:complexType>
+  
+  <xs:complexType name="DiscontinuousGalerkinType">
+   <xs:sequence>
+     <xs:element name="DiffusionType">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>
+            This specifies how to treat the advection term and is restricted 
+based on the selected projection type.
+NonConservative: Select this with ContinuousGalerkin projection
+WeakDG: Select this with DiscontinuousGalerkin projection
+FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
+           </libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+       <xs:simpleType>
+         <xs:restriction base="xs:string">
+           <xs:enumeration value="LDG"/>
+           <xs:enumeration value="LFRDG"/>
+           <xs:enumeration value="LFRHU"/>
+           <xs:enumeration value="LFRSD"/>
+           <xs:enumeration value="LFRcmin"/>
+           <xs:enumeration value="LFRcinf"/>
+         </xs:restriction>
+       </xs:simpleType>
+     </xs:element>
+   </xs:sequence>
   </xs:complexType>
   
 <xs:complexType name="TimeIntegrationType">
@@ -320,12 +362,26 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
-        <xs:simpleType>
-          <xs:restriction base="xs:string">
-            <xs:enumeration value="ContinuousGalerkin"/>
-            <xs:enumeration value="DiscontinuousGalerkin"/>
-          </xs:restriction>
-        </xs:simpleType>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ContinuousGalerkin" type="ContinuousGalerkinType">
+	          <xs:annotation>
+	            <xs:appinfo>
+	              <libhpc:documentation>Continuous galerkin projection type</libhpc:documentation>
+	              <libhpc:units></libhpc:units>
+	            </xs:appinfo>
+	          </xs:annotation>
+	        </xs:element>
+	        <xs:element name="DiscontinuousGalerkin" type="DiscontinuousGalerkinType">
+	          <xs:annotation>
+	            <xs:appinfo>
+	              <libhpc:documentation>Discontinuous galerkin projection type</libhpc:documentation>
+	              <libhpc:units></libhpc:units>
+	            </xs:appinfo>
+	          </xs:annotation>
+	        </xs:element>
+	      </xs:choice>
+        </xs:complexType>
       </xs:element>
       <xs:element name="AdvectionType">
         <xs:annotation>
@@ -349,30 +405,6 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
             <xs:enumeration value="FRSD"/>
             <xs:enumeration value="FRcmin"/>
             <xs:enumeration value="FRcinf"/>
-          </xs:restriction>
-        </xs:simpleType>
-      </xs:element>
-      <xs:element name="DiffusionType">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>
-            This specifies how to treat the advection term and is restricted 
-based on the selected projection type.
-NonConservative: Select this with ContinuousGalerkin projection
-WeakDG: Select this with DiscontinuousGalerkin projection
-FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
-            </libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-        <xs:simpleType>
-          <xs:restriction base="xs:string">
-            <xs:enumeration value="LDG"/>
-            <xs:enumeration value="LFRDG"/>
-            <xs:enumeration value="LFRHU"/>
-            <xs:enumeration value="LFRSD"/>
-            <xs:enumeration value="LFRcmin"/>
-            <xs:enumeration value="LFRcinf"/>
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
