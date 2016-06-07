@@ -153,6 +153,15 @@
       </xsl:if>
     </xsl:if>
     
+    <xsl:if test="EquationType/*[1]/Variables">
+    	<xsl:if test="EquationType/*[1]/Variables/k">
+    	  <xsl:variable name="k" select="EquationType/*[1]/Variables/k"/>
+    	  <xsl:if test="$k != '-'">
+            <P>k    = <xsl:value-of select="$k"/><xsl:text>  </xsl:text></P>
+      </xsl:if>
+    	</xsl:if>
+    </xsl:if>
+    
   </xsl:template>
   
   <xsl:template match="ProblemSpecification" mode="ADRAdvectionVelocity">
@@ -204,11 +213,14 @@
     </I>
     
     <xsl:if test="Projection/*[1]/DiffusionType">
-      <I PROPERTY="DiffusionType">
-        <xsl:attribute name="VALUE">
-          <xsl:value-of select="Projection/*[1]/DiffusionType" />
-        </xsl:attribute>
-      </I>
+      <xsl:variable name="diftype" select="Projection/*[1]/DiffusionType"/>
+      <xsl:if test="$diftype != 'Not Provided'">
+        <I PROPERTY="DiffusionType">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="Projection/*[1]/DiffusionType" />
+          </xsl:attribute>
+        </I>
+      </xsl:if>
     </xsl:if>
     
     <I PROPERTY="AdvectionType">
@@ -217,17 +229,29 @@
       </xsl:attribute>
     </I>
     
+    <xsl:variable name="upwindtype" select="UpwindType"/>
+    <xsl:if test="$upwindtype != 'Not Provided'">
+      <I PROPERTY="UpwindType">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="UpwindType" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+    
     <I PROPERTY="TimeIntegrationMethod">
       <xsl:attribute name="VALUE">
         <xsl:value-of select="TimeIntegration/TimeIntegrationMethod" />
       </xsl:attribute>
     </I>
     
-    <I PROPERTY="DiffusionAdvancement">
-      <xsl:attribute name="VALUE">
-        <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
-      </xsl:attribute>
-    </I>
+    <xsl:variable name="difadv" select="TimeIntegration/DiffusionAdvancement"/>
+    <xsl:if test="$difadv != 'Not Provided'">
+      <I PROPERTY="DiffusionAdvancement">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
   </xsl:template>
 
   <!-- *** 
@@ -283,7 +307,7 @@
         <E>
           <xsl:apply-templates select="ProblemSpecification" mode ="CompositeADR"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="Expansion"/>
-          <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
+          <xsl:attribute name="FIELDS">u</xsl:attribute>
         </E>
       </EXPANSIONS>
       
