@@ -117,7 +117,6 @@
     <!-- <xsl:message>Handling problem spec parameters...</xsl:message>
     <xsl:message>Eqtype: <xsl:value-of select="name(EquationType/*[1])"/></xsl:message>  -->
     <xsl:if test="EquationType/*[1]/SimulationTimeParams">
-      <xsl:message>Handling simulation time parameters...</xsl:message>
       <P>FinTime    = <xsl:value-of select="EquationType/*[1]/SimulationTimeParams/FinalTime"/><xsl:text>  </xsl:text></P>
       <P>TimeStep   = <xsl:value-of select="EquationType/*[1]/SimulationTimeParams/TimeStep"/><xsl:text>  </xsl:text></P>
       <P>NumSteps   = FinTime/TimeStep  </P>
