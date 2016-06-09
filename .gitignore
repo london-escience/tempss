@@ -1,2 +1,8 @@
 target
 /bin/
+# Ignore eclipse project files
+.classpath
+.cproject
+.project
+.settings
+
