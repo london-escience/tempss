@@ -45,11 +45,21 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web;
 
+import java.security.Principal;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,9 +85,12 @@ public class RootController {
 	private PebbleEngine pebbleEngine;
 	
 	@RequestMapping("/")
-    public ModelAndView index(Model pModel) {
+    public ModelAndView index(Model pModel, 
+    						  @AuthenticationPrincipal Principal principal) {
 		
 		sLog.debug("Processing root controller request for access to /");
+		
+		User activeUser = (User) ((Authentication) principal).getPrincipal();
 		
 		pebbleEngine.getTemplateCache().invalidateAll();
 		
@@ -88,9 +101,44 @@ public class RootController {
         mav.addObject("firstname", "TemPSS");
         mav.addObject("surname", "Team");
         mav.addObject("profiles", profiles);
+        mav.addObject("user", activeUser);
         return mav;
     }
 	
+	@RequestMapping("/logout")
+	public String logout(HttpServletRequest req, HttpServletResponse resp) {
+		sLog.debug("Request to log user out...");
+	    Authentication auth = 
+	    		SecurityContextHolder.getContext().getAuthentication();
+	    if (auth != null) {
+	    	sLog.debug("The user is logged in, logging user out.");
+	        new SecurityContextLogoutHandler().logout(req, resp, auth);
+	        return "redirect:/login?logout";
+	    }
+	    else{
+	    	sLog.debug("The user was not logged in.");
+	    }
+	    return "redirect:/";
+	}
+	
+	@RequestMapping("/login-test")
+	public ModelAndView loginTest(Model pModel,
+								  @AuthenticationPrincipal Principal principal){
+		
+		sLog.debug("Processing root controller request for login-test page");
+		
+		User activeUser = (User) ((Authentication) principal).getPrincipal();
+		
+		pebbleEngine.getTemplateCache().invalidateAll();
+		
+        ModelAndView mav = new ModelAndView("login-test");
+        
+        mav.addObject("firstname", "TemPSS");
+        mav.addObject("surname", "Team");
+        mav.addObject("user", activeUser);
+        return mav;
+    }
+
 	@RequestMapping(value="/*")
     public ModelAndView redirectHome() {
         return new ModelAndView("redirect:/profiles/");
