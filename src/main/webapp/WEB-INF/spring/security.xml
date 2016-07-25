@@ -4,7 +4,7 @@
 		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 	<http auto-config="true">
-		<intercept-url pattern="/**" access="hasRole('USER')"/>
+		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
 		<form-login default-target-url='/profiles/' 
 		            always-use-default-target='false'/>
 		<logout />

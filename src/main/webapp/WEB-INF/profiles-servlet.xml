@@ -11,7 +11,11 @@
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web"/>
-    <!-- <mvc:annotation-driven/>  -->
+    <mvc:annotation-driven>
+    	<mvc:argument-resolvers>
+        	<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
+    	</mvc:argument-resolvers>
+    </mvc:annotation-driven>
         
     <bean id="pebbleEngine" class="com.mitchellbosecke.pebble.PebbleEngine">
 		<property name="loader">
