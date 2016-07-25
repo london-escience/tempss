@@ -55,8 +55,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -86,11 +88,27 @@ public class RootController {
 	
 	@RequestMapping("/")
     public ModelAndView index(Model pModel, 
-    						  @AuthenticationPrincipal Principal principal) {
+    						  @AuthenticationPrincipal User user) {
 		
 		sLog.debug("Processing root controller request for access to /");
 		
-		User activeUser = (User) ((Authentication) principal).getPrincipal();
+		//User activeUser = null;
+		//Authentication auth =
+		//		SecurityContextHolder.getContext().getAuthentication();
+		
+		sLog.debug("Value of user principal: {}", user);
+		//sLog.debug("Value of auth: {}", auth);
+		//sLog.debug("Value of auth.isAuthenticated(): {}", auth.isAuthenticated());
+		
+//		if(auth != null && auth.isAuthenticated() && 
+//				!(auth instanceof AnonymousAuthenticationToken)) {
+//			activeUser = (User)auth.getPrincipal();
+//		}
+//		sLog.debug("Value of activeUser: {}", activeUser);
+		
+		if(user != null) {
+			sLog.debug("We have a user with username: {}", user.getUsername()); 
+		}
 		
 		pebbleEngine.getTemplateCache().invalidateAll();
 		
@@ -101,7 +119,7 @@ public class RootController {
         mav.addObject("firstname", "TemPSS");
         mav.addObject("surname", "Team");
         mav.addObject("profiles", profiles);
-        mav.addObject("user", activeUser);
+        mav.addObject("user", user);
         return mav;
     }
 	
