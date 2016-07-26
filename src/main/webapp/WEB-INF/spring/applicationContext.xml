@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
-	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   					   http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Here we're in the root context so exclude controllers which are 
+	     scanned for in the web context. -->
+	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web">
+    	<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
+	</context:component-scan>
 
     <bean id="profileDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcProfileDaoImpl">
 	    <property name="dataSource" ref="dataSource"/>
 	</bean>
+	
+	<bean id="tempssUserDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcTempssUserDaoImpl">
+	    <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
     
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
 	    <property name="driverClassName" value="org.sqlite.JDBC" />
@@ -20,5 +35,22 @@
 	    <property name="maxIdle" value="1" />
 	    <property name="poolPreparedStatements" value="true" />
 	</bean>
-
+	
+	<!--
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mappingResources">
+            <list>
+                <value></value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+        	<props>
+         		<prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+         		<prop key="hibernate.dialect">com.applerao.hibernatesqlite.dialect.SQLiteDialect</prop>
+        	</props>
+        </property>
+    </bean>
+ 	-->
+ 	
 </beans>

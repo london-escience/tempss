@@ -10,7 +10,12 @@
 		<logout />
 	</http>
 
-	<user-service>
-		<user name="admin" password="admin123" authorities="ROLE_USER" />
-	</user-service>
+	<!-- <b:bean id='userDetailsService' 
+	        class='uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetailsService'/>
+	-->
+	
+	<authentication-manager>
+		<authentication-provider user-service-ref="tempssUserDetailsService" />
+	</authentication-manager>
+
 </b:beans>
