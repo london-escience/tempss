@@ -10,7 +10,12 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web"/>
+	<!-- Since we're in the web context here, only look for controllers -->
+	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web" 
+	                        use-default-filters="false">
+    	<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation" />
+	</context:component-scan>
+	
     <mvc:annotation-driven>
     	<mvc:argument-resolvers>
         	<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
@@ -23,8 +28,15 @@
 		</property>
 	</bean>
 	
-	<bean id="viewResolver" class="com.mitchellbosecke.pebble.spring.PebbleViewResolver">
+	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
 		<property name="prefix" value="/WEB-INF/templates/" />
+		<property name="suffix" value=".jsp" />
+		<property name="viewNames" value="jsp/*" />
+	</bean>
+	
+	<bean id="viewResolver" class="com.mitchellbosecke.pebble.spring.PebbleViewResolver">
+		<property name="prefix" value="/WEB-INF/templates/pebble/" />
 		<property name="suffix" value=".html" />
 		<property name="pebbleEngine" ref="pebbleEngine" />
 	</bean>

@@ -45,119 +45,66 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web;
 
-import java.security.Principal;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.mitchellbosecke.pebble.PebbleEngine;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 @Controller
-public class RootController {
+public class RegistrationController {
 
-	private static final Logger sLog = LoggerFactory.getLogger(RootController.class.getName());
-	
-	@Autowired
-	private ProfileDao profileDao;
+	private static final Logger sLog = LoggerFactory.getLogger(RegistrationController.class.getName());
 	
 	// For debugging purposes, we get access to the pebble engine and
 	// empty the template cache on each call so that we don't have to
 	// restart the tomcat server to rebuild a changed template on a reload
 	@Autowired
 	private PebbleEngine pebbleEngine;
+
 	
-	@RequestMapping("/")
-    public ModelAndView index(Model pModel, 
-    						  @AuthenticationPrincipal TempssUser user) {
+	@RequestMapping(value="/register", method=RequestMethod.GET)
+	public ModelAndView registrationForm(HttpServletRequest pRequest) {
 		
-		sLog.debug("Processing root controller request for access to /");
+		pebbleEngine.getTemplateCache().invalidateAll();
 		
-		//User activeUser = null;
-		//Authentication auth =
-		//		SecurityContextHolder.getContext().getAuthentication();
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
 		
-		sLog.debug("Value of user principal: {}", user);
-		//sLog.debug("Value of auth: {}", auth);
-		//sLog.debug("Value of auth.isAuthenticated(): {}", auth.isAuthenticated());
+		ModelAndView mav = new ModelAndView("jsp/register");
+		mav.addObject("_csrf", token);
+        
+        return mav;
+	}
+
+	@RequestMapping(value="/register", method=RequestMethod.POST)
+	public ModelAndView registrationSubmit(@Valid @ModelAttribute("registration-form") TempssUser pUser,
+			BindingResult pResult, Model pModel) {
 		
-//		if(auth != null && auth.isAuthenticated() && 
-//				!(auth instanceof AnonymousAuthenticationToken)) {
-//			activeUser = (User)auth.getPrincipal();
-//		}
-//		sLog.debug("Value of activeUser: {}", activeUser);
+		sLog.debug("Received tempss user object: {}", pUser);
 		
-		if(user != null) {
-			sLog.debug("We have a user with username: {}", user.getUsername()); 
+		ModelAndView mav = new ModelAndView("jsp/register.jsp");
+		
+		if(pResult.hasErrors()) {
+			sLog.debug("We have form submission errors, processing and "
+					+ "returning the error details.");
+			mav.addObject("errors", true);
+			mav.addObject("errorBindings", pResult);
 		}
 		
-		pebbleEngine.getTemplateCache().invalidateAll();
-		
-        ModelAndView mav = new ModelAndView("index");
-        
-        List<Profile> profiles = profileDao.findAll();
-        
-        mav.addObject("firstname", "TemPSS");
-        mav.addObject("surname", "Team");
-        mav.addObject("profiles", profiles);
-        mav.addObject("user", user);
         return mav;
-    }
-	
-	@RequestMapping("/logout")
-	public String logout(HttpServletRequest req, HttpServletResponse resp) {
-		sLog.debug("Request to log user out...");
-	    Authentication auth = 
-	    		SecurityContextHolder.getContext().getAuthentication();
-	    if (auth != null) {
-	    	sLog.debug("The user is logged in, logging user out.");
-	        new SecurityContextLogoutHandler().logout(req, resp, auth);
-	        return "redirect:/login?logout";
-	    }
-	    else{
-	    	sLog.debug("The user was not logged in.");
-	    }
-	    return "redirect:/";
 	}
-	
-	@RequestMapping("/login-test")
-	public ModelAndView loginTest(Model pModel,
-								  @AuthenticationPrincipal Principal principal){
-		
-		sLog.debug("Processing root controller request for login-test page");
-		
-		User activeUser = (User) ((Authentication) principal).getPrincipal();
-		
-		pebbleEngine.getTemplateCache().invalidateAll();
-		
-        ModelAndView mav = new ModelAndView("login-test");
-        
-        mav.addObject("firstname", "TemPSS");
-        mav.addObject("surname", "Team");
-        mav.addObject("user", activeUser);
-        return mav;
-    }
-	
-	@RequestMapping(value="/*")
-    public ModelAndView redirectHome() {
-        return new ModelAndView("redirect:/profiles/");
-    }
-
 }
