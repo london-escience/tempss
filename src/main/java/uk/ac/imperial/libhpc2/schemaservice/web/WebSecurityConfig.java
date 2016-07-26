@@ -20,9 +20,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //			.logout().permitAll();
 //	}
 	
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("admin").password("admin123").roles("USER");
-    }
+//	@Autowired
+//	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.inMemoryAuthentication()
+//                .withUser("admin").password("admin123").roles("USER");
+//    }
 }
