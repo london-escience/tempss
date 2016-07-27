@@ -57,8 +57,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 public class JdbcTempssUserDaoImpl implements TempssUserDao {
@@ -78,7 +81,7 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	public int add(TempssUser pUser) {
 		Map<String,String> rowParams = new HashMap<String, String>(2);
 		rowParams.put("username", pUser.getUsername());
-		rowParams.put("password", pUser.getPassword());
+		rowParams.put("password", pUser.getHashedPassword());
 		rowParams.put("email", pUser.getEmail());
 		rowParams.put("firstname", pUser.getFirstname());
 		rowParams.put("lastname", pUser.getLastname());
@@ -119,14 +122,29 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	@Override
 	public TempssUser findByName(String pUsername) {
 		TempssUser user = null;
-		try {
-			user = _jdbcTemplate.queryForObject(
-					"select * from user where username = ?",
-					new Object[] {pUsername}, TempssUser.class);
-		} catch(EmptyResultDataAccessException e) {
+		List<Map<String,Object>> users = 
+				_jdbcTemplate.queryForList(
+						"select * from user where username = ?", pUsername);
+		
+		if(users.size() == 1) {
+			Map<String,Object> userData = users.get(0);
+			user = new TempssUser((String)userData.get("username"),
+					(String)userData.get("password"),
+					(String)userData.get("email"),
+					(String)userData.get("firstname"),
+					(String)userData.get("lastname"));
+		}
+		else if(users.size() > 1) {
+			sLog.error("ERROR: More than 1 user with name <{}> found.", 
+					pUsername);
+			return null;
+		}
+		
+		if(user == null) {
 			sLog.debug("User with name <{}> not found.", pUsername);
 			return null;
 		}
+			
 		
 		sLog.debug("Found user with name <{}> and email <{}>.", 
 				user.getUsername(), user.getEmail());
