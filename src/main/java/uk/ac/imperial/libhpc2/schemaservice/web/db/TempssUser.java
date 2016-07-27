@@ -56,73 +56,99 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class TempssUser {
 	
 	@NotBlank
-	private String _username;
+	private String username;
 	
 	@NotNull
 	@Size(min = 8, max = 48)
-	private String _password;
+	private String password;
 	
 	@NotNull
-	@Email
-	private String _email;
+	@Size(min = 8, max = 48)
+	private String password2;
 	
 	@NotBlank
-	private String _firstname;
+	@Email
+	private String email;
 	
-	private String _lastname;
+	@NotBlank
+	private String firstname;
+	
+	private String lastname;
 	
 	public TempssUser() { } 
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
-                      String pFirstname, String pLastname) { 
-		this._username = pUsername;
-		this._password = pPassword;
-		this._email = pEmail;
-		this._firstname = pFirstname;
-		this._lastname = pLastname;
+            String pFirstname, String pLastname) {
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "");
+	}
+	
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+                      String pFirstname, String pLastname, String pPassword2) { 
+		this.username = pUsername;
+		this.password = pPassword;
+		this.email = pEmail;
+		this.firstname = pFirstname;
+		this.lastname = pLastname;
+		this.password2 = pPassword2; // for password verification
 		
 	}
 
 	public String getUsername() {
-		return _username;
+		return username;
 	}
 
 	public void setUsername(String pUsername) {
-		this._username = pUsername;
+		this.username = pUsername;
 	}
 	
 	public String getPassword() {
-		return _password;
+		return this.password;
+	}
+	
+	public String getHashedPassword() {
+		if(this.password == null) {
+			return null;
+		}
+		// Hash the incoming password to generate the hash that we'll store
+		PasswordEncoder encoder = new BCryptPasswordEncoder();
+		String hashedPassword = encoder.encode(this.password);
+
+		return hashedPassword;
 	}
 
 	public void setPassword(String pPassword) {
-		// Hash the incoming password to generate the hash that we'll store
-		PasswordEncoder encoder = new BCryptPasswordEncoder();
-		String hashedPassword = encoder.encode(pPassword);
-		this._password = hashedPassword;
+		this.password = pPassword;
 	}
 	
 	public String getEmail() {
-		return _email;
+		return email;
 	}
 
 	public void setEmail(String pEmail) {
-		this._email = pEmail;
+		this.email = pEmail;
 	}
 
 	public String getFirstname() {
-		return _firstname;
+		return firstname;
 	}
 
 	public void setFirstname(String pFirstname) {
-		this._firstname = pFirstname;
+		this.firstname = pFirstname;
 	}
 
 	public String getLastname() {
-		return _lastname;
+		return lastname;
 	}
 
 	public void setLastname(String pLastname) {
-		this._lastname = pLastname;
+		this.lastname = pLastname;
+	}
+	
+	public String getPassword2() {
+		return this.password2;
+	}
+
+	public void setPassword2(String pPassword2) {
+		this.password2 = pPassword2;
 	}
 }
