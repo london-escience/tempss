@@ -73,3 +73,7 @@ body {
 	cursor: pointer;
 	cursor: hand; 
 }
+
+.form-error {
+	padding-top: 8px;
+}

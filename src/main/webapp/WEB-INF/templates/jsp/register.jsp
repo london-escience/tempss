@@ -1,3 +1,6 @@
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,9 +13,9 @@
 
 	<title>TemPSS :: Profile Manager :: Registration</title>
 	
-	    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../temp/css/bootstrap.min.css">  -->
+	<!-- Bootstrap core CSS -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  -->
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
 
     <!-- Custom styles for this template -->
     <link href="../assets/css/tempss.css" rel="stylesheet">
@@ -50,69 +53,82 @@
     <div class="container">
 
 	<div class="row">
-		<div class="col-md-3"></div>
-		<div class="col-md-7">
+		<div class="col-md-2"></div>
+		<div class="col-md-9">
 			<div class="well">
-			  <h3 style="padding-bottom: 20px;">New JSP Registration Page</h3>
 			  <h3 style="padding-bottom: 20px;">TemPSS User Registration</h3>
 			  <h4 style="padding-bottom: 20px;">Create an account</h4>
-				<form class="form-horizontal" id="registration-form">
+				<form:form commandName="tempssUser" class="form-horizontal" 
+				           id="registration-form">
+				           
+				  <form:errors/>
+				  
 				  <div class="form-group">
-				    <label for="input-username" class="col-sm-3 control-label">Username</label>
-				    <div class="col-sm-8">
-				      <input type="text" name="username" class="form-control" id="input-username" placeholder="Select a username">
+				    <form:label path="username" for="username" cssClass="col-sm-3 control-label">Username</form:label>
+				    <div class="col-sm-5">
+				      <form:input path="username" class="form-control" placeholder="Select a username"/>
+				    </div>
+				    <div class="col-sm-3">  
+				      <form:errors path="username" cssClass="form-error text-danger"/>
 				    </div>
 				  </div>
 				  <div class="form-group">
-				    <label for="input-email" class="col-sm-3 control-label">Email</label>
-				    <div class="col-sm-8">
-				      <input type="email" name="email" class="form-control" id="input-email" placeholder="">
+				    <form:label path="email" for="email" cssClass="col-sm-3 control-label">Email</form:label>
+				    <div class="col-sm-5">
+				      <form:input path="email" type="email" class="form-control" placeholder=""/>
 				    </div>
-				  </div>
-				  <hr/>
-				  <div class="form-group">
-				    <label for="input-firstname" class="col-sm-3 control-label">Firstname</label>
-				    <div class="col-sm-8">
-				      <input type="text" name="firstname" class="form-control" id="input-firstname" placeholder="">
-				    </div>
-				  </div>
-				  <div class="form-group">
-				    <label for="input-lastname" class="col-sm-3 control-label">Surname</label>
-				    <div class="col-sm-8">
-				      <input type="text" name="lastname" class="form-control" id="input-lastname" placeholder="">
+				    <div class="col-sm-3">  
+				      <form:errors path="email" cssClass="form-error text-danger"/>
 				    </div>
 				  </div>
 				  <hr/>
 				  <div class="form-group">
-				    <label for="input-password1" class="col-sm-3 control-label">Password</label>
-				    <div class="col-sm-8">
-				      <input type="password" name="password" class="form-control" id="input-password1" placeholder="">
+				    <form:label path="firstname" for="firstname" cssClass="col-sm-3 control-label">Firstname</form:label>
+				    <div class="col-sm-5">
+				      <form:input path="firstname" class="form-control" placeholder=""/>
+				    </div>
+				    <div class="col-sm-3">  
+				      <form:errors path="firstname" cssClass="form-error text-danger"/>
 				    </div>
 				  </div>
 				  <div class="form-group">
-				    <label for="input-password2" class="col-sm-3 control-label">Confirm Password</label>
-				    <div class="col-sm-8">
-				      <input type="password" name="password2" class="form-control" id="input-password2" placeholder="">
+				    <form:label path="lastname" for="lastname" cssClass="col-sm-3 control-label">Surname</form:label>
+				    <div class="col-sm-5">
+				      <form:input path="lastname" class="form-control" placeholder=""/>
+				    </div>
+				    <div class="col-sm-3">  
+				      <form:errors path="lastname" cssClass="form-error text-danger"/>
 				    </div>
 				  </div>
-				  <input type="hidden" name="{{ _csrf.parameterName }}" 
-				         value="{{ _csrf.token }}" />
+				  <hr/>
+				  <div class="form-group">
+				    <form:label path="password" for="password" cssClass="col-sm-3 control-label">Password</form:label>
+				    <div class="col-sm-5">
+				      <input name="password" type="password" class="form-control" placeholder=""/>
+				    </div>
+				    <div class="col-sm-3">
+				      <form:errors path="password" cssClass="form-error text-danger"/>
+				    </div>
+				  </div>
+				  <div class="form-group">
+				    <form:label path="password2" for="password2" cssClass="col-sm-3 control-label">Confirm Password</form:label>
+				    <div class="col-sm-5">
+				      <input name="password2" type="password" class="form-control" placeholder=""/>
+				    </div>
+				    <div class="col-sm-3">
+				      <form:errors path="password2" value="" cssClass="form-error text-danger"/>
+				    </div>
+				  </div>
+				  <sec:csrfInput />
 				  <div class="form-group text-right">
 				    <div class="col-sm-3"></div>
 				    <div class="col-sm-8">
 				      <button type="submit" id="register-user" class="btn btn-success">Register</button>
 				    </div>
 				  </div>
-			    </form>
+			    </form:form>
 			</div>
 		</div>
-		<div class="col-md-2"></div>
-		{% for error in bindingResult.errors %}
-		  Field: {{ error.field }}
-		  <br/>
-		  Error: {{ error.defaultMessage }}
-		  <br/>
-		{% endfor %} 
 	</div>
 
     </div><!-- /.container -->
@@ -120,11 +136,11 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <!-- <script src="../temp/js/jquery-1.11.0.min.js"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>  -->
+    <script src="../assets/js/jquery-1.11.0.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <!-- <script src="../temp/js/bootstrap.min.js"></script> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>  -->
+    <script src="../assets/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>  -->
     
@@ -135,7 +151,7 @@
 		log("Document ready...");
 		
 		$('#registration-form').submit(function(e) {
-			submitRegistrationForm(e);
+			//submitRegistrationForm(e);
 		});
 	});
 	

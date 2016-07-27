@@ -29,7 +29,7 @@
 	</bean>
 	
 	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<!-- <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />  -->
 		<property name="prefix" value="/WEB-INF/templates/" />
 		<property name="suffix" value=".jsp" />
 		<property name="viewNames" value="jsp/*" />
@@ -40,4 +40,5 @@
 		<property name="suffix" value=".html" />
 		<property name="pebbleEngine" ref="pebbleEngine" />
 	</bean>
+
 </beans>
