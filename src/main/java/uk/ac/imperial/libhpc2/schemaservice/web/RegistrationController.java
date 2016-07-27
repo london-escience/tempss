@@ -62,6 +62,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.mitchellbosecke.pebble.PebbleEngine;
 
+import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 @Controller
@@ -75,6 +76,11 @@ public class RegistrationController {
 	@Autowired
 	private PebbleEngine pebbleEngine;
 
+	@Autowired
+	private TempssUserValidator tempssUserValidator;
+	
+	@Autowired
+	private TempssUserDao tempssUserDao;
 	
 	@RequestMapping(value="/register", method=RequestMethod.GET)
 	public ModelAndView registrationForm(HttpServletRequest pRequest) {
@@ -86,24 +92,32 @@ public class RegistrationController {
 		
 		ModelAndView mav = new ModelAndView("jsp/register");
 		mav.addObject("_csrf", token);
+		mav.addObject("tempssUser", new TempssUser());
         
         return mav;
 	}
 
 	@RequestMapping(value="/register", method=RequestMethod.POST)
-	public ModelAndView registrationSubmit(@Valid @ModelAttribute("registration-form") TempssUser pUser,
+	public ModelAndView registrationSubmit(@Valid @ModelAttribute("tempssUser") TempssUser pUser,
 			BindingResult pResult, Model pModel) {
 		
 		sLog.debug("Received tempss user object: {}", pUser);
 		
-		ModelAndView mav = new ModelAndView("jsp/register.jsp");
+		tempssUserValidator.validate(pUser, pResult);
 		
+		// If we have errors then return the form with the errors
 		if(pResult.hasErrors()) {
-			sLog.debug("We have form submission errors, processing and "
-					+ "returning the error details.");
-			mav.addObject("errors", true);
-			mav.addObject("errorBindings", pResult);
+			ModelAndView errorMav = new ModelAndView("jsp/register");
+			errorMav.addObject("tempssUser", pUser);
+			sLog.debug("We have form submission errors...");
+			return errorMav;
 		}
+		
+		// Now store the user to the DB
+		tempssUserDao.add(pUser);
+		
+		ModelAndView mav = new ModelAndView("jsp/registered");
+		mav.addObject("tempssUser", pUser);
 		
         return mav;
 	}
