@@ -62,6 +62,7 @@ import org.springframework.stereotype.Repository;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 public class JdbcProfileDaoImpl implements ProfileDao {
 
@@ -78,27 +79,44 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	
 	@Override
 	public int add(Profile pProfile) {
-		Map<String,String> rowParams = new HashMap<String, String>(2);
+		Map<String,String> rowParams = new HashMap<String, String>(5);
 		rowParams.put("name", pProfile.getName());
 		rowParams.put("templateId", pProfile.getTemplateId());
 		rowParams.put("profileXml", pProfile.getProfileXml());
+		rowParams.put("public", new Boolean(pProfile.getPublic()).toString());
+		rowParams.put("owner", pProfile.getOwner().getUsername());
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
 	
 	@Override
-	public int delete(String pTemplateId, String pProfileName) {
-		int rowsAffected = _jdbcTemplate.update("DELETE FROM profile WHERE templateId = ? AND name = ?", new Object[] {pTemplateId, pProfileName});
+	public int delete(String pTemplateId, String pProfileName, 
+			          TempssUser pUser) {
+		int rowsAffected = _jdbcTemplate.update("DELETE FROM profile WHERE "
+				+ "templateId = ? AND name = ? and owner = ?", 
+				new Object[] {pTemplateId, pProfileName, pUser.getUsername()});
 		return rowsAffected;
 	}
 	
+	/**
+	 * Given the user name, we can findAll profiles that the user either owns, 
+	 * or that are publicly accessible.
+	 */
 	@Override
-	public List<Profile> findAll() {
-		//List<Profile> profiles = _jdbcTemplate.queryForList("select * from profile", Profile.class);
-		List<Map<String,Object>> profileDataList = _jdbcTemplate.queryForList("select * from profile");
+	public List<Profile> findAll(TempssUser pUser) {
+		String sql = "select * from profile WHERE public = ?";
+		Object[] params = new Object[] {"1"};
+		if(pUser != null) {
+			sql += " OR owner = ?";
+			params = new Object[] {"1", pUser.getUsername()};
+		}
+		
+		List<Map<String,Object>> profileList = _jdbcTemplate.queryForList(
+				sql, params); 
+		
 		List<Profile> profiles = new ArrayList<Profile>();
 		
-		for(Map<String,Object> data : profileDataList) {
+		for(Map<String,Object> data : profileList) {
 			Profile p = new Profile(data);
 			profiles.add(p);
 		}
@@ -113,15 +131,26 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	}
 	
 	@Override
-	public Profile findByName(String pName) {
-		List<Map<String,Object>> profiles = _jdbcTemplate.queryForList("select * from profile where name = ?", pName);	
+	public Profile findByName(String pName, TempssUser pUser) {
+		String sql = "select * from profile where name = ? and public = ?";
+		Object[] params = new Object[] {pName, "1"};
+		if(pUser != null) {
+			sql = "select * from profile where name = ? and (public = ? "
+					+ "or owner = ?)";
+			params = new Object[] {pName, "1", pUser.getUsername()};
+		}
+		
+		List<Map<String,Object>> profiles = _jdbcTemplate.queryForList(
+				sql, params);
+		
 		Profile profile = null;
 		if(profiles.size() > 0) {
 			Map<String,Object> profileData = profiles.get(0);
 			profile = new Profile(profileData);
 		}
 		if(profiles.size() > 1) {
-			sLog.error("More than 1 profile with specified name <{}> found. Returning first instance.", pName);
+			sLog.error("More than 1 profile with specified name <{}> found. "
+					+ "Returning first instance.", pName);
 		}
 		
 		if(profile == null) {
@@ -129,22 +158,36 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 			return null;
 		}
 		
-		sLog.debug("Found profile with name <{}> and XML <{}>.", profile.getName(), profile.getProfileXml());
+		sLog.debug("Found profile with name <{}> and XML <{}>.", 
+				profile.getName(), profile.getProfileXml());
 		
 		return profile;
 	}
 
 	@Override
-	public List<Profile> findByTemplateId(String pTemplateId) {
+	public List<Profile> findByTemplateId(String pTemplateId, 
+			                              TempssUser pUser) {
+		
+		String sql = "select * from profile where templateId = ? and public = ?";
+		Object[] params = new Object[] {pTemplateId, "1"};
+		if(pUser != null) {
+			sql = "select * from profile where templateId = ? and (public = ?"
+					+ "or owner = ?)";
+			params = new Object[] {pTemplateId, "1", pUser.getUsername()};
+		}
+		
 		List<Map<String,Object>> profileList = _jdbcTemplate.queryForList(
-				"select * from profile where templateId = ?", pTemplateId);	
+				sql, params);
 		
 		if(profileList.size() == 0) {
-			sLog.debug("Profiles for templateId <{}> not found.", pTemplateId);
+			sLog.debug("Profiles for templateId <{}> and user <{}> not found.",
+					pTemplateId, (pUser != null) ? pUser.getUsername() : "NONE");
 			return null;
 		}
 		
-		sLog.debug("Found <{}> profiles for template id <{}>.", profileList.size(), pTemplateId);
+		sLog.debug("Found <{}> profiles for template id <{}> and user <{}>.", 
+				profileList.size(), pTemplateId, 
+				(pUser != null) ? pUser.getUsername() : "NONE");
 		
 		List<Profile> profileResult = new ArrayList<Profile>();
 		for(Map<String,Object> dbItem : profileList) {
@@ -153,6 +196,5 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		}
 		
 		return profileResult;
-	}
-	
+	} 
 }

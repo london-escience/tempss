@@ -53,6 +53,8 @@ public class Profile {
 	private String _name;
 	private String _templateId;
 	private String _profileXml;
+	private boolean _public;
+	private TempssUser _owner;
 	
 	public Profile() {};
 	
@@ -96,5 +98,21 @@ public class Profile {
 	
 	public void setProfileXml(String pProfileXml) {
 		this._profileXml = pProfileXml;
+	}
+	
+	public boolean getPublic() {
+		return this._public;
+	}
+	
+	public void setPublic(boolean pPublic) {
+		this._public = pPublic;
+	}
+	
+	public TempssUser getOwner() {
+		return this._owner;
+	}
+	
+	public void setOwner(TempssUser pOwner) {
+		this._owner = pOwner;
 	}
 }

@@ -85,8 +85,6 @@ public class RegistrationController {
 	@RequestMapping(value="/register", method=RequestMethod.GET)
 	public ModelAndView registrationForm(HttpServletRequest pRequest) {
 		
-		pebbleEngine.getTemplateCache().invalidateAll();
-		
 		String tokenKey = CsrfToken.class.getName();
 		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
 		
