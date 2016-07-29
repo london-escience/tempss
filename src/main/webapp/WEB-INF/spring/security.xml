@@ -3,19 +3,26 @@
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <b:bean id="bCryptPasswordEncoder" 
+       class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+	<b:bean id="logoutSuccessHandler" 
+	        class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+    	<b:property name="useReferer" value="true"/>
+	</b:bean>
+	
 	<http auto-config="true">
 		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
 		<form-login default-target-url='/profiles/' 
 		            always-use-default-target='false'/>
-		<logout />
+		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
 	</http>
-
-	<!-- <b:bean id='userDetailsService' 
-	        class='uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetailsService'/>
-	-->
 	
 	<authentication-manager>
-		<authentication-provider user-service-ref="tempssUserDetailsService" />
+		<authentication-provider user-service-ref="tempssUserDetailsService">
+		  <password-encoder ref="bCryptPasswordEncoder" />
+		</authentication-provider>
 	</authentication-manager>
 
 </b:beans>

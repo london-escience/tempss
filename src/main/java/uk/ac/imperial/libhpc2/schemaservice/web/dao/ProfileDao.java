@@ -48,17 +48,18 @@ package uk.ac.imperial.libhpc2.schemaservice.web.dao;
 import java.util.List;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 public interface ProfileDao {
 
 	public int add(Profile pProfile);
 	
-	public int delete(String pTemplateId, String pProfileName);
+	public int delete(String pTemplateId, String pProfileName, 
+			          TempssUser pUser);
 	
-	public List<Profile> findAll();
+	public List<Profile> findAll(TempssUser pUser);
 	
-	public Profile findByName(String pName);
+	public Profile findByName(String pName, TempssUser pUser);
 	
-	public List<Profile> findByTemplateId(String pTemplateId);
-
+	public List<Profile> findByTemplateId(String pTemplateId, TempssUser pUser);
 }

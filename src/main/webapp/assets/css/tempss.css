@@ -77,3 +77,16 @@ body {
 .form-error {
 	padding-top: 8px;
 }
+
+#login-form {
+	max-width: 250px;
+	padding: 25px 25px;
+}
+
+#login-form input {
+	margin-bottom: 10px;
+	width: 180px;
+}
+
+#login-form button {
+	width: 100%;
