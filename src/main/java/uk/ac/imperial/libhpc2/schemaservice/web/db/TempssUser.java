@@ -75,6 +75,12 @@ public class TempssUser {
 	
 	private String lastname;
 	
+	/**
+	 * true (1) if the user is locked, false (0) otherwise. 
+	 * A locked user cannot log in.
+	 */
+	private boolean locked;
+	
 	public TempssUser() { } 
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
@@ -90,7 +96,7 @@ public class TempssUser {
 		this.firstname = pFirstname;
 		this.lastname = pLastname;
 		this.password2 = pPassword2; // for password verification
-		
+		this.locked = false;
 	}
 
 	public String getUsername() {
@@ -103,17 +109,6 @@ public class TempssUser {
 	
 	public String getPassword() {
 		return this.password;
-	}
-	
-	public String getHashedPassword() {
-		if(this.password == null) {
-			return null;
-		}
-		// Hash the incoming password to generate the hash that we'll store
-		PasswordEncoder encoder = new BCryptPasswordEncoder();
-		String hashedPassword = encoder.encode(this.password);
-
-		return hashedPassword;
 	}
 
 	public void setPassword(String pPassword) {
@@ -150,5 +145,13 @@ public class TempssUser {
 
 	public void setPassword2(String pPassword2) {
 		this.password2 = pPassword2;
+	}
+	
+	public boolean getLocked() {
+		return this.locked;
+	}
+
+	public void setLocked(boolean pLocked) {
+		this.locked = pLocked;
 	}
 }

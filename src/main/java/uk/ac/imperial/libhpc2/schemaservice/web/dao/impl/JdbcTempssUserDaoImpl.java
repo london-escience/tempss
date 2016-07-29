@@ -54,6 +54,7 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -70,6 +71,9 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	
 	private JdbcTemplate _jdbcTemplate;
 	private SimpleJdbcInsert _insertProfile;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	public void setDataSource(DataSource dataSource) {
 		sLog.debug("Setting data source <" + dataSource + "> for tempssuser data access object.");
@@ -79,9 +83,12 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	
 	@Override
 	public int add(TempssUser pUser) {
+		// Hash the password to store it in the DB
+		String hashedPassword = passwordEncoder.encode(pUser.getPassword());
+		
 		Map<String,String> rowParams = new HashMap<String, String>(2);
 		rowParams.put("username", pUser.getUsername());
-		rowParams.put("password", pUser.getHashedPassword());
+		rowParams.put("password", hashedPassword);
 		rowParams.put("email", pUser.getEmail());
 		rowParams.put("firstname", pUser.getFirstname());
 		rowParams.put("lastname", pUser.getLastname());
