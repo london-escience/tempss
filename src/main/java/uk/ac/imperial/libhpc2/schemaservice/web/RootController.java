@@ -59,6 +59,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,6 +70,7 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 @Controller
 public class RootController {
@@ -86,13 +88,20 @@ public class RootController {
 	
 	@RequestMapping("/")
     public ModelAndView index(Model pModel, 
-    						  @AuthenticationPrincipal TempssUser user) {
+    						  @AuthenticationPrincipal Principal principal,
+    						  HttpServletRequest pRequest) {
 		
 		sLog.debug("Processing root controller request for access to /");
 		
 		//User activeUser = null;
 		//Authentication auth =
 		//		SecurityContextHolder.getContext().getAuthentication();
+		
+		TempssUserDetails userDetails = null;
+		if(principal != null) {
+			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+		}
+		TempssUser user = userDetails.getUser();
 		
 		sLog.debug("Value of user principal: {}", user);
 		//sLog.debug("Value of auth: {}", auth);
@@ -108,16 +117,21 @@ public class RootController {
 			sLog.debug("We have a user with username: {}", user.getUsername()); 
 		}
 		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+		
 		pebbleEngine.getTemplateCache().invalidateAll();
 		
         ModelAndView mav = new ModelAndView("index");
         
-        List<Profile> profiles = profileDao.findAll();
+        mav.addObject("_csrf", token);
+        
+        List<Profile> profiles = profileDao.findAll(user);
         
         mav.addObject("firstname", "TemPSS");
         mav.addObject("surname", "Team");
         mav.addObject("profiles", profiles);
-        mav.addObject("user", user);
+        mav.addObject("user", userDetails);
         return mav;
     }
 	
@@ -134,7 +148,7 @@ public class RootController {
 	    else{
 	    	sLog.debug("The user was not logged in.");
 	    }
-	    return "redirect:/";
+	    return "redirect:/tempss/profiles";
 	}
 	
 	@RequestMapping("/login-test")
