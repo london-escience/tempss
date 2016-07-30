@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
@@ -92,6 +93,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	@Override
 	public int delete(String pTemplateId, String pProfileName, 
 			          TempssUser pUser) {
+
 		int rowsAffected = _jdbcTemplate.update("DELETE FROM profile WHERE "
 				+ "templateId = ? AND name = ? and owner = ?", 
 				new Object[] {pTemplateId, pProfileName, pUser.getUsername()});
@@ -197,4 +199,32 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		
 		return profileResult;
 	} 
+	
+	/**
+	 * Check if a profile name exists. This will check all registered profiles 
+	 * to see if the specified name is available, regardless of whether the 
+	 * currently authenticated user is able to access the profile of the 
+	 * specified name or not. It is necessary to be authenticated to call this
+	 * method.
+	 */
+	@Override
+	public boolean profileNameAvailable(String pName, TempssUser pUser) 
+		throws AuthenticationException {
+		if(pUser == null) {
+			throw new AuthenticationException("User must be authenticated to "
+					+ "call this method.") {
+			};
+		}
+		
+		// Lookup the profile name to see if it exists.
+		String sql = "select * from profile WHERE name = ?";
+		Object[] param = new Object[] {pName};
+		List<Map<String,Object>> profileList = _jdbcTemplate.queryForList(
+				sql, param);
+		
+		if(profileList.size() == 0) {
+			return true;
+		}
+		return false;
+	}
 }

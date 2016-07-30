@@ -66,10 +66,20 @@
 					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
 					              text-info tree-control-btn"
 					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
-					    <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
+
+				        {% if user != null %}
+				          <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
 					              text-info tree-control-btn"
 					          data-toggle="tooltip" title="Save this profile in TemPSS">
-					    </span>
+					      </span>
+				        {% else %}
+				          <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
+					              text-info tree-control-btn" data-placement="top"
+					            data-toggle="tooltip" disabled="disabled"
+					            title="You must be signed in to save a profile">
+					      </span>
+				        {% endif %}
+
 					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
 					    <div id="template-container">
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
@@ -372,6 +382,11 @@
 
 		// Set up tooltips for collapse/expand tree buttons
 		hideTreeExpandCollapseButtons(true);
+		
+		// Enable tooltips (for save button)
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		});
 	});
 </script>
 {% endblock script %}
