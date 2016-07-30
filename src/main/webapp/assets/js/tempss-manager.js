@@ -196,11 +196,13 @@ function updateProfileList(templateId) {
 function disableProfileButtons(disable) {
 	if(disable) {
 		$('#clear-profile-btn').prop('disabled', true);
-		$('#save-as-profile-btn').prop('disabled', true);	
+		$('#save-as-profile-btn').prop('disabled', true);
 	}
 	else {
 		$('#clear-profile-btn').removeProp('disabled');
-		$('#save-as-profile-btn').removeProp('disabled');
+		if($('#save-as-profile-btn').attr("data-toggle") == undefined) {
+			$('#save-as-profile-btn').removeProp('disabled');
+		}
 	}
 	
 }

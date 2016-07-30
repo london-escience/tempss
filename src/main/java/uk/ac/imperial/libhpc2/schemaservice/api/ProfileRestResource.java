@@ -48,17 +48,18 @@ package uk.ac.imperial.libhpc2.schemaservice.api;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -86,6 +87,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -94,6 +100,8 @@ import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 /**
  * Jersey REST class representing the profile endpoint
@@ -284,11 +292,15 @@ public class ProfileRestResource {
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
-        @Context HttpServletRequest pRequest) {
+        @Context HttpServletRequest pRequest,
+        TempssUser pUser) {
     
+    	TempssUser user = getAuthenticatedUser();
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
-    	// Check the specified template exists
+    	// Check the specified template exists and that it is owned by the 
+    	// currently authenticated user or it is public
 		TempssObject templateMetadata = components.get(templateId);
 		if(templateMetadata == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
@@ -297,7 +309,7 @@ public class ProfileRestResource {
 		}
 		
 		// Now try and get the profile
-		Profile p = profileDao.findByName(profileName);
+		Profile p = profileDao.findByName(profileName, user);
 		if(p == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
 					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
@@ -330,6 +342,7 @@ public class ProfileRestResource {
      *         and any additional description of the error under the key 'message'.
      */
     @POST
+    @RolesAllowed("ROLE_USER")
     @Path("{templateId}/{profileName}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json")
@@ -340,6 +353,8 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
+    	TempssUser user = getAuthenticatedUser();
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Check the specified template exists, if so, save the 
@@ -352,10 +367,16 @@ public class ProfileRestResource {
 		}
 		
 		// Now check if the specified profile name already exists
-		if(profileDao.findByName(profileName) != null) {
-			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
-					"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
-			return Response.status(Status.CONFLICT).entity(responseText).build();
+		try {
+			if(!profileDao.profileNameAvailable(profileName, user)) {
+				String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
+						"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
+				return Response.status(Status.CONFLICT).entity(responseText).build();
+			}
+		} catch(AuthenticationException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
+					"\"You must be authenticated to check if a profile name exists.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
 		}
 
     	String profileXml = "";
@@ -413,6 +434,8 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
+    	TempssUser user = getAuthenticatedUser();
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Undertake sme validation checks...
@@ -425,19 +448,19 @@ public class ProfileRestResource {
 		}
 		
 		// Now check that the specified profile name exists
-		if(profileDao.findByName(profileName) == null) {
+		if(profileDao.profileNameAvailable(profileName, user)) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
 					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
 			return Response.status(Status.NOT_FOUND).entity(responseText).build();
 		}
 		
 		// Now delete the profile
-		int rowsAffected = profileDao.delete(templateId, profileName);
+		int rowsAffected = profileDao.delete(templateId, profileName, user);
 		
 		if(rowsAffected == 0) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NOT_DELETED\", \"error\":" +
 					"\"Profile <" + profileName + "> for template <" + templateId + 
-					"> was not present to delete.\"}";
+					"> was not present to delete or you are not the owner.\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
 		
@@ -476,7 +499,9 @@ public class ProfileRestResource {
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+		TempssUser user = getAuthenticatedUser();
+		
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	JSONArray profileArray = new JSONArray();
     	if(profiles != null) {
     		for(Profile p : profiles) {
@@ -508,7 +533,9 @@ public class ProfileRestResource {
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+    	TempssUser user = getAuthenticatedUser();
+    	
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	StringBuilder profileNames = new StringBuilder();
     	// If there are no profiles for the specified template (or the template
     	// doesn't exist)...
@@ -564,5 +591,24 @@ public class ProfileRestResource {
 		NewCookie c = new NewCookie("fileDownload","true", "/",null, null, NewCookie.DEFAULT_MAX_AGE, false);
 		return Response.status(Status.OK).header("Content-Disposition", cd).cookie(c).entity(so).build();
     }
-
+    
+    /**
+     * Get the details of the currently authenticated user.
+     *  
+     * @return null if no user is authenticated or the TempssUser object of the
+     *         authenticated user if a user is logged in.
+     */
+    private TempssUser getAuthenticatedUser() {
+    	Authentication authToken = 
+    			SecurityContextHolder.getContext().getAuthentication();
+    	
+    	TempssUserDetails userDetails = null;
+		TempssUser user = null;
+		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
+			userDetails = (TempssUserDetails) authToken.getPrincipal();
+			user = userDetails.getUser();
+		}
+		
+		return user;
+    }
 }

@@ -98,10 +98,12 @@ public class RootController {
 		//		SecurityContextHolder.getContext().getAuthentication();
 		
 		TempssUserDetails userDetails = null;
+		TempssUser user = null;
 		if(principal != null) {
 			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+			user = userDetails.getUser();
 		}
-		TempssUser user = userDetails.getUser();
+		
 		
 		sLog.debug("Value of user principal: {}", user);
 		//sLog.debug("Value of auth: {}", auth);

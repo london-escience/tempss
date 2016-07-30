@@ -80,7 +80,15 @@
 					    </div>
 					    <div style="float: right; padding-bottom: 30px;">
 					    	<button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
-					        <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
+					        {% if user != null %}
+					          <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
+					        {% else %}
+					          <button class="btn btn-success" id="save-as-profile-btn" 
+					                  disabled="disabled" data-toggle="tooltip" 
+					                  data-placement="top" title="You must be signed in to save a profile">
+					              Save as profile
+					          </button>
+					        {% endif %}
 					    </div>
 					</div>
 				</div>
@@ -354,6 +362,11 @@
 
 		// Set up tooltips for collapse/expand tree buttons
 		hideTreeExpandCollapseButtons(true);
+		
+		// Enable tooltips (for save button)
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		});
 	});
 </script>
 {% endblock script %}
