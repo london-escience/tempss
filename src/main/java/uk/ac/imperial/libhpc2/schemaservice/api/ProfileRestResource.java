@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletContext;
@@ -86,6 +85,8 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -113,7 +114,7 @@ public class ProfileRestResource {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(ProfileRestResource.class.getName());
+    private static final Logger sLog = LoggerFactory.getLogger(ProfileRestResource.class.getName());
 	
     /**
      * Profile data access object for accessing the profile database
@@ -130,7 +131,7 @@ public class ProfileRestResource {
     @Context
     public void setServletContext(ServletContext pContext) {
         this._context = pContext;
-        sLog.fine("Servlet context injected: " + pContext);
+        sLog.debug("Servlet context injected: " + pContext);
         //sLog.fine("Manuallly wiring dao bean into class...");
         //profileDao = (ProfileDao)((BeanFactory)pContext).getBean("profileDao");
         //sLog.fine("Bean <" + profileDao + "> has been injected as profileDao...");
@@ -167,7 +168,7 @@ public class ProfileRestResource {
                 jsonResponse.put("message", "Template with ID <" + templateId + "> does not exist.");
                 return Response.status(Status.NOT_FOUND).entity(jsonResponse.toString()).build();
             } catch (JSONException e) {
-                sLog.severe("Error creating 404 response for template ID that is not found");
+                sLog.error("Error creating 404 response for template ID that is not found");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\"}").build();
             }
         }
@@ -180,14 +181,14 @@ public class ProfileRestResource {
                   "to the profile converter, only the first will be used (additional files " +
                   "should be uploaded with xmlupload_file tag).");
         if(profileField.size() == 0) {
-            sLog.severe("No profile data has been provided with this request.");
+            sLog.error("No profile data has been provided with this request.");
             try {
                 jsonResponse.put("status", "ERROR");
                 jsonResponse.put("message", "No profile data stream provided with this request.");
                 Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
                     .entity(jsonResponse.toString()).build();
             } catch (JSONException e) {
-                sLog.severe("Error creating 400 response profile stream that is empty");
+                sLog.error("Error creating 400 response profile stream that is empty");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\"}").build();
             }
         }
@@ -203,7 +204,7 @@ public class ProfileRestResource {
         try {
             profileXml = IOUtils.toString(profileXmlStream);
         } catch (IOException e) {
-            sLog.severe("Error converting profile stream to string for processing.");
+            sLog.error("Error converting profile stream to string for processing.");
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\",\"message\":\"Error converting profile stream to string for processing.\"}").build();
         }
         String completeXml = profileXml;
@@ -225,7 +226,7 @@ public class ProfileRestResource {
                     String tempXml = completeXml.replaceAll("(?i)" + fileName, fileXml);
                     completeXml = tempXml;
                 } catch (IOException e) {
-                    sLog.severe("Error converting file for embedding in profile to string.");
+                    sLog.error("Error converting file for embedding in profile to string.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\",\"message\":\"Error converting file for embedding in profile to string.\"}").build();
                 }
             }
@@ -236,13 +237,13 @@ public class ProfileRestResource {
         try {
             transformOutput = proc.convertProfileToInputData(templateId, profileXml, completeXml, session.getId());
         } catch (UnknownTemplateException e) {
-            sLog.severe("The template with ID <" + templateId + "> is not found: " + e.getMessage());
+            sLog.error("The template with ID <" + templateId + "> is not found: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("The template with ID <" + templateId + "> is not found: " + e.getMessage()).build();
         } catch (TransformerException e) {
-            sLog.severe("XSLT transform error when trying to convert profile to application input file: " + e.getMessage());
+            sLog.error("XSLT transform error when trying to convert profile to application input file: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to convert profile to application input file: " + e.getMessage()).build();	
         } catch (IOException e) {
-            sLog.severe("IO error when trying to convert profile to application input file: " + e.getMessage());
+            sLog.error("IO error when trying to convert profile to application input file: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to convert profile to application input file: " + e.getMessage()).build();
         }
 		
@@ -251,7 +252,7 @@ public class ProfileRestResource {
         try {
             servletUrl = new URL(pRequest.getScheme(), pRequest.getServerName(), pRequest.getServerPort(), pRequest.getContextPath());
         } catch (MalformedURLException e) {
-            sLog.severe("Unable to get servlet URL to prepare response: " + e.getMessage());
+            sLog.error("Unable to get servlet URL to prepare response: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to get servlet URL to prepare response: " + e.getMessage()).build();
         }
         String servletBaseURL = servletUrl.toString();
@@ -266,7 +267,7 @@ public class ProfileRestResource {
             jsonResponse.put("TransformedXml", servletBaseURL + "/temp/" + transformOutput.get("TransformedDataFile"));
             jsonResponse.put("status","OK");
         } catch (JSONException e) {
-            sLog.severe("Error preparing JSON response data: " + e.getMessage());
+            sLog.error("Error preparing JSON response data: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error preparing JSON response data: " + e.getMessage()).build(); 
         }
 				
@@ -386,7 +387,7 @@ public class ProfileRestResource {
 		try {
 			JSONObject profileObj = new JSONObject(profileJson);
 			profileXml = profileObj.getString("profile");
-			sLog.fine("Handling save request for profile name <" + profileName + "> for template <" 
+			sLog.debug("Handling save request for profile name <" + profileName + "> for template <" 
 					  + templateId + ">:\n" + profileXml);
 		} catch (JSONException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
@@ -505,7 +506,16 @@ public class ProfileRestResource {
     	JSONArray profileArray = new JSONArray();
     	if(profiles != null) {
     		for(Profile p : profiles) {
-        		profileArray.put(p.getName());
+    			JSONObject profileItem = new JSONObject();
+    			try {
+    				profileItem.put("name", p.getName());
+    				profileItem.put("public", p.getPublic());
+    				profileArray.put(profileItem);
+    			} catch(JSONException e) {
+    				sLog.debug("Error adding profile name <{}> to JSON " +
+    						"object. Ignoring this profile ", p.getName());
+    			}
+    			
         	}	
     	}
     	JSONObject jsonResponse = new JSONObject();
@@ -541,8 +551,10 @@ public class ProfileRestResource {
     	// doesn't exist)...
     	if(profiles != null) {
 	    	for(Profile p : profiles) {
-	    		profileNames.append(p.getName());
-	    		profileNames.append("\n");
+	    		profileNames.append(p.getName() + " (");
+	    		profileNames.append(
+	    				(p.getPublic() == true) ? "public" : "private");
+	    		profileNames.append(")\n");
 	    	}
     	}
     	return Response.ok(profileNames.toString(), MediaType.TEXT_PLAIN).build();
@@ -561,7 +573,7 @@ public class ProfileRestResource {
         @PathParam("fileId") String pFileId,
         @Context HttpServletRequest pRequest) {
     	
-    	sLog.fine("Request to get application input file with ID: " + pFileId);
+    	sLog.debug("Request to get application input file with ID: " + pFileId);
     	
     	String fileDirPath = _context.getRealPath("temp");
     	final File dataFile = new File(fileDirPath + File.separator + "output_xml_" + pFileId + ".xml");

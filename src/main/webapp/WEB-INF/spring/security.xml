@@ -14,8 +14,10 @@
 	
 	<http auto-config="true">
 		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
-		<form-login default-target-url='/profiles/' 
-		            always-use-default-target='false'/>
+		<form-login default-target-url="/profiles/" 
+		            login-page="/profiles/signin" 
+		            always-use-default-target="false"
+		            authentication-failure-url="/profiles/signin" />
 		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
 	</http>
 	

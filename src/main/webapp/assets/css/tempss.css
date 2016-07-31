@@ -42,12 +42,25 @@ body {
 	color: #888;
 }
 
+.profile-type {
+	display: inline-block;
+	width: 40px;
+	max-width: 40px;
+}
+
 .profile-item {
 	padding: 8px 12px;
 }
 
 .profile-item a {
-	font-weight: 600;
+	font-weight: 400;
+	text-decoration: none;
+	display: inline-block;
+	max-width: 200px;
+}
+
+.profile-item icon {
+	font-weight: 400;
 	text-decoration: none;
 }
 

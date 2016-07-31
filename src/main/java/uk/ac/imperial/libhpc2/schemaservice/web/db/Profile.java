@@ -54,7 +54,7 @@ public class Profile {
 	private String _templateId;
 	private String _profileXml;
 	private boolean _public;
-	private TempssUser _owner;
+	private String _owner;
 	
 	public Profile() {};
 	
@@ -66,6 +66,11 @@ public class Profile {
 		this._name = (String)pData.get("name");
 		this._templateId = (String)pData.get("templateId");
 		this._profileXml = (String)pData.get("profileXml");
+		this._owner = (String)pData.get("owner");
+		this._public = false;
+		if(((Integer)pData.get("public")) == 1) {
+			this._public = true;
+		}
 	}
 	
 	public int getId() {
@@ -108,11 +113,11 @@ public class Profile {
 		this._public = pPublic;
 	}
 	
-	public TempssUser getOwner() {
+	public String getOwner() {
 		return this._owner;
 	}
 	
-	public void setOwner(TempssUser pOwner) {
+	public void setOwner(String pOwner) {
 		this._owner = pOwner;
 	}
 }

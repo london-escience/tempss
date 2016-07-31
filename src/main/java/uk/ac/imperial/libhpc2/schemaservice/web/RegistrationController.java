@@ -119,4 +119,17 @@ public class RegistrationController {
 		
         return mav;
 	}
+	
+	@RequestMapping(value="/signin", method=RequestMethod.GET)
+	public ModelAndView signinForm(HttpServletRequest pRequest) {
+		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+		
+		ModelAndView mav = new ModelAndView("jsp/signin");
+		mav.addObject("_csrf", token);
+		mav.addObject("tempssUser", new TempssUser());
+        
+        return mav;
+	}
 }
