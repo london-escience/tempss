@@ -85,7 +85,7 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		rowParams.put("templateId", pProfile.getTemplateId());
 		rowParams.put("profileXml", pProfile.getProfileXml());
 		rowParams.put("public", new Boolean(pProfile.getPublic()).toString());
-		rowParams.put("owner", pProfile.getOwner().getUsername());
+		rowParams.put("owner", pProfile.getOwner());
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
