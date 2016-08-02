@@ -12,12 +12,17 @@
     	<b:property name="useReferer" value="true"/>
 	</b:bean>
 	
+	<b:bean id="tempssAuthFailureHandler" 
+	        class="uk.ac.imperial.libhpc2.schemaservice.security.TempssAuthFailureHandler">
+	</b:bean>
+	
 	<http auto-config="true">
 		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
 		<form-login default-target-url="/profiles/" 
 		            login-page="/profiles/signin" 
 		            always-use-default-target="false"
-		            authentication-failure-url="/profiles/signin" />
+		            authentication-failure-handler-ref="tempssAuthFailureHandler" />
+		     <!-- authentication-failure-url="/profiles/signin"  -->
 		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
 	</http>
 	
