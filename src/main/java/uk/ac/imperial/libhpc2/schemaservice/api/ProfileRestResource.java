@@ -356,6 +356,14 @@ public class ProfileRestResource {
 
     	TempssUser user = getAuthenticatedUser();
     	
+    	// Check that the user is authenticated
+		if(user == null) {
+			String responseText = "{\"status\":\"ERROR\", "
+					+ "\"code\":\"PERMISSION_DENIED\", \"error\":" +
+					"\"You must be signed in to save a profile.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
+		}
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Check the specified template exists, if so, save the 
@@ -381,14 +389,18 @@ public class ProfileRestResource {
 		}
 
     	String profileXml = "";
+    	int profilePublic = 0;
     	JSONObject jsonResponse = new JSONObject();
  
     	// Get the profile XML string from the incoming request data
 		try {
 			JSONObject profileObj = new JSONObject(profileJson);
 			profileXml = profileObj.getString("profile");
+			if(profileObj.getBoolean("profilePublic")) {
+				profilePublic = 1;
+			}
 			sLog.debug("Handling save request for profile name <" + profileName + "> for template <" 
-					  + templateId + ">:\n" + profileXml);
+					  + templateId + "> with public flag <" + profilePublic + ">:\n" + profileXml);
 		} catch (JSONException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
@@ -398,6 +410,8 @@ public class ProfileRestResource {
 		profileData.put("name", profileName);
 		profileData.put("templateId", templateId);
 		profileData.put("profileXml", profileXml);
+		profileData.put("public", profilePublic);
+		profileData.put("owner", user.getUsername());
 		Profile profile = new Profile(profileData);
 		profileDao.add(profile);
 		sLog.info("The value of profileDao is: " + profileDao);
@@ -436,6 +450,15 @@ public class ProfileRestResource {
         @Context HttpServletRequest pRequest) {
     
     	TempssUser user = getAuthenticatedUser();
+    	
+    	// Check that the user is authenticated
+		if(user == null) {
+			String responseText = "{\"status\":\"ERROR\", "
+					+ "\"code\":\"PERMISSION_DENIED\", \"error\":" +
+					"\"You do not have permission to delete the profile with "
+					+ "the specified name <" + profileName + ">.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
+		}
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -510,6 +533,12 @@ public class ProfileRestResource {
     			try {
     				profileItem.put("name", p.getName());
     				profileItem.put("public", p.getPublic());
+    				if(user == null) {
+    					profileItem.put("owner", false);
+    				}
+    				else {
+    					profileItem.put("owner", p.getOwner().equals(user.getUsername()));
+    				}
     				profileArray.put(profileItem);
     			} catch(JSONException e) {
     				sLog.debug("Error adding profile name <{}> to JSON " +
