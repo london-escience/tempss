@@ -68,9 +68,12 @@ public class Profile {
 		this._profileXml = (String)pData.get("profileXml");
 		this._owner = (String)pData.get("owner");
 		this._public = false;
-		if(((Integer)pData.get("public")) == 1) {
-			this._public = true;
+		if(pData.containsKey("public")) {
+			if(((Integer)pData.get("public")) == 1) {
+				this._public = true;
+			}	
 		}
+		
 	}
 	
 	public int getId() {
