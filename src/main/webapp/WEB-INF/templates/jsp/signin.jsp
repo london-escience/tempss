@@ -63,7 +63,7 @@
 				  <form:errors/>
 				  
 				  <div class="form-group">
-				    <form:label path="username" for="username" cssClass="col-sm-3 control-label">Username</form:label>
+				    <form:label path="username" for="username" value="<c:out value="${sessionScope.PREVIOUS_USERNAME}"/>" cssClass="col-sm-3 control-label">Username</form:label>
 				    <div class="col-sm-5">
 				      <form:input path="username" class="form-control" placeholder="Select a username"/>
 				    </div>
