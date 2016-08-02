@@ -76,6 +76,10 @@ body {
 	cursor: pointer;
 }
 
+.profile-item .no-pointer {
+	cursor: default;
+}
+
 #editing-profile-name {
 	color: #777;
 }

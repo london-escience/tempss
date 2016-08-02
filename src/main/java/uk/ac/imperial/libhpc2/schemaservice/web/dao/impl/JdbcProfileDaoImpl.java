@@ -80,11 +80,12 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	
 	@Override
 	public int add(Profile pProfile) {
+		boolean pub = new Boolean(pProfile.getPublic());
 		Map<String,String> rowParams = new HashMap<String, String>(5);
 		rowParams.put("name", pProfile.getName());
 		rowParams.put("templateId", pProfile.getTemplateId());
 		rowParams.put("profileXml", pProfile.getProfileXml());
-		rowParams.put("public", new Boolean(pProfile.getPublic()).toString());
+		rowParams.put("public", (pub) ? "1" : "0");
 		rowParams.put("owner", pProfile.getOwner());
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
