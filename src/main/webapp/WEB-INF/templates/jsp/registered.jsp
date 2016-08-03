@@ -1,3 +1,6 @@
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,17 +11,15 @@
     <meta name="author" content="TemPSS Project Team">
     <!-- <link rel="icon" href="../../favicon.ico">  -->
 
-	{% block title %}
-	{% endblock title %}
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../temp/css/bootstrap.min.css">  -->
+	<title>TemPSS :: Profile Manager :: Registration</title>
+	
+	<!-- Bootstrap core CSS -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  -->
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
 
     <!-- Custom styles for this template -->
     <link href="../assets/css/tempss.css" rel="stylesheet">
-    {% block style %}
-    {% endblock %}
+    <link rel="stylesheet" href="../assets/css/tree-style.css" media="all" />
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -51,31 +52,65 @@
 
     <div class="container">
 
-      {% block content %}
-    
-      {% endblock content %}
-
+	<div class="row">
+		<div class="col-md-3"></div>
+		<div class="col-md-6" style="margin-top: 200px;">
+			<div class="alert alert-success">
+				<b style="font-size:24px;">Registration successful</b>
+				<br/><br/>
+				<p style="font-size:16px;">You have been successfully 
+				registered with TemPSS.</p>
+				<br/>
+				<p style="font-size:16px;">Thanks for signing up. You can now 
+				create and store your own public and private profiles.</p>
+			</div>
+			
+			<div><h5>
+				<a href="/tempss/profiles">Return to profile manager</a>
+			</h5></div>
+		</div>
+		<div class="col-md-3"></div>
     </div><!-- /.container -->
 
-	{% block modals %}
-	
-	{% endblock modals %}
-
-        <!-- Bootstrap core JavaScript
+    <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <!-- <script src="../temp/js/jquery-1.11.0.min.js"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>  -->
+    <script src="../assets/js/jquery-1.11.0.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <!-- <script src="../temp/js/bootstrap.min.js"></script> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>  -->
+    <script src="../assets/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>  -->
     
     <!-- Local script file for the template manager app -->
     <script src="../assets/js/tempss-manager.js"></script>
-    {% block script %}
-    {% endblock %}
+	<script type="text/javascript">
+	$(document).ready( function() {
+		log("Document ready...");
+		
+		$('#registration-form').submit(function(e) {
+			//submitRegistrationForm(e);
+		});
+	});
+	
+	function submitRegistrationForm(e) {
+		log('Request to submit registration form...');
+		e.preventDefault();
+		var formData = $('#registration-form').serialize();
+		$.ajax({
+			url: '/tempss/profiles/register',
+			method: 'POST',
+			data: formData
+		}).done(function() {
+			// Success function
+			log("Form submission successful...");
+		}).fail(function() {
+			// Error function
+			log("Form submission error...");
+		})
+	}
+	
+	</script>
   </body>
 </html>
-

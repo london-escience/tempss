@@ -615,6 +615,8 @@ function processJobProfile(treeRootNode, templateId) {
     // var componentName = $("input[name = 'componentname']").val();
     // formData.append('componentname', componentName);
 
+    var csrfToken = $('input[name="_csrf"]').val();
+
     $.ajax({
         url: '/tempss/api/profile/' + templateId + '/convert',
         data: formData,
@@ -622,6 +624,9 @@ function processJobProfile(treeRootNode, templateId) {
         contentType: false,
         type: 'POST',
         dataType: 'json',
+        beforeSend: function(jqxhr, settings) {
+        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        },
         success: function (data) {
         	// If the request returns successfully we'll
         	// have some JSON data containing a group of URLs

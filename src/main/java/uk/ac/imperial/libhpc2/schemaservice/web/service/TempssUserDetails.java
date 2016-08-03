@@ -43,27 +43,42 @@
  *     and Sustainability of HPC Software (EP/K038788/1).
  */
 
-package uk.ac.imperial.libhpc2.schemaservice.web.dao;
+package uk.ac.imperial.libhpc2.schemaservice.web.service;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
-public interface ProfileDao {
+public class TempssUserDetails extends User {
+	
+	private TempssUser _user;
+	
+	public TempssUserDetails(TempssUser pUser, 
+			Collection<? extends GrantedAuthority> pAuthorities) {
+		super(pUser.getUsername(), pUser.getPassword(),  
+              true, true, true, true, pAuthorities);
+		this._user = pUser;
+	}
+		
+	public TempssUserDetails(String pUsername, String pPassword,  
+                      boolean pEnabled, boolean pAccountNonExpired, 
+					  boolean pCredentialsNonExpired, boolean pAccountNonLocked,
+					  Collection<? extends GrantedAuthority> pAuthorities,
+					  String pEmail, String pFirstname, String pLastname) {
+		
+		super(pUsername, pPassword, true, true, true, true, pAuthorities);
+		this._user = new TempssUser(pUsername, pPassword, pEmail, pFirstname, 
+				                    pLastname);
+	}
+	
+	public TempssUser getUser() {
+		return _user;
+	}
 
-	public int add(Profile pProfile);
-	
-	public int delete(String pTemplateId, String pProfileName, 
-			          TempssUser pUser);
-	
-	public List<Profile> findAll(TempssUser pUser);
-	
-	public Profile findByName(String pName, TempssUser pUser);
-	
-	public List<Profile> findByTemplateId(String pTemplateId, TempssUser pUser);
-	
-	public boolean profileNameAvailable(String pName, TempssUser pUser);
+	public void setUser(TempssUser pUser) {
+		this._user = pUser;
+	}
 }

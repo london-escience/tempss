@@ -1,0 +1,44 @@
+<b:beans xmlns="http://www.springframework.org/schema/security"
+		 xmlns:b="http://www.springframework.org/schema/beans"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <b:bean id="bCryptPasswordEncoder" 
+       class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+	<b:bean id="logoutSuccessHandler" 
+	        class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+    	<b:property name="useReferer" value="true"/>
+	</b:bean>
+	
+	<b:bean id="tempssAuthFailureHandler" 
+	        class="uk.ac.imperial.libhpc2.schemaservice.security.TempssAuthFailureHandler">
+	</b:bean>
+	
+	<b:bean id="messageSource"
+	         class="org.springframework.context.support.ResourceBundleMessageSource">
+	    <b:property name="basenames">
+	        <b:list>
+                <b:value>springSecurityMessages</b:value>
+            </b:list>
+	    </b:property>
+	</b:bean>
+	
+	<http auto-config="true">
+		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
+		<form-login default-target-url="/profiles/" 
+		            login-page="/profiles/signin" 
+		            always-use-default-target="false"
+		            authentication-failure-handler-ref="tempssAuthFailureHandler" />
+		     <!-- authentication-failure-url="/profiles/signin"  -->
+		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
+	</http>
+	
+	<authentication-manager>
+		<authentication-provider user-service-ref="tempssUserDetailsService">
+		  <password-encoder ref="bCryptPasswordEncoder" />
+		</authentication-provider>
+	</authentication-manager>
+
+</b:beans>
