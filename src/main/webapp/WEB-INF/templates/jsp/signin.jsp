@@ -1,5 +1,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="sec"  uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="c"    uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn"    uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,14 +60,20 @@
 			<div class="well">
 			  <h3 style="padding-bottom: 20px;">TemPSS Sign In</h3>
 				<form:form commandName="tempssUser" class="form-horizontal" 
-				           id="signin-form">
+				           id="signin-form" action="/tempss/login" method="POST">
 				           
 				  <form:errors/>
+				  <div class="row">
+				    <div class="col-sm-3"></div>
+				    <div id="signin-errors" class="text-danger col-sm-5">${fn:escapeXml(sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message)}</div>
+				    <div class="col-sm-3"></div>
+				    <c:remove var = "SPRING_SECURITY_LAST_EXCEPTION" scope = "session" />
+				  </div>
 				  
 				  <div class="form-group">
-				    <form:label path="username" for="username" value="<c:out value="${sessionScope.PREVIOUS_USERNAME}"/>" cssClass="col-sm-3 control-label">Username</form:label>
+				    <form:label path="username" for="username" cssClass="col-sm-3 control-label">Username</form:label>
 				    <div class="col-sm-5">
-				      <form:input path="username" class="form-control" placeholder="Select a username"/>
+				      <form:input path="username" value="${fn:escapeXml(sessionScope.PREVIOUS_USERNAME)}" class="form-control" placeholder="Select a username"/>
 				    </div>
 				    <div class="col-sm-3">  
 				      <form:errors path="username" cssClass="form-error text-danger"/>

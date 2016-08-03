@@ -16,6 +16,15 @@
 	        class="uk.ac.imperial.libhpc2.schemaservice.security.TempssAuthFailureHandler">
 	</b:bean>
 	
+	<b:bean id="messageSource"
+	         class="org.springframework.context.support.ResourceBundleMessageSource">
+	    <b:property name="basenames">
+	        <b:list>
+                <b:value>springSecurityMessages</b:value>
+            </b:list>
+	    </b:property>
+	</b:bean>
+	
 	<http auto-config="true">
 		<intercept-url pattern="/admin*" access="hasRole('ADMIN')"/>
 		<form-login default-target-url="/profiles/" 
