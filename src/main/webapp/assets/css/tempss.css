@@ -107,3 +107,9 @@ body {
 
 #login-form button {
 	width: 100%;
+}
+
+#signin-errors {
+	height: 50px;
+	padding-bottom: 30px;
+}
