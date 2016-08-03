@@ -136,6 +136,28 @@
 			<artifactId>spring-security-taglibs</artifactId>
 			<version>4.1.1.RELEASE</version>
 		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-servlet</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-jsp</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-template</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		 -->
+		<dependency>
+			<groupId>jstl</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>tempss</finalName>
@@ -159,6 +181,7 @@
 					<include>profiles.db</include>
 					<include>log4j.xml</include>
 					<include>application.properties</include>
+					<include>springSecurityMessages.properties</include>
 				</includes>
 			</resource>
 		</resources>
