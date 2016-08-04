@@ -92,11 +92,7 @@ public class RootController {
     						  HttpServletRequest pRequest) {
 		
 		sLog.debug("Processing root controller request for access to /");
-		
-		//User activeUser = null;
-		//Authentication auth =
-		//		SecurityContextHolder.getContext().getAuthentication();
-		
+				
 		TempssUserDetails userDetails = null;
 		TempssUser user = null;
 		if(principal != null) {
@@ -153,6 +149,27 @@ public class RootController {
 	    return "redirect:/tempss/profiles";
 	}
 	
+	@RequestMapping("/about")
+	public ModelAndView about(Model pModel) {
+	
+		ModelAndView mav = new ModelAndView("about");
+		return mav;
+	}
+	
+	@RequestMapping("/docs")
+	public ModelAndView docs(Model pModel) {
+	
+		ModelAndView mav = new ModelAndView("docs");
+		return mav;
+	}
+	
+	@RequestMapping("/contact")
+	public ModelAndView contact(Model pModel) {
+	
+		ModelAndView mav = new ModelAndView("contact");
+		return mav;
+	}
+
 	@RequestMapping("/login-test")
 	public ModelAndView loginTest(Model pModel,
 								  @AuthenticationPrincipal Principal principal){
