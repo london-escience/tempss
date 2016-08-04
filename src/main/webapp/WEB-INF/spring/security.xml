@@ -39,6 +39,10 @@
 		<authentication-provider user-service-ref="tempssUserDetailsService">
 		  <password-encoder ref="bCryptPasswordEncoder" />
 		</authentication-provider>
+		<ldap-authentication-provider user-search-filter="(cn={0})"
+                                  user-search-base="dc=ic,dc=ac,dc=uk"/>
 	</authentication-manager>
-
+	
+	<ldap-server root="dc=ic,dc=ac,dc=uk"/>
+    
 </b:beans>
