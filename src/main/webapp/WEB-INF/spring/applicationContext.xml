@@ -25,10 +25,11 @@
     
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
 	    <property name="driverClassName" value="org.sqlite.JDBC" />
-	    <!-- <property name="url" value="jdbc:sqlite::resource:profiles.db" /> -->
+	    <property name="url" value="jdbc:sqlite::resource:profiles.db" />
 	    <!-- Use DB in a directory outside the main tomcat app tree when
-	         testing/debugging via Eclipse. -->
+	         testing/debugging via Eclipse.
 	    <property name="url" value="jdbc:sqlite:/tmp/profiles.db" />
+            -->
 	    <property name="initialSize" value="1" />
 	    <!--  <property name="maxTotal" value="1" />  REQUIRED INSTEAD OF maxActive FOR DBCP2-->
 	    <property name="maxActive" value="1" /> 
