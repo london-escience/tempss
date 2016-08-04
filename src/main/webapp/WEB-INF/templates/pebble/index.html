@@ -85,6 +85,7 @@
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
 					    </div>
 					    <div style="float: left; padding-bottom: 30px;">
+					        <button class="btn btn-info" id="generate-input-file-btn">Generate app input file</button>
 					    	<span class="loading" id="process-profile-loading" style="padding-left: 8px; display: none;">
 					    	  <img src="../assets/img/loading.gif"/>
 				      	      <span>Processing profile...</span>
@@ -92,7 +93,20 @@
 					    </div>
 					    <div style="float: right; padding-bottom: 30px;">
 					    	<button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
-					    	<button class="btn btn-success" id="generate-input-file-btn">Generate Nektar++ input file</button>
+					    	{% if user != null %}
+                            <span id="save-btn-wrapper">
+                              <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
+                            </span>
+                            {% else %}
+                            <span id="save-btn-wrapper" data-toggle="tooltip" 
+                                  data-placement="top" 
+                                  title="You must be signed in to save a profile">
+                              <button class="btn btn-success" id="save-as-profile-btn" 
+                                      disabled="disabled">Save as profile
+                              </button>
+                            </span>
+                            {% endif %}
+					    	
 					    </div>
 					</div>
 				</div>
@@ -127,8 +141,8 @@
 		          <input type="checkbox" id="profile-public"><span>Make profile public </span><span class="text-muted">(profile will be visible to all TemPSS users)</span>
 		        </label>
 		      </div>
-		     </div>
-		   </div>
+		    </div>
+		  </div>
 		  <div class="form-group">
 		  	<div id="profile-save-errors" class="col-sm-offset-3 col-sm-8 text-danger"></div>
 		  </div>
