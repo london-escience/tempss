@@ -70,6 +70,7 @@
 			</h5></div>
 		</div>
 		<div class="col-md-3"></div>
+	</div>
     </div><!-- /.container -->
 
     <!-- Bootstrap core JavaScript
