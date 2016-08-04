@@ -52,7 +52,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +90,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -290,6 +288,7 @@ public class ProfileRestResource {
     @GET
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
+    @SuppressWarnings("unchecked")
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
@@ -444,6 +443,7 @@ public class ProfileRestResource {
     @DELETE
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
+    @SuppressWarnings("unchecked")
     public Response deleteProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,

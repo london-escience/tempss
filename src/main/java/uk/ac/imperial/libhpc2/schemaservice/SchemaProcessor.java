@@ -50,22 +50,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -75,10 +69,8 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.dom4j.DocumentException;
-import org.json.JSONObject;
 
 public class SchemaProcessor {
     /**
@@ -113,7 +105,7 @@ public class SchemaProcessor {
 
         sLog.fine("ServletContext: " + _context);
         String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
-        String verboseName = pComponentMetadata.getName();
+        //String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
 
         // Construct full path to file
@@ -317,7 +309,7 @@ public class SchemaProcessor {
         // Get path to web-inf folder
         String filePath = _context.getRealPath("/temp");
         File tempDir = new File(filePath);
-        boolean isSuccess = tempDir.mkdirs();
+        //boolean isSuccess = tempDir.mkdirs();
 
         try {
             File file = new File(tempDir, basicXmlFileName);

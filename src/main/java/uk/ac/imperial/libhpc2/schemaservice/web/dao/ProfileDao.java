@@ -47,8 +47,6 @@ package uk.ac.imperial.libhpc2.schemaservice.web.dao;
 
 import java.util.List;
 
-import org.springframework.security.core.AuthenticationException;
-
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
