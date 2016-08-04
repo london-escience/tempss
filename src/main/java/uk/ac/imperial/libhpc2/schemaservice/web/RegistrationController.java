@@ -60,8 +60,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
@@ -69,12 +67,6 @@ import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 public class RegistrationController {
 
 	private static final Logger sLog = LoggerFactory.getLogger(RegistrationController.class.getName());
-	
-	// For debugging purposes, we get access to the pebble engine and
-	// empty the template cache on each call so that we don't have to
-	// restart the tomcat server to rebuild a changed template on a reload
-	@Autowired
-	private PebbleEngine pebbleEngine;
 
 	@Autowired
 	private TempssUserValidator tempssUserValidator;

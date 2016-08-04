@@ -162,6 +162,7 @@ public class SchemaProcessorServlet extends HttpServlet {
      * @throws ServletException if problem
      * @throws IOException if problem
      */
+    @SuppressWarnings("unchecked")
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 

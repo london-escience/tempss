@@ -45,16 +45,10 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;

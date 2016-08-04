@@ -55,14 +55,11 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 public class JdbcTempssUserDaoImpl implements TempssUserDao {
