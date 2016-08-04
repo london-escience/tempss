@@ -54,9 +54,17 @@
 
 	<div class="row">
 		<div class="col-md-2"></div>
-		<div class="col-md-9">
+		<div class="col-md-8">
 			<div class="well">
 			  <h3 style="padding-bottom: 20px;">TemPSS User Registration</h3>
+			  <p class="text-info">Registering for a TemPSS account will allow you  
+			    to save your own profiles, either as private profiles that only you have 
+			    access to, or as public profiles that are available to all registered and 
+			    unregistered TemPSS users.</p>
+			    
+		      <p class="text-info">By saving your profiles, you can avoid the  
+		         time consuming process of creating new profiles from scratch  
+		         when you want to build a new input file.</p> 
 			  <h4 style="padding-bottom: 20px;">Create an account</h4>
 				<form:form commandName="tempssUser" class="form-horizontal" 
 				           id="registration-form">
@@ -65,7 +73,7 @@
 				  
 				  <div class="form-group">
 				    <form:label path="username" for="username" cssClass="col-sm-3 control-label">Username</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <form:input path="username" class="form-control" placeholder="Select a username"/>
 				    </div>
 				    <div class="col-sm-3">  
@@ -74,7 +82,7 @@
 				  </div>
 				  <div class="form-group">
 				    <form:label path="email" for="email" cssClass="col-sm-3 control-label">Email</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <form:input path="email" type="email" class="form-control" placeholder=""/>
 				    </div>
 				    <div class="col-sm-3">  
@@ -84,7 +92,7 @@
 				  <hr/>
 				  <div class="form-group">
 				    <form:label path="firstname" for="firstname" cssClass="col-sm-3 control-label">Firstname</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <form:input path="firstname" class="form-control" placeholder=""/>
 				    </div>
 				    <div class="col-sm-3">  
@@ -93,7 +101,7 @@
 				  </div>
 				  <div class="form-group">
 				    <form:label path="lastname" for="lastname" cssClass="col-sm-3 control-label">Surname</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <form:input path="lastname" class="form-control" placeholder=""/>
 				    </div>
 				    <div class="col-sm-3">  
@@ -103,7 +111,7 @@
 				  <hr/>
 				  <div class="form-group">
 				    <form:label path="password" for="password" cssClass="col-sm-3 control-label">Password</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <input name="password" type="password" class="form-control" placeholder=""/>
 				    </div>
 				    <div class="col-sm-3">
@@ -112,7 +120,7 @@
 				  </div>
 				  <div class="form-group">
 				    <form:label path="password2" for="password2" cssClass="col-sm-3 control-label">Confirm Password</form:label>
-				    <div class="col-sm-5">
+				    <div class="col-sm-6">
 				      <input name="password2" type="password" class="form-control" placeholder=""/>
 				    </div>
 				    <div class="col-sm-3">
@@ -120,6 +128,15 @@
 				    </div>
 				  </div>
 				  <sec:csrfInput />
+				  <div class="form-group">
+				    <div class="col-sm-3"></div>
+				    <div class="col-sm-6">
+				      <p class="text-info">By registering for a TemPSS  
+				      account you confirm that you have read and accept our 
+				      <a href="/tempss/privacy">privacy policy</a>.
+				    </div>
+				    <div class="col-sm-3"></div>
+				  </div>
 				  <div class="form-group text-right">
 				    <div class="col-sm-3"></div>
 				    <div class="col-sm-8">
@@ -128,6 +145,7 @@
 				  </div>
 			    </form:form>
 			</div>
+			<div class="col-md-2"></div>
 		</div>
 	</div>
 
