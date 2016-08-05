@@ -206,6 +206,7 @@
 					<include>log4j.xml</include>
 					<include>application.properties</include>
 					<include>springSecurityMessages.properties</include>
+					<include>users-test.ldif</include>
 				</includes>
 			</resource>
 		</resources>
