@@ -89,6 +89,8 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 		rowParams.put("email", pUser.getEmail());
 		rowParams.put("firstname", pUser.getFirstname());
 		rowParams.put("lastname", pUser.getLastname());
+		rowParams.put("locked", (pUser.getLocked() == true) ? "1" : "0");
+		rowParams.put("activated", (pUser.getActivated() == true) ? "1" : "0");
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
@@ -109,15 +111,18 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 					                      (String)data.get("password"),
 					                      (String)data.get("email"),
 					                      (String)data.get("firstname"),
-					                      (String)data.get("lastname"));
+					                      (String)data.get("lastname"),
+					                      Boolean.parseBoolean((String)data.get("locked")),
+					                      Boolean.parseBoolean((String)data.get("activated")));
 			users.add(u);
 		}
 		
 		sLog.debug("Found <{}> users", users.size());
 		for(TempssUser u : users) {
-			sLog.debug("User <{}>: Email: {}, Firstname: {}, Lastname: {}", 
+			sLog.debug("User <{}>: Email: {}, Firstname: {}, Lastname: {}, "
+					+ "Locked <{}>, Activated: <{}>", 
 					u.getUsername(), u.getEmail(), u.getFirstname(), 
-					u.getLastname());
+					u.getLastname(), u.getLocked(), u.getActivated());
 		}
 		
 		return users;
@@ -132,11 +137,23 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 		
 		if(users.size() == 1) {
 			Map<String,Object> userData = users.get(0);
+			boolean locked = true;
+			boolean activated = false;
+			Object lockedObj = userData.get("locked");
+			Object activatedObj = userData.get("activated");
+			if( (lockedObj != null) && (((Integer)lockedObj) == 0)) {
+				locked = false;
+			}
+			if( (activatedObj != null) && (((Integer)activatedObj) == 1)) {
+				activated = true;
+			}
 			user = new TempssUser((String)userData.get("username"),
 					(String)userData.get("password"),
 					(String)userData.get("email"),
 					(String)userData.get("firstname"),
-					(String)userData.get("lastname"));
+					(String)userData.get("lastname"),
+					locked,
+                    activated);
 		}
 		else if(users.size() > 1) {
 			sLog.error("ERROR: More than 1 user with name <{}> found.", 

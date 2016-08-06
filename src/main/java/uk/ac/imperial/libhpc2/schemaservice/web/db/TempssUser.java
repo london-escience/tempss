@@ -79,15 +79,40 @@ public class TempssUser {
 	 */
 	private boolean locked;
 	
+	/**
+	 * true (1 in DB) if the user has been activated, false (0 in DB) otherwise. 
+	 * This is used to determine whether a user has activated their account.
+	 * Users who register via the registration form as local users are 
+	 * activated by default. Users who sign in via LDAP are not activated until
+	 * they agree to the details on the activation page that is shown until
+	 * their account is activated.
+	 */
+	private boolean activated;
+	
 	public TempssUser() { } 
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
             String pFirstname, String pLastname) {
-		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "");
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
+			 false, false);
 	}
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
-                      String pFirstname, String pLastname, String pPassword2) { 
+            String pFirstname, String pLastname, boolean pActivated) {
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
+			 false, pActivated);
+	}
+	
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+            String pFirstname, String pLastname,
+            boolean pLocked, boolean pActivated) {
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
+			 pLocked, pActivated);
+	}
+	
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+                      String pFirstname, String pLastname, String pPassword2,
+                      boolean pLocked, boolean pActivated) { 
 		this.username = pUsername;
 		this.password = pPassword;
 		this.email = pEmail;
@@ -95,6 +120,7 @@ public class TempssUser {
 		this.lastname = pLastname;
 		this.password2 = pPassword2; // for password verification
 		this.locked = false;
+		this.activated = false;
 	}
 
 	public String getUsername() {
@@ -151,5 +177,13 @@ public class TempssUser {
 
 	public void setLocked(boolean pLocked) {
 		this.locked = pLocked;
+	}
+	
+	public boolean getActivated() {
+		return this.activated;
+	}
+
+	public void setActivated(boolean pActivated) {
+		this.activated = pActivated;
 	}
 }

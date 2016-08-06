@@ -21,7 +21,7 @@ public class TempssLdapContextMapper implements UserDetailsContextMapper {
 		String password = "";
 		String email = pCtx.getStringAttribute("mail");
 		String firstname = pCtx.getStringAttribute("givenName");
-		String lastname = pCtx.getStringAttribute("sn");;
+		String lastname = pCtx.getStringAttribute("sn");
 		
 		TempssUser user = new TempssUser(pUsername, password, email, 
 				                         firstname, lastname);
