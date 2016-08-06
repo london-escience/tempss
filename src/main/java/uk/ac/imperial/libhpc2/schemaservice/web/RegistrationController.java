@@ -103,6 +103,10 @@ public class RegistrationController {
 			return errorMav;
 		}
 		
+		// Since we're registering a user manually and the user has agreed to 
+		// register, we set them to be activated by default
+		pUser.setActivated(true);
+		
 		// Now store the user to the DB
 		tempssUserDao.add(pUser);
 		
