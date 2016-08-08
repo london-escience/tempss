@@ -173,6 +173,8 @@ public class RootController {
 	@RequestMapping("/activation")
 	public ModelAndView activation(Model pModel) {
 	
+		pebbleEngine.getTemplateCache().invalidateAll();
+		
 		ModelAndView mav = new ModelAndView("activation");
 		return mav;
 	}
