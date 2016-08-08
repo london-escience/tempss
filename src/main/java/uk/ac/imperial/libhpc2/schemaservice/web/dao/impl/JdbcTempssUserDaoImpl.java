@@ -45,6 +45,7 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 		// Hash the password to store it in the DB
 		String hashedPassword = passwordEncoder.encode(pUser.getPassword());
 		
-		Map<String,String> rowParams = new HashMap<String, String>(2);
+		Map<String,Object> rowParams = new HashMap<String, Object>(8);
 		rowParams.put("username", pUser.getUsername());
 		rowParams.put("password", hashedPassword);
 		rowParams.put("email", pUser.getEmail());
@@ -91,6 +92,16 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 		rowParams.put("lastname", pUser.getLastname());
 		rowParams.put("locked", (pUser.getLocked() == true) ? "1" : "0");
 		rowParams.put("activated", (pUser.getActivated() == true) ? "1" : "0");
+		if(pUser.getActivationTime() != null) {
+			// Don't need to call usingColumns since we're using all cols
+			// Set reg time to same as activation time it may be unset
+			rowParams.put("regtime", pUser.getActivationTime());
+			rowParams.put("acttime", pUser.getActivationTime());
+		}
+		else {
+			_insertProfile.usingColumns("username", "password", "email", 
+					"firstname", "lastname", "locked", "activated");
+		}
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
@@ -113,7 +124,9 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 					                      (String)data.get("firstname"),
 					                      (String)data.get("lastname"),
 					                      Boolean.parseBoolean((String)data.get("locked")),
-					                      Boolean.parseBoolean((String)data.get("activated")));
+					                      Boolean.parseBoolean((String)data.get("activated")),
+					                      (Timestamp)data.get("registrationTime"),
+					                      (Timestamp)data.get("activationTime"));
 			users.add(u);
 		}
 		
@@ -153,7 +166,9 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 					(String)userData.get("firstname"),
 					(String)userData.get("lastname"),
 					locked,
-                    activated);
+                    activated,
+                    (Timestamp)userData.get("registrationTime"),
+                    (Timestamp)userData.get("activationTime"));
 		}
 		else if(users.size() > 1) {
 			sLog.error("ERROR: More than 1 user with name <{}> found.", 
