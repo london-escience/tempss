@@ -5,17 +5,101 @@
 {% endblock title %}
 
 {% block style %}
+<style>
+body {
+	padding-bottom: 80px; 
+}
+
+p {
+	font-size: 16px; 
+}
+
+.list-item {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+.list-item span {
+	vertical-align: middle;
+}
+
+.list-item.icon {
+	text-align: right;
+	font-size: 32px;
+}
+
+</style>
 {% endblock style %}
 
 {% block content %}
 
 	<div class="row">
-		<div class="col-md-12">
-			<h1>TemPSS User Activation</h1>
-			<h4>Thanks for signing in to TemPSS. In order to store and publish
-			    your own profiles, you will need to activate your account...
-			</h4>
+	    <div class="col-md-2"></div>
+		<div class="col-md-8">
+			<h1>Welcome to TemPSS</h1>
+			<h2>Templates and Profiles for Scientific Software</h2>
+			<br/>
+			<h4>Hello {{ user.user.firstname }},</h4>
+			<p class="text-muted">Thanks for signing in to TemPSS.  
+			   Since you have signed in via your institutional login, a 
+			   TemPSS account has been pre-configured for you. However, before you can 
+			   use your account, please confirm that you agree to our <a href="/tandc">terms 
+			   and conditions</a> and <a href="/privacy">privacy policy</a>.
+			</p>
+			<br/>
+			<p class="text-muted">Your TemPSS account will allow you to:</p> 			    
 		</div>
+		<div class="col-md-2"></div>
+	</div>
+	<div class="row">
+	    <div class="col-md-2"></div>
+	    <div class="col-md-1 list-item icon text-primary">
+	    	<span><i class="glyphicon glyphicon-floppy-disk"></i></span>
+	    </div>
+	    <div class="col-md-7 list-item text-info">
+	        <p>Save application configurations that you've produced by 
+	           populating a TemPSS template with your own configuration.</p>
+	    </div>
+	    <div class="col-md-2"></div>
+	</div>
+	<div class="row">
+	    <div class="col-md-2"></div>
+	    <div class="col-md-1 list-item icon text-primary">
+	    	<span><i class="glyphicon glyphicon-share"></i></span>
+	    </div>
+	    <div class="col-md-7 list-item text-info">
+	        <p>Share your application configurations with collaborators and 
+	           make them publicly available to other TemPSS users who can 
+	           benefit from the configurations that you've developed.</p>
+	    </div>
+	    <div class="col-md-2"></div>
+	</div>
+	<div class="row">
+	    <div class="col-md-2"></div>
+	    <div class="col-md-1 list-item icon text-primary">
+	    	<span><i class="glyphicon glyphicon-duplicate"></i></span>
+	    </div>
+	    <div class="col-md-7 list-item text-info">
+	        <p>Build up a library of your own partial and complete profiles 
+	           that you can use to help speed up the process of configuring 
+	           applications to support your requirements when running 
+	           computational jobs.</p>
+	    </div>
+	    <div class="col-md-2"></div>
+	</div>
+	<div class="row">
+	    <div class="col-md-2"></div>
+	    <div class="col-md-7 col-md-offset-1">
+	        <form>
+	            <div class="checkbox">
+			        <label>
+			            <input type="checkbox"> I accept the TemPSS <a href="/tandc">terms</a> and <a href="/privacy">privacy policy</a>.
+			        </label>
+			        <button type="submit" class="btn btn-success" style="float:right;">Activate my account</button>
+			    </div>
+	        </form>
+	    </div>
+	    <div class="col-md-2"></div>
 	</div>
 
 {% endblock content %}
