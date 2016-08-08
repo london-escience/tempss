@@ -81,6 +81,8 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	
 	@Override
 	public int add(TempssUser pUser) {
+		_insertProfile = new SimpleJdbcInsert(_jdbcTemplate).withTableName("user").usingGeneratedKeyColumns("id");
+		
 		// Hash the password to store it in the DB
 		String hashedPassword = passwordEncoder.encode(pUser.getPassword());
 		
