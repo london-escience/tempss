@@ -45,6 +45,9 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -104,8 +107,10 @@ public class RegistrationController {
 		}
 		
 		// Since we're registering a user manually and the user has agreed to 
-		// register, we set them to be activated by default
+		// register, we set them to be activated by default and set the 
+		// registration and activation timestamps manually.
 		pUser.setActivated(true);
+		pUser.setActivationTime(new Timestamp(Calendar.getInstance().getTime().getTime()));
 		
 		// Now store the user to the DB
 		tempssUserDao.add(pUser);

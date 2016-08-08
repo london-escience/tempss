@@ -45,6 +45,8 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.db;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -89,38 +91,53 @@ public class TempssUser {
 	 */
 	private boolean activated;
 	
+	private Timestamp registrationTime;
+	
+	private Timestamp activationTime;
+	
 	public TempssUser() { } 
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
             String pFirstname, String pLastname) {
 		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
-			 false, false);
+			 false, false, null, null);
 	}
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
             String pFirstname, String pLastname, boolean pActivated) {
 		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
-			 false, pActivated);
+			 false, pActivated, null, null);
 	}
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
             String pFirstname, String pLastname,
             boolean pLocked, boolean pActivated) {
 		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
-			 pLocked, pActivated);
+			 pLocked, pActivated, null, null);
+	}
+	
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+            String pFirstname, String pLastname, boolean pLocked,
+            boolean pActivated, Timestamp pRegTime, Timestamp pActivationTime) {
+            
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "", 
+				 pLocked, pActivated, pRegTime, pActivationTime);
 	}
 	
 	public TempssUser(String pUsername, String pPassword, String pEmail, 
                       String pFirstname, String pLastname, String pPassword2,
-                      boolean pLocked, boolean pActivated) { 
+                      boolean pLocked, boolean pActivated,
+                      Timestamp pRegTime, Timestamp pActivationTime) { 
 		this.username = pUsername;
 		this.password = pPassword;
 		this.email = pEmail;
 		this.firstname = pFirstname;
 		this.lastname = pLastname;
 		this.password2 = pPassword2; // for password verification
-		this.locked = false;
-		this.activated = false;
+		this.locked = pLocked;
+		this.activated = pActivated;
+		this.registrationTime = pRegTime;
+		this.activationTime = pActivationTime;
 	}
 
 	public String getUsername() {
@@ -186,4 +203,21 @@ public class TempssUser {
 	public void setActivated(boolean pActivated) {
 		this.activated = pActivated;
 	}
+	
+	public Timestamp getRegistrationTime() {
+		return this.registrationTime;
+	}
+
+	public void setRegistrationTime(Timestamp pRegTime) {
+		this.registrationTime = pRegTime;
+	}
+	
+	public Timestamp getActivationTime() {
+		return this.activationTime;
+	}
+
+	public void setActivationTime(Timestamp pActivationTime) {
+		this.activationTime = pActivationTime;
+	}
+	
 }
