@@ -170,23 +170,12 @@ public class RootController {
 		return mav;
 	}
 
-	@RequestMapping("/login-test")
-	public ModelAndView loginTest(Model pModel,
-								  @AuthenticationPrincipal Principal principal){
-		
-		sLog.debug("Processing root controller request for login-test page");
-		
-		User activeUser = (User) ((Authentication) principal).getPrincipal();
-		
-		pebbleEngine.getTemplateCache().invalidateAll();
-		
-        ModelAndView mav = new ModelAndView("login-test");
-        
-        mav.addObject("firstname", "TemPSS");
-        mav.addObject("surname", "Team");
-        mav.addObject("user", activeUser);
-        return mav;
-    }
+	@RequestMapping("/activation")
+	public ModelAndView activation(Model pModel) {
+	
+		ModelAndView mav = new ModelAndView("activation");
+		return mav;
+	}
 	
 	@RequestMapping(value="/*")
     public ModelAndView redirectHome() {
