@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -33,9 +34,13 @@ public class TempssInactiveUserInterceptor extends HandlerInterceptorAdapter {
 			TempssUserDetails userDetails = (TempssUserDetails)auth.getPrincipal();
 			TempssUser user = userDetails.getUser();
 			if(!user.getActivated()) {
+				String tokenKey = CsrfToken.class.getName();
+				CsrfToken token = (CsrfToken)request.getAttribute(tokenKey);
+				
 				sLog.debug("Interceptor handling request from user <{}> who " +
 						"is not activated. Returning activation page view.",
 						user.getUsername());
+				modelAndView.addObject("_csrf", token);
 				modelAndView.setViewName("activation");
 			}
 		}

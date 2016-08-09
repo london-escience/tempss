@@ -47,6 +47,7 @@ package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,6 +189,20 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 				user.getUsername(), user.getEmail());
 		
 		return user;
+	}
+
+	@Override
+	public int activateUser(TempssUser pUser) {
+		Timestamp currentTime = new Timestamp(Calendar.getInstance().getTime().getTime());
+		int rowsAffected = _jdbcTemplate.update("UPDATE user SET activated = 1, acttime = ? WHERE username = ?", 
+				new Object[] {currentTime, pUser.getUsername()});
+		return rowsAffected;
+	}
+
+	@Override
+	public int deactivateUser(TempssUser pUser) {
+		int rowsAffected = _jdbcTemplate.update("UPDATE user SET activated = 0 WHERE username = ?", pUser.getUsername());
+		return rowsAffected;	
 	}
 
 }
