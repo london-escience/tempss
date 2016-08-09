@@ -159,24 +159,27 @@
 			<version>1.2</version>
 		</dependency>
 		<!-- Dependencies added for LDAP -->
-
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-ldap</artifactId>
 			<version>4.1.1.RELEASE</version>
 		</dependency>
+		<!-- Disabling Apache DS server used for testing LDAP support.
 		<dependency>
 			<groupId>org.apache.directory.server</groupId>
 			<artifactId>apacheds-server-jndi</artifactId>
 			<version>1.5.5</version>
 		</dependency>
+		-->
+		<!-- From http://forum.spring.io/forum/spring-projects/security/81005-embedded-ldap-server-not-working-with-apache-ds1-5 -->
+        <!-- Required by ApacheDS, but not listed in its POM -->
+		<!--
 		<dependency>
-            <!-- From http://forum.spring.io/forum/spring-projects/security/81005-embedded-ldap-server-not-working-with-apache-ds1-5 -->
-            <!-- Required by ApacheDS, but not listed in its POM -->
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
         </dependency>
+        -->
 		<dependency>
 			<groupId>org.ini4j</groupId>
 			<artifactId>ini4j</artifactId>
@@ -211,7 +214,8 @@
 					<include>log4j.xml</include>
 					<include>application.properties</include>
 					<include>springSecurityMessages.properties</include>
-					<include>users-test.ldif</include>
+					<!--Local LDAP user config used for testing  -->
+					<!-- <include>users-test.ldif</include>  -->
 				</includes>
 			</resource>
 		</resources>
