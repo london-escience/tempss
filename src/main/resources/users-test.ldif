@@ -27,4 +27,4 @@ initials: J
 mail: jeremy.cohen@imperial.ac.uk
 distinguishedName: CN=jhc02,OU=doc,OU=Users,O=Imperial College (London),DC=ic,DC=ac,DC=uk
 uid: jhc02
-userPassword: admin123
+userPassword: test
