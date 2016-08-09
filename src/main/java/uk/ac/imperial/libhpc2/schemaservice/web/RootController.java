@@ -93,13 +93,11 @@ public class RootController {
 		
 		sLog.debug("Processing root controller request for access to /");
 				
-		TempssUserDetails userDetails = null;
+		TempssUserDetails userDetails = getUserDetails(principal);
 		TempssUser user = null;
-		if(principal != null) {
-			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+		if(userDetails != null) {
 			user = userDetails.getUser();
 		}
-		
 		
 		sLog.debug("Value of user principal: {}", user);
 		//sLog.debug("Value of auth: {}", auth);
@@ -150,38 +148,67 @@ public class RootController {
 	}
 	
 	@RequestMapping("/about")
-	public ModelAndView about(Model pModel) {
+	public ModelAndView about(Model pModel,
+                              @AuthenticationPrincipal Principal principal) {
 	
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
 		ModelAndView mav = new ModelAndView("about");
+		mav.addObject("user", userDetails);
 		return mav;
 	}
 	
 	@RequestMapping("/docs")
-	public ModelAndView docs(Model pModel) {
+	public ModelAndView docs(Model pModel,
+                             @AuthenticationPrincipal Principal principal) {
 	
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
 		ModelAndView mav = new ModelAndView("docs");
+		mav.addObject("user", userDetails);
 		return mav;
 	}
 	
 	@RequestMapping("/contact")
-	public ModelAndView contact(Model pModel) {
+	public ModelAndView contact(Model pModel,
+                                @AuthenticationPrincipal Principal principal) {
 	
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
 		ModelAndView mav = new ModelAndView("contact");
+		mav.addObject("user", userDetails);
 		return mav;
 	}
 
 	@RequestMapping("/activation")
-	public ModelAndView activation(Model pModel) {
+	public ModelAndView activation(Model pModel,
+                                   @AuthenticationPrincipal Principal principal) {
 	
 		pebbleEngine.getTemplateCache().invalidateAll();
 		
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
 		ModelAndView mav = new ModelAndView("activation");
+		mav.addObject("user", userDetails);
 		return mav;
 	}
 	
 	@RequestMapping(value="/*")
-    public ModelAndView redirectHome() {
-        return new ModelAndView("redirect:/profiles/");
+    public ModelAndView redirectHome(@AuthenticationPrincipal Principal principal) {
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
+        ModelAndView mav = new ModelAndView("redirect:/profiles/");
+        mav.addObject("user", userDetails);
+        
+        return mav;
     }
+	
+	private TempssUserDetails getUserDetails(Principal principal) {
+		TempssUserDetails userDetails = null;
+		if(principal != null) {
+			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+		}
+		return userDetails;
+	}
 
 }

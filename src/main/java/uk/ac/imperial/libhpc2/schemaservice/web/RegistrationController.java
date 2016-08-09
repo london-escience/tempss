@@ -45,6 +45,7 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web;
 
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
@@ -54,6 +55,10 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -64,7 +69,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.ActivationModel;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 @Controller
 public class RegistrationController {
@@ -131,6 +138,45 @@ public class RegistrationController {
 		mav.addObject("_csrf", token);
 		mav.addObject("tempssUser", new TempssUser());
         
+        return mav;
+	}
+	
+	@RequestMapping(value="/activateAccount", method=RequestMethod.POST)
+	public ModelAndView activateAccount(
+			@Valid @ModelAttribute("activationModel") ActivationModel pActivation,
+			BindingResult pResult, Model pModel,
+			@AuthenticationPrincipal Principal principal) {
+		
+		sLog.debug("Received activation model: {}", pActivation);
+		
+		TempssUserDetails userDetails = null;
+		TempssUser user = null;
+		if(principal != null) {
+			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+			user = userDetails.getUser();
+		}
+		else {
+			throw new AccessDeniedException("ERROR: The current user is not "
+					+ "recognised.");
+		}
+		
+		// If we have errors then return the form with the errors
+		if(pResult.hasErrors()) {
+			ModelAndView errorMav = new ModelAndView("activation");
+			errorMav.addObject("activationModel", pActivation);
+			errorMav.addObject("user", userDetails);
+			errorMav.addObject("errors", pResult.getAllErrors());
+			sLog.debug("We have activation form submission errors...");
+			return errorMav;
+		}
+
+		// If there were no errors, we activate the user's account in the DB
+		tempssUserDao.activateUser(user);
+		user.setActivated(true);
+				
+		ModelAndView mav = new ModelAndView("activated");
+		mav.addObject("user", userDetails);
+		
         return mav;
 	}
 }

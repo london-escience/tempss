@@ -28,22 +28,19 @@ public class TempssLdapContextMapper implements UserDetailsContextMapper {
 			                              String pUsername,
 		  Collection<? extends GrantedAuthority> pAuthorities) {
 		
+		// We don't want to store the user's password so we just generate a 
+		// long random string and dump that in place of the password.
 		String password = RandomStringUtils.random(48);
 		String email = pCtx.getStringAttribute("mail");
 		String firstname = pCtx.getStringAttribute("givenName");
 		String lastname = pCtx.getStringAttribute("sn");
 		
-		// We don't want to store the user's password so we just generate a 
-		// long random string and dump that in place of the password.
-		
-		
-		TempssUser user = new TempssUser("IC/" + pUsername, password, email, 
-				                         firstname, lastname, false, false);
-		
 		// Here we check whether a record for the user exists in the DB. If 
 		// not, we create the user record here setting it to non-activated.
-		TempssUser uSearch = tempssUserDao.findByName("IC/" + pUsername);
-		if(uSearch == null) {
+		TempssUser user = tempssUserDao.findByName("IC/" + pUsername);
+		if(user == null) {
+			user = new TempssUser("IC/" + pUsername, password, email, 
+                    			  firstname, lastname, false, false);
 			sLog.debug("We have a login from an LDAP user who has not " +
 					"previously logged in to the system, creating a new " +
 					"user record and setting it inactive.");
