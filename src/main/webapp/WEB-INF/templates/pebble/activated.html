@@ -1,7 +1,8 @@
 {% extends "base" %}
 
 {% block title %}
-<title>TemPSS :: Activate your account</title>
+<meta http-equiv="refresh" content="5; url=/tempss/profiles/">
+<title>TemPSS :: Activation successful</title>
 {% endblock title %}
 
 {% block style %}
@@ -9,120 +10,34 @@
 body {
 	padding-bottom: 80px; 
 }
-
-p {
-	font-size: 16px; 
-}
-
-.list-item {
-	padding-top: 12px;
-	padding-bottom: 12px;
-}
-
-.list-item span {
-	vertical-align: middle;
-}
-
-.list-item.icon {
-	text-align: right;
-	font-size: 32px;
-}
-
 </style>
 {% endblock style %}
 
 {% block content %}
 
 	<div class="row">
-	    <div class="col-md-2"></div>
-		<div class="col-md-8">
-			<h1>Welcome to TemPSS</h1>
-			<h2>Templates and Profiles for Scientific Software</h2>
-			<br/>
-			<h4>Hello {{ user.user.firstname }},</h4>
-			<p class="text-muted">Thanks for signing in to TemPSS.  
-			   Since you have signed in via your institutional login, a 
-			   TemPSS account has been pre-configured for you. However, before you can 
-			   use your account, please confirm that you wish to active it.
-			</p>
-			<br/>
-			<p class="text-muted">Your TemPSS account will allow you to:</p> 			    
+		<div class="col-md-3"></div>
+		<div class="col-md-6" style="margin-top: 200px;">
+			<div class="alert alert-success">
+				<b style="font-size:24px;">Account activated</b>
+				<br/><br/>
+				<p style="font-size:16px;">Your TemPSS account has been 
+				  successfully activated.</p>
+				<br/>
+				<p style="font-size:16px;">You will shortly be automatically 
+				redirected to the profile manager, alternatively you can click 
+				<a href="/tempss/profiles/">here</a>.</p>
+			</div>
 		</div>
-		<div class="col-md-2"></div>
+		<div class="col-md-3"></div>
 	</div>
-	<div class="row">
-	    <div class="col-md-2"></div>
-	    <div class="col-md-1 list-item icon text-primary">
-	    	<span><i class="glyphicon glyphicon-floppy-disk"></i></span>
-	    </div>
-	    <div class="col-md-7 list-item text-info">
-	        <p>Save application configurations that you've produced by 
-	           populating a TemPSS template with your own configuration.</p>
-	    </div>
-	    <div class="col-md-2"></div>
-	</div>
-	<div class="row">
-	    <div class="col-md-2"></div>
-	    <div class="col-md-1 list-item icon text-primary">
-	    	<span><i class="glyphicon glyphicon-share"></i></span>
-	    </div>
-	    <div class="col-md-7 list-item text-info">
-	        <p>Share your application configurations with collaborators and 
-	           make them publicly available to other TemPSS users who can 
-	           benefit from the configurations that you've developed.</p>
-	    </div>
-	    <div class="col-md-2"></div>
-	</div>
-	<div class="row">
-	    <div class="col-md-2"></div>
-	    <div class="col-md-1 list-item icon text-primary">
-	    	<span><i class="glyphicon glyphicon-duplicate"></i></span>
-	    </div>
-	    <div class="col-md-7 list-item text-info">
-	        <p>Build up a library of your own partial and complete profiles 
-	           that you can use to help speed up the process of configuring 
-	           applications to support your requirements when running 
-	           computational jobs.</p>
-	    </div>
-	    <div class="col-md-2"></div>
-	</div>
-	<div class="row">
-	    <div class="col-md-2"></div>
-	    <div class="col-md-7 col-md-offset-1">
-	        <form method="POST" action="/tempss/profiles/activateAccount">
-	            <div
-	            {% for error in errors %}
-	              {% if error.field == "activated" %}
-	              class="has-error"
-	              {% endif %}
-	            {% endfor %}
-	            >
-	            <div class="checkbox">
-			        <label>
-			              <input type="checkbox" name="activated"> I accept the TemPSS <a href="/tandc">terms</a> and <a href="/privacy">privacy policy</a>.
-			        </label>
-			        <input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}"/>
-			        <button type="submit" class="btn btn-success" style="float:right;">Activate my account</button>
-			    </div>
-			    </div>
-			    <div class="form-error text-danger">
-			       {% for error in errors %}
-			         {% if error.field == "activated" %}
-			            You must accept the terms and conditions and privacy policy<br/>in order to activate your account.
-			         {% endif %}
-			       {% endfor %}
-			    </div>
-	        </form>
-	    </div>
-	    <div class="col-md-2"></div>
-	</div>
-
+	
 {% endblock content %}
 
 {% block script %}
 <script type="text/javascript">
 	$(document).ready( function() {
-		log("Activation page ready...")
+		log("Activation successful page ready...")
 	});
 </script>
 {% endblock script %}
