@@ -90,8 +90,7 @@
 		<authentication-provider user-service-ref="tempssUserDetailsService">
 		  <password-encoder ref="bCryptPasswordEncoder" />
 		</authentication-provider>
-		<authentication-provider ref="ldapAuthenticationProvider"/>
-		<!-- <ldap-authentication-provider user-search-filter="(cn={0})" /> -->
+		<!-- <authentication-provider ref="ldapAuthenticationProvider"/> -->
 	</authentication-manager>
 	
 </b:beans>
