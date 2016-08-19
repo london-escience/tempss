@@ -241,6 +241,30 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="change-profile-state-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Change profile state</h4>
+      </div>
+      <div class="modal-body">
+		  <div id="change-state-text"><h5></h5></div>
+      </div>
+      <div class="modal-footer">
+        <span class="loading" id="state-change-loading" style="float:left; display:none;">
+          <img src="../assets/img/loading.gif"/>
+          <span>Changing profile state...</span>
+        </span>
+        <span id="change-state-errors" class="text-danger" style="float:left; display:none"></span>
+        <button type="button" id="cancel-change-state-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="change-state-btn-modal" type="button" class="btn btn-success">Yes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 {% endblock modals %}
 
 {% block script %}
@@ -366,12 +390,39 @@
 			loadProfile(templateId, selectedProfileName);
 		});
 
+		// Add click listeners for the change state links
+		$('#profile-list').on('click', '.change-state', function(e) {
+			e.preventDefault();
+			var profilesObj = $(e.currentTarget).parents('.profile-item');
+			var selectedProfileName = profilesObj.find('.profile-link').first().data('pid');
+			var templateId = $('input[name=componentname]').val();
+			log('About to display confirmation modal for profile state change <' + selectedProfileName + '>.');
+			var currentState = $(e.currentTarget).data('state');
+			var newState = (currentState == "private") ? "public" : "private";
+			$('#change-state-text').html('<h5 class="text-info">Are you sure you want to change the state of profile '
+					+ '<span id="profile-state-change-name">' + selectedProfileName + '</span> from ' 
+					+ '<span id="profile-change-current" class="text-warning">' + currentState + '</span> ' 
+					+ 'to <span id="profile-change-new" class="text-warning">' + newState + '</span>?"');
+			$('#change-state-errors').html("");
+			$('#change-profile-state-modal').modal('show');
+		});
+		
 		// Delete profile when the confirm button is pressed on the confirmation modal
 		$('#delete-profile-btn-modal').on('click', function() {
 			var profileToDelete = $('#delete-profile-name').text();
 			var templateId = $('input[name=componentname]').val();
 			log('About to delete profile <' + profileToDelete + '>.');
 			deleteProfile(templateId, profileToDelete);
+		});
+		
+		// Change the state of a profile when confirmed via modal 'yes' button
+		$('#change-state-btn-modal').on('click', function() {
+			var profileName = $('#profile-state-change-name').text();
+			var templateId = $('input[name=componentname]').val();
+			var currentState = $('#profile-change-current').html();
+			var newState = $('#profile-change-new').html();
+			log('About to change the state of profile <' + profileName + '>.');
+			changeProfileState(templateId, profileName, currentState, newState);
 		});
 
 		// Open a modal to confirm that the user wants to clear

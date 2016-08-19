@@ -179,7 +179,7 @@ function updateProfileList(templateId) {
 	        	for(var i = 0; i < data.profile_names.length; i++) {
 	        		var profileVisibilityIcon = "";
 	        		if(data.profile_names[i].public == true) {
-	        			profileVisibilityIcon += '<span class="profile-type glyphicon glyphicon-user text-success no-pointer" data-toggle="tooltip" data-placement="left" title="Public profile"></span>';
+	        			profileVisibilityIcon += '<span class="profile-type glyphicon glyphicon-globe text-success no-pointer" data-toggle="tooltip" data-placement="left" title="Public profile"></span>';
 	        		}
 	        		else {
 	        			profileVisibilityIcon += '<span class="profile-type glyphicon glyphicon-lock text-danger no-pointer" data-toggle="tooltip" data-placement="left" title="Private profile"></span>';
@@ -196,8 +196,19 @@ function updateProfileList(templateId) {
 	        				htmlString += '<span></span>';
 	        			}
 	        			
-	        			htmlString += '<span class="glyphicon glyphicon-floppy-save load-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Load profile into template"></span>' +
-	        			'</div></div>\n';
+	        			htmlString += '<span class="glyphicon glyphicon-floppy-save load-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Load profile into template"></span>\n';
+	        			
+	        			if(data.profile_names[i].owner) {
+	        				var newStateStr = (data.profile_names[i].public == true) ? "private" : "public";
+	        				var stateStr = (data.profile_names[i].public == true) ? "public" : "private";
+	        				htmlString += '<span class="dropdown">' +
+	        					'<a class="dropdown-toggle dropdown-link" id="dropdown-' + i + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="caret"></span></a>' +
+	        					'<ul class="dropdown-menu" aria-labelledby="dropdown-' + i + '">' +
+	        					'<li><a class="change-state" data-state="' + stateStr + '" href="#">Make profile ' + newStateStr + '</a></li>' +
+	        					'</ul></span>';
+	        			}
+	        			
+	        			htmlString += '</div></div>';
 	        	}
 	        	$('#profiles').html(htmlString);
 	        	$('.profile-item span[data-toggle="tooltip"]').tooltip();
@@ -482,6 +493,60 @@ function deleteProfile(templateId, profileId) {
         }
 	});
 	
+}
+
+function changeProfileState(templateId, profileName, currentState, newState) {
+	log('Request to change the state of profile <' + profileName + '> for '+
+			'template <' + templateId + '> from state <' + currentState + 
+			'> to <' + newState + '>.');
+	
+	var csrfToken = $('input[name="_csrf"]').val();   
+        
+	$("#state-change-loading").show();
+    var csrfToken = $('input[name="_csrf"]').val();
+	$.ajax({
+        method:   'POST',
+        url:      '/tempss/api/profile/' + templateId + '/' + profileName + '/' + newState,
+        dataType: 'json',
+        contentType: 'application/json',
+        beforeSend: function(jqxhr, settings) {
+        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        },
+        success:  function(data) {
+        	// Check if profile state change succeeded
+        	if(data.status == 'OK') {
+        		$('#change-profile-state-modal').modal('hide');
+        		updateProfileList(templateId);
+        	}
+        	else {
+        		$("#change-state-errors").html("An unknown error has occured when updating profile status.");
+        	}
+        	$("#state-change-loading").hide();
+        },
+        error: function(data) {
+        	if(data.status == 'ERROR') {
+        		var errorText = "";
+        		switch(result.code) {
+        		case 'INVALID_TEMPLATE':
+        			errorText = "An invalid template identifier has been specified.";
+        			break;
+        		case 'PROFILE_DOES_NOT_EXIST':
+        			errorText = "The specified profile does not exist.";
+        			break;
+        		case 'UPDATED FAILED':
+        			errorText = "The profile status update has failed.";
+        			break;
+        		case 'RESPONSE_DATA':
+        			errorText = "Unable to prepare JSON response data.";
+        			break;
+        		default:
+        			errorText = "An unknown error has occurred.";
+        		}
+        		$("#change-state-errors").html(errorText);
+        		$("#state-change-loading").hide();
+        	}
+        }
+	});
 }
 
 // Clears any profile content entered into the template and
