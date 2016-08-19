@@ -64,4 +64,6 @@ public interface ProfileDao {
 	public List<Profile> findByTemplateId(String pTemplateId, TempssUser pUser);
 	
 	public boolean profileNameAvailable(String pName, TempssUser pUser);
+	
+	public int updateStatus(Boolean pStatus, String pName, String pTemplate, TempssUser pUser);
 }

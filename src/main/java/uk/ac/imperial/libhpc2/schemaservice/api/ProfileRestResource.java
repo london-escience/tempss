@@ -272,6 +272,62 @@ public class ProfileRestResource {
         return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
     
+    @POST
+    @RolesAllowed("ROLE_USER")
+    @Path("{templateId}/{profileName}/{newState}")
+    @Produces("application/json")
+    @SuppressWarnings("unchecked")
+    public Response changeProfileState(
+    		@PathParam("templateId") String templateId,
+            @PathParam("profileName") String profileName,
+            @PathParam("newState") String newState,
+            @Context HttpServletRequest pRequest) {
+    	
+    	TempssUser user = getAuthenticatedUser();
+    	
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
+
+    	// Check the specified template exists and that it is owned by the 
+    	// currently authenticated user or it is public
+		TempssObject templateMetadata = components.get(templateId);
+		if(templateMetadata == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
+					"\"The specified template <" + templateId + "> does not exist.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		// Now try and get the profile
+		Profile p = profileDao.findByName(profileName, user);
+		if(p == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
+					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
+			return Response.status(Status.NOT_FOUND).entity(responseText).build();
+		}
+    
+		boolean profilePublic = false;
+		if(newState.toUpperCase().equals("PUBLIC")) {
+			profilePublic = true;
+		}
+		
+		int rowsUpdated = profileDao.updateStatus(profilePublic, profileName, p.getTemplateId(), user);
+		if(rowsUpdated != 1) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"UPDATE_FAILED\", \"error\":\"Profile state update failed.\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+		
+		
+    	JSONObject jsonResponse = new JSONObject();
+		try {
+			jsonResponse.put("status", "OK");
+		} catch (JSONException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_DATA\", \"error\":\"" + e.getMessage() + "\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+    	    	    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+
+    
     /**
      * Get the profile identified by "profileName" that is based
      * on the template identified by "templateId".

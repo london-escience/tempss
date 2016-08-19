@@ -45,7 +45,9 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,5 +226,17 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public int updateStatus(Boolean pPublic, String pName, String pTemplate, 
+							TempssUser pUser) {
+		String status = "0";
+		if(pPublic) {
+			status = "1";
+		}
+		int rowsAffected = _jdbcTemplate.update("UPDATE profile SET public = ? WHERE name = ? AND templateId = ? AND owner = ?", 
+				new Object[] {status, pName, pTemplate, pUser.getUsername()});
+		return rowsAffected;
 	}
 }

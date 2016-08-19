@@ -49,7 +49,7 @@ body {
 }
 
 .profile-item {
-	padding: 8px 12px;
+	padding: 8px 4px;
 }
 
 .profile-item a {
@@ -112,4 +112,9 @@ body {
 #signin-errors {
 	height: 50px;
 	padding-bottom: 30px;
+}
+
+/* Styling for dropdown list items in profile name list */
+.dropdown-link {
+	cursor: pointer;
 }
