@@ -48,17 +48,17 @@ package uk.ac.imperial.libhpc2.schemaservice.api;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -85,7 +85,14 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -94,6 +101,8 @@ import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 /**
  * Jersey REST class representing the profile endpoint
@@ -105,7 +114,7 @@ public class ProfileRestResource {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(ProfileRestResource.class.getName());
+    private static final Logger sLog = LoggerFactory.getLogger(ProfileRestResource.class.getName());
 	
     /**
      * Profile data access object for accessing the profile database
@@ -122,7 +131,7 @@ public class ProfileRestResource {
     @Context
     public void setServletContext(ServletContext pContext) {
         this._context = pContext;
-        sLog.fine("Servlet context injected: " + pContext);
+        sLog.debug("Servlet context injected: " + pContext);
         //sLog.fine("Manuallly wiring dao bean into class...");
         //profileDao = (ProfileDao)((BeanFactory)pContext).getBean("profileDao");
         //sLog.fine("Bean <" + profileDao + "> has been injected as profileDao...");
@@ -159,7 +168,7 @@ public class ProfileRestResource {
                 jsonResponse.put("message", "Template with ID <" + templateId + "> does not exist.");
                 return Response.status(Status.NOT_FOUND).entity(jsonResponse.toString()).build();
             } catch (JSONException e) {
-                sLog.severe("Error creating 404 response for template ID that is not found");
+                sLog.error("Error creating 404 response for template ID that is not found");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\"}").build();
             }
         }
@@ -172,14 +181,14 @@ public class ProfileRestResource {
                   "to the profile converter, only the first will be used (additional files " +
                   "should be uploaded with xmlupload_file tag).");
         if(profileField.size() == 0) {
-            sLog.severe("No profile data has been provided with this request.");
+            sLog.error("No profile data has been provided with this request.");
             try {
                 jsonResponse.put("status", "ERROR");
                 jsonResponse.put("message", "No profile data stream provided with this request.");
                 Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
                     .entity(jsonResponse.toString()).build();
             } catch (JSONException e) {
-                sLog.severe("Error creating 400 response profile stream that is empty");
+                sLog.error("Error creating 400 response profile stream that is empty");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\"}").build();
             }
         }
@@ -195,7 +204,7 @@ public class ProfileRestResource {
         try {
             profileXml = IOUtils.toString(profileXmlStream);
         } catch (IOException e) {
-            sLog.severe("Error converting profile stream to string for processing.");
+            sLog.error("Error converting profile stream to string for processing.");
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\",\"message\":\"Error converting profile stream to string for processing.\"}").build();
         }
         String completeXml = profileXml;
@@ -217,7 +226,7 @@ public class ProfileRestResource {
                     String tempXml = completeXml.replaceAll("(?i)" + fileName, fileXml);
                     completeXml = tempXml;
                 } catch (IOException e) {
-                    sLog.severe("Error converting file for embedding in profile to string.");
+                    sLog.error("Error converting file for embedding in profile to string.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\",\"message\":\"Error converting file for embedding in profile to string.\"}").build();
                 }
             }
@@ -228,13 +237,13 @@ public class ProfileRestResource {
         try {
             transformOutput = proc.convertProfileToInputData(templateId, profileXml, completeXml, session.getId());
         } catch (UnknownTemplateException e) {
-            sLog.severe("The template with ID <" + templateId + "> is not found: " + e.getMessage());
+            sLog.error("The template with ID <" + templateId + "> is not found: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("The template with ID <" + templateId + "> is not found: " + e.getMessage()).build();
         } catch (TransformerException e) {
-            sLog.severe("XSLT transform error when trying to convert profile to application input file: " + e.getMessage());
+            sLog.error("XSLT transform error when trying to convert profile to application input file: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to convert profile to application input file: " + e.getMessage()).build();	
         } catch (IOException e) {
-            sLog.severe("IO error when trying to convert profile to application input file: " + e.getMessage());
+            sLog.error("IO error when trying to convert profile to application input file: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to convert profile to application input file: " + e.getMessage()).build();
         }
 		
@@ -243,7 +252,7 @@ public class ProfileRestResource {
         try {
             servletUrl = new URL(pRequest.getScheme(), pRequest.getServerName(), pRequest.getServerPort(), pRequest.getContextPath());
         } catch (MalformedURLException e) {
-            sLog.severe("Unable to get servlet URL to prepare response: " + e.getMessage());
+            sLog.error("Unable to get servlet URL to prepare response: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to get servlet URL to prepare response: " + e.getMessage()).build();
         }
         String servletBaseURL = servletUrl.toString();
@@ -258,7 +267,7 @@ public class ProfileRestResource {
             jsonResponse.put("TransformedXml", servletBaseURL + "/temp/" + transformOutput.get("TransformedDataFile"));
             jsonResponse.put("status","OK");
         } catch (JSONException e) {
-            sLog.severe("Error preparing JSON response data: " + e.getMessage());
+            sLog.error("Error preparing JSON response data: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error preparing JSON response data: " + e.getMessage()).build(); 
         }
 				
@@ -284,11 +293,15 @@ public class ProfileRestResource {
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
-        @Context HttpServletRequest pRequest) {
+        @Context HttpServletRequest pRequest,
+        TempssUser pUser) {
     
+    	TempssUser user = getAuthenticatedUser();
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
-    	// Check the specified template exists
+    	// Check the specified template exists and that it is owned by the 
+    	// currently authenticated user or it is public
 		TempssObject templateMetadata = components.get(templateId);
 		if(templateMetadata == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
@@ -297,7 +310,7 @@ public class ProfileRestResource {
 		}
 		
 		// Now try and get the profile
-		Profile p = profileDao.findByName(profileName);
+		Profile p = profileDao.findByName(profileName, user);
 		if(p == null) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
 					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
@@ -330,6 +343,7 @@ public class ProfileRestResource {
      *         and any additional description of the error under the key 'message'.
      */
     @POST
+    @RolesAllowed("ROLE_USER")
     @Path("{templateId}/{profileName}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json")
@@ -340,6 +354,16 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
+    	TempssUser user = getAuthenticatedUser();
+    	
+    	// Check that the user is authenticated
+		if(user == null) {
+			String responseText = "{\"status\":\"ERROR\", "
+					+ "\"code\":\"PERMISSION_DENIED\", \"error\":" +
+					"\"You must be signed in to save a profile.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
+		}
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Check the specified template exists, if so, save the 
@@ -352,21 +376,31 @@ public class ProfileRestResource {
 		}
 		
 		// Now check if the specified profile name already exists
-		if(profileDao.findByName(profileName) != null) {
-			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
-					"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
-			return Response.status(Status.CONFLICT).entity(responseText).build();
+		try {
+			if(!profileDao.profileNameAvailable(profileName, user)) {
+				String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
+						"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
+				return Response.status(Status.CONFLICT).entity(responseText).build();
+			}
+		} catch(AuthenticationException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
+					"\"You must be authenticated to check if a profile name exists.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
 		}
 
     	String profileXml = "";
+    	int profilePublic = 0;
     	JSONObject jsonResponse = new JSONObject();
  
     	// Get the profile XML string from the incoming request data
 		try {
 			JSONObject profileObj = new JSONObject(profileJson);
 			profileXml = profileObj.getString("profile");
-			sLog.fine("Handling save request for profile name <" + profileName + "> for template <" 
-					  + templateId + ">:\n" + profileXml);
+			if(profileObj.getBoolean("profilePublic")) {
+				profilePublic = 1;
+			}
+			sLog.debug("Handling save request for profile name <" + profileName + "> for template <" 
+					  + templateId + "> with public flag <" + profilePublic + ">:\n" + profileXml);
 		} catch (JSONException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
@@ -376,6 +410,8 @@ public class ProfileRestResource {
 		profileData.put("name", profileName);
 		profileData.put("templateId", templateId);
 		profileData.put("profileXml", profileXml);
+		profileData.put("public", profilePublic);
+		profileData.put("owner", user.getUsername());
 		Profile profile = new Profile(profileData);
 		profileDao.add(profile);
 		sLog.info("The value of profileDao is: " + profileDao);
@@ -413,6 +449,17 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
+    	TempssUser user = getAuthenticatedUser();
+    	
+    	// Check that the user is authenticated
+		if(user == null) {
+			String responseText = "{\"status\":\"ERROR\", "
+					+ "\"code\":\"PERMISSION_DENIED\", \"error\":" +
+					"\"You do not have permission to delete the profile with "
+					+ "the specified name <" + profileName + ">.\"}";
+			return Response.status(Status.FORBIDDEN).entity(responseText).build();
+		}
+    	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
     	// Undertake sme validation checks...
@@ -425,19 +472,19 @@ public class ProfileRestResource {
 		}
 		
 		// Now check that the specified profile name exists
-		if(profileDao.findByName(profileName) == null) {
+		if(profileDao.profileNameAvailable(profileName, user)) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
 					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
 			return Response.status(Status.NOT_FOUND).entity(responseText).build();
 		}
 		
 		// Now delete the profile
-		int rowsAffected = profileDao.delete(templateId, profileName);
+		int rowsAffected = profileDao.delete(templateId, profileName, user);
 		
 		if(rowsAffected == 0) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NOT_DELETED\", \"error\":" +
 					"\"Profile <" + profileName + "> for template <" + templateId + 
-					"> was not present to delete.\"}";
+					"> was not present to delete or you are not the owner.\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
 		
@@ -476,11 +523,28 @@ public class ProfileRestResource {
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+		TempssUser user = getAuthenticatedUser();
+		
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	JSONArray profileArray = new JSONArray();
     	if(profiles != null) {
     		for(Profile p : profiles) {
-        		profileArray.put(p.getName());
+    			JSONObject profileItem = new JSONObject();
+    			try {
+    				profileItem.put("name", p.getName());
+    				profileItem.put("public", p.getPublic());
+    				if(user == null) {
+    					profileItem.put("owner", false);
+    				}
+    				else {
+    					profileItem.put("owner", p.getOwner().equals(user.getUsername()));
+    				}
+    				profileArray.put(profileItem);
+    			} catch(JSONException e) {
+    				sLog.debug("Error adding profile name <{}> to JSON " +
+    						"object. Ignoring this profile ", p.getName());
+    			}
+    			
         	}	
     	}
     	JSONObject jsonResponse = new JSONObject();
@@ -508,14 +572,18 @@ public class ProfileRestResource {
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId);
+    	TempssUser user = getAuthenticatedUser();
+    	
+    	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	StringBuilder profileNames = new StringBuilder();
     	// If there are no profiles for the specified template (or the template
     	// doesn't exist)...
     	if(profiles != null) {
 	    	for(Profile p : profiles) {
-	    		profileNames.append(p.getName());
-	    		profileNames.append("\n");
+	    		profileNames.append(p.getName() + " (");
+	    		profileNames.append(
+	    				(p.getPublic() == true) ? "public" : "private");
+	    		profileNames.append(")\n");
 	    	}
     	}
     	return Response.ok(profileNames.toString(), MediaType.TEXT_PLAIN).build();
@@ -534,7 +602,7 @@ public class ProfileRestResource {
         @PathParam("fileId") String pFileId,
         @Context HttpServletRequest pRequest) {
     	
-    	sLog.fine("Request to get application input file with ID: " + pFileId);
+    	sLog.debug("Request to get application input file with ID: " + pFileId);
     	
     	String fileDirPath = _context.getRealPath("temp");
     	final File dataFile = new File(fileDirPath + File.separator + "output_xml_" + pFileId + ".xml");
@@ -567,5 +635,24 @@ public class ProfileRestResource {
 				header("Content-Type", "application/xml").
 				cookie(c).entity(so).build();
     }
-
+    
+    /**
+     * Get the details of the currently authenticated user.
+     *  
+     * @return null if no user is authenticated or the TempssUser object of the
+     *         authenticated user if a user is logged in.
+     */
+    private TempssUser getAuthenticatedUser() {
+    	Authentication authToken = 
+    			SecurityContextHolder.getContext().getAuthentication();
+    	
+    	TempssUserDetails userDetails = null;
+		TempssUser user = null;
+		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
+			userDetails = (TempssUserDetails) authToken.getPrincipal();
+			user = userDetails.getUser();
+		}
+		
+		return user;
+    }
 }

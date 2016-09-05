@@ -45,20 +45,32 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web;
 
+import java.security.Principal;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.mitchellbosecke.pebble.PebbleEngine;
+
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
-
-import com.mitchellbosecke.pebble.PebbleEngine;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 @Controller
 public class RootController {
@@ -75,19 +87,87 @@ public class RootController {
 	private PebbleEngine pebbleEngine;
 	
 	@RequestMapping("/")
-    public ModelAndView index(Model pModel) {
+    public ModelAndView index(Model pModel, 
+    						  @AuthenticationPrincipal Principal principal,
+    						  HttpServletRequest pRequest) {
 		
 		sLog.debug("Processing root controller request for access to /");
+		
+		//User activeUser = null;
+		//Authentication auth =
+		//		SecurityContextHolder.getContext().getAuthentication();
+		
+		TempssUserDetails userDetails = null;
+		TempssUser user = null;
+		if(principal != null) {
+			userDetails = (TempssUserDetails) ((Authentication) principal).getPrincipal();
+			user = userDetails.getUser();
+		}
+		
+		
+		sLog.debug("Value of user principal: {}", user);
+		//sLog.debug("Value of auth: {}", auth);
+		//sLog.debug("Value of auth.isAuthenticated(): {}", auth.isAuthenticated());
+		
+//		if(auth != null && auth.isAuthenticated() && 
+//				!(auth instanceof AnonymousAuthenticationToken)) {
+//			activeUser = (User)auth.getPrincipal();
+//		}
+//		sLog.debug("Value of activeUser: {}", activeUser);
+		
+		if(user != null) {
+			sLog.debug("We have a user with username: {}", user.getUsername()); 
+		}
+		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
 		
 		pebbleEngine.getTemplateCache().invalidateAll();
 		
         ModelAndView mav = new ModelAndView("index");
         
-        List<Profile> profiles = profileDao.findAll();
+        mav.addObject("_csrf", token);
+        
+        List<Profile> profiles = profileDao.findAll(user);
         
         mav.addObject("firstname", "TemPSS");
         mav.addObject("surname", "Team");
         mav.addObject("profiles", profiles);
+        mav.addObject("user", userDetails);
+        return mav;
+    }
+	
+	@RequestMapping("/logout")
+	public String logout(HttpServletRequest req, HttpServletResponse resp) {
+		sLog.debug("Request to log user out...");
+	    Authentication auth = 
+	    		SecurityContextHolder.getContext().getAuthentication();
+	    if (auth != null) {
+	    	sLog.debug("The user is logged in, logging user out.");
+	        new SecurityContextLogoutHandler().logout(req, resp, auth);
+	        return "redirect:/login?logout";
+	    }
+	    else{
+	    	sLog.debug("The user was not logged in.");
+	    }
+	    return "redirect:/tempss/profiles";
+	}
+	
+	@RequestMapping("/login-test")
+	public ModelAndView loginTest(Model pModel,
+								  @AuthenticationPrincipal Principal principal){
+		
+		sLog.debug("Processing root controller request for login-test page");
+		
+		User activeUser = (User) ((Authentication) principal).getPrincipal();
+		
+		pebbleEngine.getTemplateCache().invalidateAll();
+		
+        ModelAndView mav = new ModelAndView("login-test");
+        
+        mav.addObject("firstname", "TemPSS");
+        mav.addObject("surname", "Team");
+        mav.addObject("user", activeUser);
         return mav;
     }
 	
@@ -95,4 +175,5 @@ public class RootController {
     public ModelAndView redirectHome() {
         return new ModelAndView("redirect:/profiles/");
     }
+
 }

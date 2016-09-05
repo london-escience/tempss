@@ -45,82 +45,113 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.db;
 
-import java.util.Map;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
-public class Profile {
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+public class TempssUser {
 	
-	private int _id;
-	private String _name;
-	private String _templateId;
-	private String _profileXml;
-	private boolean _public;
-	private String _owner;
+	@NotBlank
+	private String username;
 	
-	public Profile() {};
+	@NotNull
+	@Size(min = 8, max = 48)
+	private String password;
 	
-	public Profile(Map<String,Object> pData) {
-		Integer id = (Integer)pData.get("id");
-		if(id != null) {
-			this._id = (Integer)pData.get("id");
-		}
-		this._name = (String)pData.get("name");
-		this._templateId = (String)pData.get("templateId");
-		this._profileXml = (String)pData.get("profileXml");
-		this._owner = (String)pData.get("owner");
-		this._public = false;
-		if(pData.containsKey("public")) {
-			if(((Integer)pData.get("public")) == 1) {
-				this._public = true;
-			}	
-		}
-		
+	@NotNull
+	@Size(min = 8, max = 48)
+	private String password2;
+	
+	@NotBlank
+	@Email
+	private String email;
+	
+	@NotBlank
+	private String firstname;
+	
+	private String lastname;
+	
+	/**
+	 * true (1) if the user is locked, false (0) otherwise. 
+	 * A locked user cannot log in.
+	 */
+	private boolean locked;
+	
+	public TempssUser() { } 
+	
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+            String pFirstname, String pLastname) {
+		this(pUsername, pPassword, pEmail, pFirstname, pLastname, "");
 	}
 	
-	public int getId() {
-		return _id;
+	public TempssUser(String pUsername, String pPassword, String pEmail, 
+                      String pFirstname, String pLastname, String pPassword2) { 
+		this.username = pUsername;
+		this.password = pPassword;
+		this.email = pEmail;
+		this.firstname = pFirstname;
+		this.lastname = pLastname;
+		this.password2 = pPassword2; // for password verification
+		this.locked = false;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String pUsername) {
+		this.username = pUsername;
 	}
 	
-	public void setId(int pId) {
-		this._id = pId;
+	public String getPassword() {
+		return this.password;
+	}
+
+	public void setPassword(String pPassword) {
+		this.password = pPassword;
 	}
 	
-	public String getName() {
-		return _name;
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String pEmail) {
+		this.email = pEmail;
+	}
+
+	public String getFirstname() {
+		return firstname;
+	}
+
+	public void setFirstname(String pFirstname) {
+		this.firstname = pFirstname;
+	}
+
+	public String getLastname() {
+		return lastname;
+	}
+
+	public void setLastname(String pLastname) {
+		this.lastname = pLastname;
 	}
 	
-	public void setName(String pName) {
-		this._name = pName;
+	public String getPassword2() {
+		return this.password2;
+	}
+
+	public void setPassword2(String pPassword2) {
+		this.password2 = pPassword2;
 	}
 	
-	public String getTemplateId() {
-		return _templateId;
+	public boolean getLocked() {
+		return this.locked;
 	}
-	
-	public void setTemplateId(String pTemplateId) {
-		this._templateId = pTemplateId;
-	}
-	
-	public String getProfileXml() {
-		return _profileXml;
-	}
-	
-	public void setProfileXml(String pProfileXml) {
-		this._profileXml = pProfileXml;
-	}
-	
-	public boolean getPublic() {
-		return this._public;
-	}
-	
-	public void setPublic(boolean pPublic) {
-		this._public = pPublic;
-	}
-	
-	public String getOwner() {
-		return this._owner;
-	}
-	
-	public void setOwner(String pOwner) {
-		this._owner = pOwner;
+
+	public void setLocked(boolean pLocked) {
+		this.locked = pLocked;
 	}
 }
