@@ -224,7 +224,7 @@
 
 		// Variable to check whether a template has been edited
 		window.templateEdited = false;
-
+		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
 			var selected = $(target).find(":selected");
@@ -239,6 +239,11 @@
 				$('#confirm-change-template-modal').modal('show');
 			}
 			else {
+				// We need to store the previous value of #template-select so that we
+				// can revert to the originally selected value if the user cancels a 
+				// change request - since the confirmation is not being displayed
+				// we can store the new value as previous.
+				$('#template-select').data('prev', $('#template-select').val());
 				setTimeout(function() {
 					templateChanged(selectedValue, selectedText);
 				}, 0);
@@ -251,6 +256,10 @@
 			var selected = $('#template-select').find(":selected");
 			var selectedText = selected.text();
 			var selectedValue = selected.val();
+			// Since the user has confirmed that they want to change the 
+			// displayed template, we store the new value as previous.
+			$('#template-select').data('prev', selectedValue);
+			
 			setTimeout(function() {
 				templateChanged(selectedValue, selectedText);
 			}, 0);
@@ -258,6 +267,13 @@
 			$('#confirm-change-template-modal').modal('hide');
 		});
 
+		// If the user cancels the template change process, we revert the 
+		// selected value in the box to the previously selected value
+		$('#cancel-change-template-btn-modal').on('click', function() {
+			var prevVal = $('#template-select').data('prev'); 
+			$('#template-select').val(prevVal);
+		});
+		
 		// When the "Save as profile" button is clicked below a
 		// template that has had values entered into it, open
 		// the save profile modal to prompt the user for a profile name
