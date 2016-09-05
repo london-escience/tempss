@@ -58,29 +58,29 @@
 		<div class="col-md-2"></div>
 		<div class="col-md-9" style="margin-top: 100px;">
 			<div class="well">
-			  <h3 style="padding-bottom: 20px;">TemPSS Sign In</h3>
+			  <h3 style="padding-bottom: 20px; margin-top: 10px;">TemPSS Sign In</h3>
 				<form:form commandName="tempssUser" class="form-horizontal" 
 				           id="signin-form" action="/tempss/login" method="POST">
 				           
 				  <form:errors/>
 				  <div class="row">
-				    <div class="col-sm-3"></div>
+				    <div class="col-sm-4"></div>
 				    <div id="signin-errors" class="text-danger col-sm-5">${fn:escapeXml(sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message)}</div>
 				    <div class="col-sm-3"></div>
 				    <c:remove var = "SPRING_SECURITY_LAST_EXCEPTION" scope = "session" />
 				  </div>
 				  
 				  <div class="form-group">
-				    <form:label path="username" for="username" cssClass="col-sm-3 control-label">Username</form:label>
+				    <form:label path="username" for="username" cssClass="col-sm-4 control-label">Username</form:label>
 				    <div class="col-sm-5">
-				      <form:input path="username" value="${fn:escapeXml(sessionScope.PREVIOUS_USERNAME)}" class="form-control" placeholder="Select a username"/>
+				      <form:input path="username" value="${fn:escapeXml(sessionScope.PREVIOUS_USERNAME)}" class="form-control" placeholder=""/>
 				    </div>
-				    <div class="col-sm-3">  
+				    <div class="col-sm-4">  
 				      <form:errors path="username" cssClass="form-error text-danger"/>
 				    </div>
 				  </div>
 				  <div class="form-group">
-				    <form:label path="password" for="password" cssClass="col-sm-3 control-label">Password</form:label>
+				    <form:label path="password" for="password" cssClass="col-sm-4 control-label">Password</form:label>
 				    <div class="col-sm-5">
 				      <input name="password" type="password" class="form-control" placeholder=""/>
 				    </div>
@@ -90,7 +90,9 @@
 				  </div>
 				  <sec:csrfInput />
 				  <div class="form-group text-right">
-				    <div class="col-sm-3"></div>
+				    <div class="col-sm-3" style="padding-top: 15px;">
+			          <a href="${pageContext.request.contextPath}/profiles/register"><i class="glyphicon glyphicon-edit"></i> Create account</a>
+				    </div>
 				    <div class="col-sm-8">
 				      <button type="submit" id="register-user" class="btn btn-success">Sign In</button>
 				    </div>
