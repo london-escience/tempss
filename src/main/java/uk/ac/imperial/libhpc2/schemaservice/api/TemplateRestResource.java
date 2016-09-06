@@ -69,7 +69,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
+import uk.ac.imperial.libhpc2.schemaservice.TemplateProcessorException;
 import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
+import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 
 /**
  * Jersey REST class representing the template endpoint
@@ -206,12 +208,56 @@ public class TemplateRestResource {
     @Path("id/{templateId}")
     @SuppressWarnings("unchecked")
     public Response getTemplatesHtmlTree(@PathParam("templateId") String templateId) {
+    	String templateHtml = "";
+    	try {
+    		templateHtml = _getTemplateHtml(templateId);
+    	} catch(UnknownTemplateException e) {
+    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    	} catch(TemplateProcessorException e) {
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    	}
+    	
+    	return Response.ok(templateHtml, MediaType.TEXT_HTML).build();
+    }
+    
+    @GET
+    @Produces("application/json")
+    @Path("id/{templateId}")
+    @SuppressWarnings("unchecked")
+    public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId) {
+    	String templateHtml = "";
+    	try {
+    		templateHtml = _getTemplateHtml(templateId);
+    	} catch(UnknownTemplateException e) {
+    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    	} catch(TemplateProcessorException e) {
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    	}
+    	
+    	JSONObject templateObj = new JSONObject();
+        try {
+        	// Keys used for compatibility with old API
+            templateObj.put("ComponentName", templateId);
+            templateObj.put("TreeHtml", templateHtml);
+        } catch (JSONException e) {
+            sLog.error("Unable to add template HTML for template <" 
+            		+ templateId + "> to JSON object: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+            		"Unable to add template HTML for template <" + templateId +
+            		"> to JSON object: " + e.getMessage()).build();
+        }
+    	
+    	return Response.ok(templateObj.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    private String _getTemplateHtml(String templateId) 
+    		throws UnknownTemplateException, TemplateProcessorException {
         // Get the component metadata from the servletcontext and check the name is valid
         Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
         // If we don't have a template of this name then throw an error
         if(!components.containsKey(templateId)) {
-            return Response.status(Status.NOT_FOUND).entity("Template with ID <" + templateId + "> does not exist.").build();
+        	throw new UnknownTemplateException("Template with ID <" + templateId + "> does not exist.");
         }
 
         // Get the template information from the metadata map
@@ -225,18 +271,18 @@ public class TemplateRestResource {
             htmlTree = proc.processComponentSelector(metadata);
         } catch (FileNotFoundException e) {
             sLog.error("File not found when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("File not found when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("File not found when trying to generate HTML tree: " + e.getMessage());
         } catch (IOException e) {
             sLog.error("IO error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("IO error when trying to generate HTML tree: " + e.getMessage());
         } catch (ParseException e) {
             sLog.error("XML parse error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XML parse error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("XML parse error when trying to generate HTML tree: " + e.getMessage());
         } catch (TransformerException e) {
             sLog.error("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
         }
 
-        return Response.ok(htmlTree, MediaType.TEXT_HTML).build();
+        return htmlTree;
     }
 }
