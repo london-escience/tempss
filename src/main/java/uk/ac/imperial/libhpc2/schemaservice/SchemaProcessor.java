@@ -308,6 +308,11 @@ public class SchemaProcessor {
 
         // Get path to web-inf folder
         String filePath = _context.getRealPath("/temp");
+        File filePathObj = new File(filePath);
+        if(!filePathObj.exists()) {
+        	// Try to create the directory if it doesn't exist
+        	filePathObj.mkdir();
+        }
         File tempDir = new File(filePath);
         //boolean isSuccess = tempDir.mkdirs();
 
