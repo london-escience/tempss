@@ -91,6 +91,9 @@ function displayTemplate(templateId, templateText) {
 	$.ajax({
         method:   'get',
         url:      '/tempss/api/template/id/' + templateId,
+        headers: { 
+            Accept : "text/html",
+        },
         success:  function(data){
         	// Data that comes back is the raw HTML to place into the page
         	$("#template-container").html(data)
