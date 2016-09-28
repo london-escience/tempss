@@ -51,6 +51,15 @@ h2 {
     top:0;
     width:1px
 }
+/*
+.tree ul:last-child li::before {
+    border-left:1px solid #999;
+    bottom:50px;
+    height:25px;
+    top:0;
+    width:1px
+}
+*/
 .tree li::after {
     border-top:1px solid #999;
     height:20px;
@@ -136,8 +145,8 @@ ul {
 }
 
 ul.valid > li > span:first-child::before {
-  content:"\e089";
-  font-family:"Glyphicons Halflings";
+  content:"\f05d";
+  font-family:"FontAwesome";
   position: absolute;
   top: 8px;
   left: -14px;
@@ -146,8 +155,8 @@ ul.valid > li > span:first-child::before {
 }
 
 ul.invalid > li > span:first-child::before {
-  content:"\e088";
-  font-family:"Glyphicons Halflings";
+  content:"\f05c";
+  font-family:"FontAwesome";
   position: absolute;
   top: 8px;
   left: -14px;
@@ -155,30 +164,46 @@ ul.invalid > li > span:first-child::before {
   font-size: 1.2em;
 }
 
-span.toggle-button {
-  font-size: 0.8em;
+span.toggle_button {
+  font-size: 0.75em;
   background-color: #ededed;
   margin-left: 0.5em;
 }
 
-span.enable-button {
+i.enable_button::before {
   color: #E52638;
+  content: "\f204";
+  font-family: "FontAwesome";
+  font-style: normal;
+  font-weight: normal;
 }
 
-span.disable-button {
+i.disable_button::before {
   color: #46A939;
+  content: "\f205";
+  font-family: "FontAwesome";
+  font-style: normal;
+  font-weight: normal;
 }
 
-span.repeat-button {
+span.repeat_button {
   font-size: 0.8em;
   background-color: #ededed;
-  color: #46A939;
   margin-left: 0.5em;
 }
 
-span.remove-button {
-  font-size: 0.8em;
-  background-color: #ededed;
-  color: #E52638;
-  margin-left: 0.5em;
+i.repeat_button_add::before {
+    color: #46A939;
+    content: "\f067";
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-weight: normal;
+}
+
+i.repeat_button_remove::before {
+    color: #E52638;
+    content: "\f068";
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-weight: normal;
 }

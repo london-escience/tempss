@@ -34,6 +34,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:param name="this_path" select="concat($path,concat('.',$nodeName))"/>
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
     <xsl:param name="units" select="xs:annotation/xs:appinfo/libhpc:units"/>
+    <xsl:param name="editable_units" select="xs:annotation/xs:appinfo/libhpc:editableUnits"/>
     <xsl:param name="badge_type">
       <xsl:choose>
         <xsl:when test="./xs:complexType/xs:choice or /xs:schema/xs:complexType[@name=$type]/xs:choice">badge badge-warning</xsl:when>
@@ -137,17 +138,23 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <!-- Add optional toggle button here, javascript addition is too slow -->
         <xsl:if test="$optional">
           <xsl:element name="span">
-            <xsl:attribute name="class">toggle-button enable-button glyphicon glyphicon-off</xsl:attribute>
-            <xsl:attribute name="title">Optional branch disabled - click to activate</xsl:attribute>
+            <xsl:attribute name="class">toggle_button</xsl:attribute>
+            <xsl:attribute name="title">Optional branch inactive - click to activate</xsl:attribute>
             <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:element name="i">
+              <xsl:attribute name="class">toggle_button enable_button</xsl:attribute>
+            </xsl:element>
           </xsl:element>
         </xsl:if>
         <!-- Add repeatable add section button here, javascript addition is too slow -->
         <xsl:if test="$repeatable">
           <xsl:element name="span">
-            <xsl:attribute name="class">repeat-button glyphicon glyphicon-plus</xsl:attribute>
+            <xsl:attribute name="class">repeat_button repeat_button_add</xsl:attribute>
             <xsl:attribute name="title">This branch is repeatable - click to add another</xsl:attribute>
             <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:element name="i">
+              <xsl:attribute name="class">repeat_button repeat_button_add</xsl:attribute>
+            </xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="substring($type,1,3)='xs:'">
@@ -173,7 +180,21 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:apply-templates mode="findChildNodes">
           <xsl:with-param name="path" select="$this_path"/>
         </xsl:apply-templates>
-        <xsl:text> </xsl:text><xsl:value-of select="$units" disable-output-escaping="yes"/>
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="$units" disable-output-escaping="yes"/>
+        <xsl:if test="$editable_units">
+          <xsl:element name="input">
+            <xsl:attribute name="type">text</xsl:attribute>
+            <xsl:attribute name="class">unit</xsl:attribute>
+            <xsl:attribute name="data-unit">true</xsl:attribute>
+            <xsl:attribute name="value">
+              <xsl:value-of select="$editable_units"/>
+            </xsl:attribute>
+            <xsl:if test="xs:annotation/xs:appinfo/libhpc:editDisabled">
+              <xsl:attribute name="disabled">disabled</xsl:attribute>
+            </xsl:if>
+          </xsl:element>
+        </xsl:if>
       </xsl:element><!-- </li> -->
     </xsl:element><!-- </ul> -->
   </xsl:template>
@@ -369,14 +390,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:apply-templates>
   </xsl:template>
 
-  <xsl:template match="libhpc:documentation" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:units" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:locationInFile" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:refersToFile" mode="findChildNodes">
-  </xsl:template>
+  <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
+  <xsl:template match="libhpc:alias" mode="findChildNodes"/>
+  <xsl:template match="libhpc:units" mode="findChildNodes"/>
+  <xsl:template match="libhpc:editableUnits" mode="findChildNodes"/>
+  <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>
+  <xsl:template match="libhpc:refersToFile" mode="findChildNodes"/>
 
   <xsl:template match="*">
     <xsl:message terminate="no">

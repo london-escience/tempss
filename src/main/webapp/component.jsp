@@ -5,8 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Job Configuration</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link href="./assets/css/style.css" rel="stylesheet" media="all" />
     <link href="./assets/css/tree-style.css" rel="stylesheet" media="all" >
   </head>
@@ -42,6 +41,7 @@
               <label class="col-md-3 control-label" for="componentselector">Component:</label>
               <div class="col-md-5">
                 <select name="componentselector" id="componentselector">
+                  <option value="cp2k-3.0">CP2K 3.0</option>
                   <option value="nektar-cardiac-electrophysiology">Nektar++ Cardiac Electrophysiology</option>
                   <option value="incompressiblenavierstokes">Nektar++ Incompressible Navier-Stokes</option>
                   <option value="compressibleflowsolver">Nektar++ Compressible Flow Solver</option>
@@ -81,8 +81,7 @@
     </script>
     <script type="text/javascript" src="./assets/js/bootstrap-tree.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-      crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <!-- Fallback for bootstrap -->
     <script>
     (window.jQuery.fn.modal || document.write('<script src="./assets/js/bootstrap-3.3.6.min.js"><\/script>'))
@@ -98,5 +97,12 @@
     </script>
     <script type="text/javascript" src="./assets/js/bootstrap-fileinput.js"></script>
     <script type="text/javascript" src="./assets/js/libhpc-parameter-tree.js"></script>
+    <script type="text/javascript" src="./assets/js/legacy.js"></script>
+    <script type="text/javascript">
+      $(document).ready( function() {
+          $('#xmlsubmission').hide();
+          $('#libraryload').hide();
+      });
+    </script>
   </body>
 </html>

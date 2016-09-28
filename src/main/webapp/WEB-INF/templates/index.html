@@ -66,10 +66,6 @@
               <span id="tree-expand" class="glyphicon glyphicon-plus-sign
                         text-info tree-control-btn"
                     data-toggle="tooltip" title="Expand all nodes in tree"></span>
-              <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
-                        text-info tree-control-btn"
-                    data-toggle="tooltip" title="Save this profile in TemPSS">
-              </span>
               <h4>Profile editor: <span id="editing-profile-name"></span></h4>
               <div id="template-container">
                 <h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
@@ -83,7 +79,7 @@
               </div>
               <div style="float: right; padding-bottom: 30px;">
                 <button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
-                            <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
+                <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
               </div>
           </div>
         </div>
@@ -105,24 +101,24 @@
       </div>
       <div class="modal-body">
         <form class="form-horizonal" role="form" style="padding-bottom: 60px;">
-      <div id="save-profile-group" class="form-group">
-        <label for="profileName" class="col-sm-3 control-label">Profile name</label>
-        <div class="col-sm-8">
-          <input type="text" class="form-control" id="profileName" placeholder="Enter a profile name">
-        </div>
-      </div>
-      <div class="form-group">
-        <div id="profile-save-errors" class="col-sm-offset-3 col-sm-8 text-danger"></div>
-      </div>
-    </form>
+          <div id="save-profile-group" class="form-group">
+            <label for="profileName" class="col-sm-3 control-label">Profile name</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" id="profileName" placeholder="Enter a profile name">
+            </div>
+          </div>
+          <div class="form-group">
+            <div id="profile-save-errors" class="col-sm-offset-3 col-sm-8 text-danger"></div>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
         <div class="loading" id="profile-saving" style="float: left; display: none;">
           <img src="../assets/img/loading.gif"/>
           <span>Saving profile...</span>
-      </div>
-        <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        </div>
         <button id="save-profile-btn-modal" type="button" class="btn btn-success">Save</button>
+        <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -136,16 +132,16 @@
         <h4 class="modal-title">Delete profile</h4>
       </div>
       <div class="modal-body">
-      <div id="delete-confirm-text"></div>
-      <div id="profile-delete-errors"></div>
+        <div id="delete-confirm-text"></div>
+        <div id="profile-delete-errors"></div>
       </div>
       <div class="modal-footer">
         <div class="loading" id="profile-deleting" style="float: left; display: none;">
           <img src="../assets/img/loading.gif"/>
           <span>Deleting profile...</span>
-      </div>
-        <button type="button" id="cancel-delete-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        </div>
         <button id="delete-profile-btn-modal" type="button" class="btn btn-success">Delete</button>
+        <button type="button" id="cancel-delete-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -159,8 +155,10 @@
         <h4 class="modal-title">Load profile</h4>
       </div>
       <div class="modal-body">
-      <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p>
-      <p>Any unsaved changes entered into the current template will be lost.</p></div>
+        <div id="confirm-load-text">
+          <p>Are you sure you want to load a new profile?</p>
+          <p>Any unsaved changes entered into the current template will be lost.</p>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" id="load-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Continue</button>
@@ -178,12 +176,14 @@
         <h4 class="modal-title">Reset template</h4>
       </div>
       <div class="modal-body">
-      <div id="confirm-load-text"><h5><p>Are you sure you want to clear all inserted values and empty the current template?</p>
-      <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div>
+        <div id="confirm-load-text">
+          <p>Are you sure you want to clear all inserted values and empty the current template?</p>
+          <p class="text-danger">Any unsaved changes entered into this template will be lost.</p>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" id="cancel-clear-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
         <button id="clear-profile-btn-modal" type="button" class="btn btn-success">OK</button>
+        <button type="button" id="cancel-clear-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -197,12 +197,14 @@
         <h4 class="modal-title">Change template confirmation</h4>
       </div>
       <div class="modal-body">
-      <div id="confirm-load-text"><h5><p>Are you sure you want to switch to a different template?</p>
-      <p class="text-danger">Any unsaved changes entered into this template will be lost.</p></div>
+        <div id="confirm-load-text">
+          <p>Are you sure you want to switch to a different template?</p>
+          <p class="text-danger">Any unsaved changes entered into this template will be lost.</p>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" id="cancel-change-template-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
         <button id="change-template-btn-modal" type="button" class="btn btn-success">Continue</button>
+        <button type="button" id="cancel-change-template-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -212,6 +214,7 @@
 
 {% block script %}
 <script type="text/javascript" src="../assets/js/bootstrap-tree.js"></script>
+<script type="text/javascript" src="../assets/js/tempss-api.js"></script>
 <script type="text/javascript" src="../assets/js/libhpc-parameter-tree.js"></script>
 <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fileDownload/1.4.2/jquery.fileDownload.min.js"></script> -->
 <script type="text/javascript" src="../assets/js/jquery.fileDownload.js"></script>
@@ -223,9 +226,6 @@
     disableProfileButtons(true);
     disableGenerateInputButton(true);
 
-    // Variable to check whether a template has been edited
-    window.templateEdited = false;
-
     $('#template-select').on('change', function(e) {
       var target = e.currentTarget;
       var selected = $(target).find(":selected");
@@ -236,10 +236,9 @@
       // to the base template have been made, confirm that
       // the user wants to change template. This change will
       // lose any unsaved changes.
-      if(templateEdited) {
+      if (templateEdited) {
         $('#confirm-change-template-modal').modal('show');
-      }
-      else {
+      } else {
         setTimeout(function() {
           templateChanged(selectedValue, selectedText);
         }, 0);
@@ -264,13 +263,12 @@
     // the save profile modal to prompt the user for a profile name
     $('#save-as-profile-btn').on('click', function(e) {
       $('#profileName').val("");
-      if($('#profileName').val() == "") {
+      if ($('#profileName').val() == "") {
         $('#save-profile-btn-modal').prop('disabled', true);
-      }
-      else {
+      } else {
         $('#save-profile-btn-modal').removeProp('disabled');
       }
-      $('#save-profile-modal').modal();
+      $('#save-profile-modal').modal('show');
     });
 
     // When the modal input box is changed, check if there is text
@@ -278,10 +276,9 @@
     $('body').on('keyup', '#profileName', function() {
       var saveBtn = $('#save-profile-btn-modal');
 
-      if($('#profileName').val() == "") {
+      if ($('#profileName').val() == "") {
         saveBtn.prop('disabled', true);
-      }
-      else {
+      } else {
         saveBtn.prop('disabled', false);
       }
     });
@@ -341,11 +338,6 @@
       $('#process-profile-loading').show();
       tempssProcessProfile();
     });
-
-    // Set up tooltips for validation help and tree expand/collapse buttons
-    //$('body').tooltip({
-    //    selector: ".val-help, .tree-control-btn"
-    //});
 
     $('#tree-collapse').on('click', function() {
       collapseTree();
