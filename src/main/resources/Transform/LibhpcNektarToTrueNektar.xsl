@@ -271,6 +271,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:choose>
       </xsl:attribute>
     </I>
+    <xsl:if test="SpectralhpDealiasing">
+      <I PROPERTY="SpectralhpDealiasing" VALUE="True" />
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="Physics" mode ="CardiacFunctions">

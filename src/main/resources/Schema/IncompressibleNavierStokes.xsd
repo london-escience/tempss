@@ -237,6 +237,89 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     </xs:sequence>
   </xs:complexType>
   
+  <xs:complexType name="INSNumericalAlgorithm">
+    <xs:sequence>
+      <xs:element name="Projection">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+ContinuousGalerkin: enforces continuity of solution across element boundaries
+DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shocks in solution
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ContinuousGalerkin"/>
+            <xs:enumeration value="DiscontinuousGalerkin"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TimeIntegration" type="TimeIntegration">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters setting the method for time integration.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="MatrixInversion" type="MatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SpectralhpDealiasing" type="OnOffType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Enables the use of spectral/hp dealiasing, which can stablise certain simulations through the use of additional integration of the nonlinear convective terms.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SpectralVanishingViscosity" type="SpectralVanishingViscosityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>If enabled adds additional damping for high-frequency modes which may help in stabilising underresolved simulations.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="WeightPartitions">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>If using a hybrid mesh of more than one element type, this should be set to NonUniform to give better parallel partitions</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Uniform"/>
+            <xs:enumeration value="NonUniform"/>
+          </xs:restriction>
+        </xs:simpleType>  
+      </xs:element>
+      <xs:element name="GlobalOptimizationParameters" type="GlobalOptimizationParameters">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+Specify the algorithm to use for matrix-vector multiplication. This is specified individually for the various matrix operators that are encountered. These are the: 
+  - backward transform
+  - inner product
+  - Helmholtz and 
+  - mass 
+operators.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
   <xs:element name="IncompressibleNavierStokes">
     <xs:annotation>
       <xs:appinfo>
@@ -398,7 +481,7 @@ The boundary conditions may be overridden on a per-run basis, but this will not 
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="NumericalAlgorithm" type="NumericalAlgorithm">
+        <xs:element name="NumericalAlgorithm" type="INSNumericalAlgorithm">
           <xs:annotation>
             <xs:appinfo>
               <libhpc:documentation>This section contains all the parameters that specify the numerical algorithm for solving the problem.</libhpc:documentation>
