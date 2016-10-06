@@ -67,25 +67,27 @@
 					              text-info tree-control-btn"
 					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
 
-				        {% if user != null %}
-				          <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
-					              text-info tree-control-btn"
-					          data-toggle="tooltip" title="Save this profile in TemPSS">
-					      </span>
-				        {% else %}
-				          <span id="save-as-profile-btn" class="glyphicon glyphicon-floppy-disk
-					              text-info tree-control-btn" data-placement="top"
-					            data-toggle="tooltip" disabled="disabled"
-					            title="You must be signed in to save a profile">
-					      </span>
-				        {% endif %}
-
 					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
 					    <div id="template-container">
 					    	<h6 class="infotext">No template selected. Please select a template from the drop-down list above.</h6>
 					    </div>
 					    <div style="float: left; padding-bottom: 30px;">
-					        <button class="btn btn-info" id="generate-input-file-btn">Generate app input file</button>
+					    {% if user != null %}
+                          <span id="save-btn-wrapper">
+                            <button class="btn btn-default" id="save-as-profile-btn">
+                              <i class="glyphicon glyphicon-floppy-disk"></i> Save profile
+                            </button>
+                          </span>
+                        {% else %}
+                          <span id="save-btn-wrapper" data-toggle="tooltip" 
+                                data-placement="top" 
+                                title="You must be signed in to save a profile">
+                            <button class="btn btn-default" id="save-as-profile-btn" 
+                                    disabled="disabled">
+                              <i class="glyphicon glyphicon-floppy-disk"></i> Save profile
+                            </button>
+                          </span>
+                        {% endif %}
 					    	<span class="loading" id="process-profile-loading" style="padding-left: 8px; display: none;">
 					    	  <img src="../assets/img/loading.gif"/>
 				      	      <span>Processing profile...</span>
@@ -93,20 +95,7 @@
 					    </div>
 					    <div style="float: right; padding-bottom: 30px;">
 					    	<button class="btn btn-danger" id="clear-profile-btn">Clear template content</button>
-					    	{% if user != null %}
-                            <span id="save-btn-wrapper">
-                              <button class="btn btn-success" id="save-as-profile-btn">Save as profile</button>
-                            </span>
-                            {% else %}
-                            <span id="save-btn-wrapper" data-toggle="tooltip" 
-                                  data-placement="top" 
-                                  title="You must be signed in to save a profile">
-                              <button class="btn btn-success" id="save-as-profile-btn" 
-                                      disabled="disabled">Save as profile
-                              </button>
-                            </span>
-                            {% endif %}
-					    	
+					    	<button class="btn btn-info" id="generate-input-file-btn">Generate app input file</button>
 					    </div>
 					</div>
 				</div>

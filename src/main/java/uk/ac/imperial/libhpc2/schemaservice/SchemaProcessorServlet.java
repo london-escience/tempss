@@ -334,7 +334,8 @@ public class SchemaProcessorServlet extends HttpServlet {
 
         if (sComponentName.equalsIgnoreCase("electrocardiology") ||
             sComponentName.equalsIgnoreCase("incompressiblenavierstokes") ||
-            sComponentName.equalsIgnoreCase("compressibleflowsolver")) {
+            sComponentName.equalsIgnoreCase("compressibleflowsolver") ||
+            sComponentName.equalsIgnoreCase("advectiondiffusion")) {
             for (Map.Entry<String, FileItem> entry : filesMap.entrySet()) {
                 String fileName = entry.getKey();
                 FileItem fileItem = entry.getValue();
