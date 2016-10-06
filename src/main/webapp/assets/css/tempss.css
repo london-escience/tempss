@@ -42,12 +42,25 @@ body {
 	color: #888;
 }
 
+.profile-type {
+	display: inline-block;
+	width: 40px;
+	max-width: 40px;
+}
+
 .profile-item {
 	padding: 8px 12px;
 }
 
 .profile-item a {
-	font-weight: 600;
+	font-weight: 400;
+	text-decoration: none;
+	display: inline-block;
+	max-width: 200px;
+}
+
+.profile-item icon {
+	font-weight: 400;
 	text-decoration: none;
 }
 
@@ -63,6 +76,10 @@ body {
 	cursor: pointer;
 }
 
+.profile-item .no-pointer {
+	cursor: default;
+}
+
 #editing-profile-name {
 	color: #777;
 }
@@ -72,4 +89,27 @@ body {
 	padding-left: 6px;
 	cursor: pointer;
 	cursor: hand; 
+}
+
+.form-error {
+	padding-top: 8px;
+}
+
+#login-form {
+	max-width: 250px;
+	padding: 25px 25px;
+}
+
+#login-form input {
+	margin-bottom: 10px;
+	width: 180px;
+}
+
+#login-form button {
+	width: 100%;
+}
+
+#signin-errors {
+	height: 50px;
+	padding-bottom: 30px;
 }

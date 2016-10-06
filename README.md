@@ -66,7 +66,7 @@ You can now start a container based on this image. Network ports for the running
 
 You can adjust the first port number in the `-p` switch values to change the port on your host system that will listen for requests and forward them to the docker container. You can SSH to the container from your host machine by specifying the port on localhost that you have selected as port to forward to SSH on the container, e.g.
 
-`ssh -i ~/.ssh/<private key file> -p 8022 root@localhost`
+`ssh -i ~/.ssh/<private key file> -p 8022 root@${HOST_IP}`
 
 #### Configuration
 

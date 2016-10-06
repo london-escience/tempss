@@ -177,11 +177,26 @@ function updateProfileList(templateId) {
         	if(data.profile_names.length > 0) {
 	        	var htmlString = "";
 	        	for(var i = 0; i < data.profile_names.length; i++) {
-	        		htmlString += '<div class="profile-item"><a class="profile-link" href="#"' +  
-	        			'data-pid="'+ data.profile_names[i] + '">' + data.profile_names[i] +
-	        			'</a><div style="float: right;">' +
-	        			'<span class="glyphicon glyphicon-remove-sign delete-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Delete profile"></span>' +
-	        			'<span class="glyphicon glyphicon-floppy-save load-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Load profile into template"></span>' +
+	        		var profileVisibilityIcon = "";
+	        		if(data.profile_names[i].public == true) {
+	        			profileVisibilityIcon += '<span class="profile-type glyphicon glyphicon-user text-success no-pointer" data-toggle="tooltip" data-placement="left" title="Public profile"></span>';
+	        		}
+	        		else {
+	        			profileVisibilityIcon += '<span class="profile-type glyphicon glyphicon-lock text-danger no-pointer" data-toggle="tooltip" data-placement="left" title="Private profile"></span>';
+	        		}
+	        		htmlString += '<div class="profile-item">' + 
+	        		    profileVisibilityIcon +
+	        		    '<a class="profile-link" href="#"' +  
+	        			'data-pid="'+ data.profile_names[i].name + '">' + data.profile_names[i].name +
+	        			'</a><div style="float: right;">';
+	        			if(data.profile_names[i].owner) {
+	        				htmlString += '<span class="glyphicon glyphicon-remove-sign delete-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Delete profile"></span>';
+	        			}
+	        			else {
+	        				htmlString += '<span></span>';
+	        			}
+	        			
+	        			htmlString += '<span class="glyphicon glyphicon-floppy-save load-profile" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Load profile into template"></span>' +
 	        			'</div></div>\n';
 	        	}
 	        	$('#profiles').html(htmlString);
@@ -203,11 +218,15 @@ function updateProfileList(templateId) {
 // Disable the button used for clearing profile content 
 // These should only be enabled when a template is selected.
 function disableProfileButtons(disable) {
-	if(disable) {
-		$('#clear-profile-btn').prop('disabled', true);	
+	if(disable) {	
+		$('#clear-profile-btn').prop('disabled', true);
+		$('#save-as-profile-btn').prop('disabled', true);
 	}
 	else {
 		$('#clear-profile-btn').removeProp('disabled');
+		if($('#save-btn-wrapper').attr("data-toggle") == undefined) {
+			$('#save-as-profile-btn').removeProp('disabled');
+		}
 	}
 	
 }
@@ -246,15 +265,20 @@ function disableGenerateInputButton(disable) {
 function saveProfile(templateId, profileName) {
 	log('Request to save profile <' + profileName + '> for template <' + templateId + '>.');
 	var profileData = getProfileXml($("ul[role='tree']"));
-	var profileObject = {profile:profileData};
+	var profilePublic = $('#profile-public').prop('checked');
+	var csrfToken = $('input[name="_csrf"]').val();
+	var profileObject = {profile:profileData, profilePublic:profilePublic};
 	$("#profile-saving").show();
 	// Clear any existing error text
-	$('#profile-save-errors').html("");
+	$('#profile-save-errors').html("");   
 	$.ajax({
         method:   'POST',
         url:      '/tempss/api/profile/' + templateId + '/' + profileName,
         dataType: 'json',
         contentType: 'application/json',
+        beforeSend: function(jqxhr, settings) {
+        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        },
         data:     JSON.stringify(profileObject),
         success:  function(data){
         	// Check if save succeeded
@@ -376,9 +400,14 @@ function deleteProfile(templateId, profileId) {
 	$("#profile-deleting").show();
 	// Clear any existing error text
 	$('#profile-delete-errors').html("");
+	
+	var csrfToken = $('input[name="_csrf"]').val();
 	$.ajax({
         method:   'DELETE',
         url:      '/tempss/api/profile/' + templateId + '/' + profileId,
+        beforeSend: function(jqxhr, settings) {
+        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        },
         dataType: 'json',
         success:  function(data) {
         	// Check if save succeeded
@@ -396,7 +425,33 @@ function deleteProfile(templateId, profileId) {
         },
         error: function(data) {
         	var result = $.parseJSON(data.responseText);
-        	if(result.status == 'ERROR') {
+        	if(data.status == 403) {
+        		log('Profile deletion failed - you do not have permission to '+
+        			'delete this profile.');
+        		/*
+        		BootstrapDialog.show({
+        			type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Unable to delete profile',
+        			message: 'You do not have permission to delete this ' +
+                              'profile. To delete a profile you must be ' + 
+                              'logged in and have created the profile.',
+                    
+                    buttons: [{
+                        label: 'Close',
+                        cssClass: 'btn-danger',
+                    	action: function(dialog){
+                            $('#delete-profile-modal').modal('hide');
+                    		dialog.close();
+                        }
+                    }],
+                });
+                */
+        		$('#profile-delete-errors').html("<h6>Unable to delete " +
+        				"profile: 'You do not have permission to delete this " +
+                        "profile. To delete a profile you must be " + 
+                        "logged in and have created the profile.</h6>");
+        	}
+        	else if(result.status == 'ERROR') {
         		// An error occurred, show the error message in the modal
         		var errorText = "";
         		switch(result.code) {
