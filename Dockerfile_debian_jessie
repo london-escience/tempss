@@ -13,6 +13,9 @@ EXPOSE 8443
 EXPOSE 22
 
 # Update package lists and install JDK, Tomcat, Maven, git, and an SSH server
+# Before the package update, switch to using the UK debian mirror since having 
+# issues with the redirector that is configured by default
+RUN sed -i 's/httpredir\.debian\.org/ftp\.uk\.debian\.org/g' /etc/apt/sources.list  
 RUN apt-get update && apt-get install -y openjdk-7-jdk tomcat8 git-core maven2 supervisor openssh-server
 
 # Create and configure the tempss user
@@ -23,6 +26,10 @@ RUN usermod -a -G tomcat8 tempss
 RUN mkdir -p /root/.ssh/ 
 # Add your SSH key here if you want to be able to SSH to the container
 #RUN echo "" >> /root/.ssh/authorized_keys
+
+# Edit the Tomcat context configuration to ensure trailing slash redirection is
+# enabled. Restart tomcat8
+RUN sed -i 's/<Context>/<Context mapperContextRootRedirectEnabled=\"true\" mapperDirectoryRedirectEnabled=\"true\">/' /var/lib/tomcat8/conf/context.xml
 
 # Switch to tempss user and build and deploy the tempss-service
 USER tempss
