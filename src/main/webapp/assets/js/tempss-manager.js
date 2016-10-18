@@ -229,7 +229,7 @@ function updateProfileList(templateID) {
            }
            else {
                    // If no profiles are available
-                   $('#profiles').html('<h6 class="infotext">There are no profiles registered for the "' + templateId + '" template.</h6>');
+                   $('#profiles').html('<h6 class="infotext">There are no profiles registered for the "' + templateID + '" template.</h6>');
            }
            $("#profiles-loading").hide(0);
         },
