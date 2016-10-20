@@ -60,6 +60,13 @@ PA: why is this necessary?
       <xs:enumeration value="On"/>
     </xs:restriction>
   </xs:simpleType>
+  
+  <xs:simpleType name="NektarBooleanType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="True"/>
+      <xs:enumeration value="False"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="boundaryCondition">
     <xs:sequence>
@@ -403,7 +410,7 @@ SumFactorization: Represent as a tensor product of smaller dense matrices (more 
     </xs:sequence>
   </xs:complexType>
   
-  <xs:complexType name="SVVEnabledType">
+  <xs:complexType name="SpectralVanishingViscosityType">
     <xs:sequence>
       <xs:element name="SVVDiffCoeff" type="positiveIncDouble">
         <xs:annotation>
@@ -424,28 +431,6 @@ SumFactorization: Represent as a tensor product of smaller dense matrices (more 
     </xs:sequence>
   </xs:complexType>
   
-  <xs:complexType name="SpectralVanishingViscosityType">
-    <xs:choice>
-      <xs:element name="True" type="SVVEnabledType">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Enable spectral vanishing viscosity support</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="False">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Disable spectral vanishing viscosity support.</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-        <xs:complexType/>
-      </xs:element>
-    </xs:choice>
-  </xs:complexType>
-
   <xs:complexType name="NumericalAlgorithm">
     <xs:sequence>
       <xs:element name="Projection">

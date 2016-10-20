@@ -280,10 +280,10 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="SpectralVanishingViscosity" type="SpectralVanishingViscosityType">
+      <xs:element name="SpectralVanishingViscosity" type="SpectralVanishingViscosityType" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>If enabled adds additional damping for high-frequency modes which may help in stabilising underresolved simulations.</libhpc:documentation>
+            <libhpc:documentation>Adds additional damping for high-frequency modes which may help in stabilising underresolved simulations.</libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
