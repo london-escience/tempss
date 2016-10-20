@@ -56,7 +56,7 @@
               {% if user == null %}
               <!-- This block is shown if the user is not logged in -->
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sign in<span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu dropdown-menu-right">
                 <form id="login-form" class="form-horizontal" 
                       method="POST" action="/tempss/login">
 				  <input type="text" name="username" class="form-control" id="login-username" placeholder="Username">
@@ -76,7 +76,7 @@
 				                     value="{{ _csrf.token }}"/>
               </form>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.user.firstname }} {{ user.user.lastname }}<span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu dropdown-menu-right">
                 <li role="separator" class="divider"></li>
                 <li><a id="sign-out" href="#">Sign out</a></li>
               </ul>
