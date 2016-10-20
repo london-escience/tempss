@@ -13,5 +13,9 @@ public interface TempssUserDao {
 	public List<TempssUser> findAll();
 	
 	public TempssUser findByName(String pUsername);
+	
+	public int activateUser(TempssUser pUser);
+	
+	public int deactivateUser(TempssUser pUser);
 
 }

@@ -28,6 +28,13 @@ PA: why is this necessary?
       <xs:minExclusive value="0"/>
     </xs:restriction>
   </xs:simpleType>
+  
+  <xs:simpleType name="positiveIncDouble01">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:simpleType name="positiveIncDouble">
     <xs:restriction base="xs:double">
@@ -46,6 +53,20 @@ PA: why is this necessary?
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+  
+  <xs:simpleType name="OnOffType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Off"/>
+      <xs:enumeration value="On"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="NektarBooleanType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="True"/>
+      <xs:enumeration value="False"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="boundaryCondition">
     <xs:sequence>
@@ -215,6 +236,48 @@ LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulatio
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="XxtMatrixInversion">
+    <xs:sequence>
+      <xs:element name="SubStructuring">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Substructuring allows the matrix to be reorganised into a form that is easier to invert.
+  Full: the degrees of freedom from all elements are put together into one big matrix
+  StaticCondensation: Using linear algebra, the matrix is restructured so that all the degrees of freedom on element boundaries come first. This gives a dense matrix in the top left hand corner, and a series of block matrices elsewhere. Then the Schur complement method is used to invert the matrix.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Full"/>
+            <xs:enumeration value="StaticCondensation"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PETScMatrixInversion">
+    <xs:sequence>
+      <xs:element name="SubStructuring">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Substructuring allows the matrix to be reorganised into a form that is easier to invert.
+  Full: the degrees of freedom from all elements are put together into one big matrix
+  StaticCondensation: Using linear algebra, the matrix is restructured so that all the degrees of freedom on element boundaries come first. This gives a dense matrix in the top left hand corner, and a series of block matrices elsewhere. Then the Schur complement method is used to invert the matrix.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Full"/>
+            <xs:enumeration value="StaticCondensation"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="MatrixInversion">
     <xs:choice>
       <xs:element name="Direct" type="DirectMatrixInversion">
@@ -229,6 +292,22 @@ LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulatio
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>Invert the matrix iteratively using the conjugate gradient approach. Uses repeated matrix multiplication to converge to a solution to the matrix inverse problem rather than direcly inverting the matrix.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Xxt" type="XxtMatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="PETSc" type="PETScMatrixInversion">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
@@ -330,7 +409,28 @@ SumFactorization: Represent as a tensor product of smaller dense matrices (more 
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-
+  
+  <xs:complexType name="SpectralVanishingViscosityType">
+    <xs:sequence>
+      <xs:element name="SVVDiffCoeff" type="positiveIncDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Diffusion coefficient (i.e. strength of diffusion) to use for SVV. Larger number imposes higher level of diffusion.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SVVCutoffRatio" type="positiveIncDouble01">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Dictates the frequencies of the coefficients to be damped. i.e. for polynomial order 7, a value of 0.75 means damping is only applied to modes 6 and 7.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
   <xs:complexType name="NumericalAlgorithm">
     <xs:sequence>
       <xs:element name="Projection">

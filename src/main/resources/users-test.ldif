@@ -1,0 +1,30 @@
+dn: o=Imperial College (London),dc=ic,dc=ac,dc=uk
+objectclass: top
+objectclass: organization
+o: Imperial College (London)
+
+dn: ou=Users,o=Imperial College (London),dc=ic,dc=ac,dc=uk
+objectclass: top
+objectclass: organizationalUnit
+ou: Users
+
+dn: ou=doc,ou=Users,o=Imperial College (London),dc=ic,dc=ac,dc=uk
+objectclass: top
+objectclass: organizationalUnit
+ou: doc
+
+dn: cn=jhc02,ou=Users,o=Imperial College (London),dc=ic,dc=ac,dc=uk
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: jhc02
+sn: Cohen
+title: Research Fellow
+telephoneNumber: 020 7594 8380
+givenName: Jeremy
+initials: J
+mail: jeremy.cohen@imperial.ac.uk
+distinguishedName: CN=jhc02,OU=doc,OU=Users,O=Imperial College (London),DC=ic,DC=ac,DC=uk
+uid: jhc02
+userPassword: test

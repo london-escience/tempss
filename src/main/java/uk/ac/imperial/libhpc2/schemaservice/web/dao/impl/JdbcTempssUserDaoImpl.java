@@ -45,7 +45,9 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +57,11 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TempssUserDao;
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
 public class JdbcTempssUserDaoImpl implements TempssUserDao {
@@ -83,15 +82,29 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 	
 	@Override
 	public int add(TempssUser pUser) {
+		_insertProfile = new SimpleJdbcInsert(_jdbcTemplate).withTableName("user").usingGeneratedKeyColumns("id");
+		
 		// Hash the password to store it in the DB
 		String hashedPassword = passwordEncoder.encode(pUser.getPassword());
 		
-		Map<String,String> rowParams = new HashMap<String, String>(2);
+		Map<String,Object> rowParams = new HashMap<String, Object>(8);
 		rowParams.put("username", pUser.getUsername());
 		rowParams.put("password", hashedPassword);
 		rowParams.put("email", pUser.getEmail());
 		rowParams.put("firstname", pUser.getFirstname());
 		rowParams.put("lastname", pUser.getLastname());
+		rowParams.put("locked", (pUser.getLocked() == true) ? "1" : "0");
+		rowParams.put("activated", (pUser.getActivated() == true) ? "1" : "0");
+		if(pUser.getActivationTime() != null) {
+			// Don't need to call usingColumns since we're using all cols
+			// Set reg time to same as activation time it may be unset
+			rowParams.put("regtime", pUser.getActivationTime());
+			rowParams.put("acttime", pUser.getActivationTime());
+		}
+		else {
+			_insertProfile.usingColumns("username", "password", "email", 
+					"firstname", "lastname", "locked", "activated");
+		}
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
@@ -112,15 +125,20 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 					                      (String)data.get("password"),
 					                      (String)data.get("email"),
 					                      (String)data.get("firstname"),
-					                      (String)data.get("lastname"));
+					                      (String)data.get("lastname"),
+					                      Boolean.parseBoolean((String)data.get("locked")),
+					                      Boolean.parseBoolean((String)data.get("activated")),
+					                      (Timestamp)data.get("registrationTime"),
+					                      (Timestamp)data.get("activationTime"));
 			users.add(u);
 		}
 		
 		sLog.debug("Found <{}> users", users.size());
 		for(TempssUser u : users) {
-			sLog.debug("User <{}>: Email: {}, Firstname: {}, Lastname: {}", 
+			sLog.debug("User <{}>: Email: {}, Firstname: {}, Lastname: {}, "
+					+ "Locked <{}>, Activated: <{}>", 
 					u.getUsername(), u.getEmail(), u.getFirstname(), 
-					u.getLastname());
+					u.getLastname(), u.getLocked(), u.getActivated());
 		}
 		
 		return users;
@@ -135,11 +153,25 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 		
 		if(users.size() == 1) {
 			Map<String,Object> userData = users.get(0);
+			boolean locked = true;
+			boolean activated = false;
+			Object lockedObj = userData.get("locked");
+			Object activatedObj = userData.get("activated");
+			if( (lockedObj != null) && (((Integer)lockedObj) == 0)) {
+				locked = false;
+			}
+			if( (activatedObj != null) && (((Integer)activatedObj) == 1)) {
+				activated = true;
+			}
 			user = new TempssUser((String)userData.get("username"),
 					(String)userData.get("password"),
 					(String)userData.get("email"),
 					(String)userData.get("firstname"),
-					(String)userData.get("lastname"));
+					(String)userData.get("lastname"),
+					locked,
+                    activated,
+                    (Timestamp)userData.get("registrationTime"),
+                    (Timestamp)userData.get("activationTime"));
 		}
 		else if(users.size() > 1) {
 			sLog.error("ERROR: More than 1 user with name <{}> found.", 
@@ -157,6 +189,20 @@ public class JdbcTempssUserDaoImpl implements TempssUserDao {
 				user.getUsername(), user.getEmail());
 		
 		return user;
+	}
+
+	@Override
+	public int activateUser(TempssUser pUser) {
+		Timestamp currentTime = new Timestamp(Calendar.getInstance().getTime().getTime());
+		int rowsAffected = _jdbcTemplate.update("UPDATE user SET activated = 1, acttime = ? WHERE username = ?", 
+				new Object[] {currentTime, pUser.getUsername()});
+		return rowsAffected;
+	}
+
+	@Override
+	public int deactivateUser(TempssUser pUser) {
+		int rowsAffected = _jdbcTemplate.update("UPDATE user SET activated = 0 WHERE username = ?", pUser.getUsername());
+		return rowsAffected;	
 	}
 
 }

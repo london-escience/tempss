@@ -75,6 +75,22 @@ A configuration file `tempss.conf` can be used to provide static configuration i
 ###### Section: [tempss-ignore]
 The configuration file currently supports only one section `[template-ignore]` which is used for hiding the display of certain templates. In cases where an administrator does not want all the default TemPSS templates to appear as options in the user interface, template IDs can be added to the template-ignore section of the configuration file. Each entry should appear on a separate line and can be a full template ID, or a partial ID followed by a wildcard `*` character. Note that, at present, the wildcard character can only appear at the end of a string. For example, to hide all templates that have an id beginning with `bio-`, enter a line into the `[tempss-ignore]` section of `tempss.conf` containing `bio-*`.
 
+#### User Accounts
+
+TemPSS now has support for user accounts. Registered users can save their profiles as private profiles that are only visible to them. They can also create new public profiles that are visible to all users. Unregistered users or users who are not logged in cannot save profiles but they are able to load existing public profiles and use/extend them. When an unregistered user completes a profile, they are able to convert this to an application input file which they can then download.
+
+######Standard Authentication
+
+By default the user accounts implementation stores account informatino in the local database with secure password storage. Accounts that users create are local to the TemPSS system.
+
+######LDAP Authentication
+
+We also provide support for LDAP authentication. LDAP authentication can be configured by editing the [src/main/webapp/WEB-INF/spring/security.xml](../blob/master/src/main/webapp/WEB-INF/spring/security.xml) file.
+
+To enable LDAP authentication, uncomment the `<authentication-provider ref="ldapAuthenticationProvider"/>` tag in the `<authentication-manager>` element towards the end of the file. Then add your local LDAP configuration into the `ldapAuthenticationProvider` bean. The bean that is enabled by default is for authentication against an Active Directory LDAP infrastructure. To use this you need to replace the placeholder values for each of the three `constructor-arg` elements with your LDAP domain (e.g. EXAMPLE.COM), server URL, and base domain (e.g. dc=example,dc=com). 
+
+If you wish to use a standard LDAP server, an example is given for a standard LDAP authentication provider bean configuration. Comment out the `bean` element for the `ldapAuthenticationProvider` bean that is configured to use the Active Directory provider and replace this with the `bean` element configured to use the standard LDAP provider, changing the properties to fit your local LDAP configuration.
+
 #### Documentation
 
 [API Documentation](doc/API.md)

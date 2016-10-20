@@ -70,7 +70,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="ForceOutputBAMFormat" type="boolean">
+              <xs:element name="ForceOutputBAMFormat" type="xs:boolean">
                 <!-- -b: Specifies output in BAM format -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -79,7 +79,7 @@
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="OutputUncompressedBAM" type="boolean">
+              <xs:element name="OutputUncompressedBAM" type="xs:boolean">
                 <!-- -u: Output uncompressed BAM -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -94,7 +94,7 @@
         <xs:element name="GeneralConfiguration">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="IncludeHeaderInOutput" type="boolean">
+              <xs:element name="IncludeHeaderInOutput" type="xs:boolean">
                 <!-- -h - Include the header in the output. -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -103,7 +103,7 @@
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="HeaderOnlyOutput" type="boolean">
+              <xs:element name="HeaderOnlyOutput" type="xs:boolean">
                 <!-- -H - Output the header only. -->
                 <xs:annotation>
                   <xs:appinfo>
@@ -157,7 +157,7 @@
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="OutputOnlyCounts" type="boolean">
+              <xs:element name="OutputOnlyCounts" type="xs:boolean">
                 <!-- -c - Instead of printing the alignments, only count them and print the total number.  -->
                 <xs:annotation>
                   <xs:appinfo>

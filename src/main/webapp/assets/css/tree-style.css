@@ -64,6 +64,7 @@ h2 {
     border-radius:5px;
     display:inline-block;
     padding:3px 8px;
+    margin-right: 8px;
     text-decoration:none
 }
 .tree li.parent_li>span {
@@ -122,6 +123,11 @@ h2 {
 	color: #000000;
 }
 
+.disabled .badge {
+    background-color: #ededed;
+    color: #000000;
+}
+
 /* ul.valid {
   background-image:url('../img/valid.png');
   background-repeat:no-repeat;
@@ -152,3 +158,57 @@ ul.invalid li span:first-child:before {
   color: #E52638;
   font-size: 1.2em;
 }
+
+/* Styling for toggle and plus/minus buttons */
+span.toggle_button {
+  font-size: 0.75em;
+  background-color: #ededed;
+  margin-left: 0.5em;
+}
+
+i.enable_button::before {
+  color: #E52638;
+  content: "\f204"; /* toggle-off */ 
+  font-family: "FontAwesome";
+  font-style: normal;
+  font-weight: normal;
+}
+
+i.disable_button::before {
+  color: #46A939;
+  content: "\f205"; /* toggle-on */
+  font-family: "FontAwesome";
+  font-style: normal;
+  font-weight: normal;
+}
+
+span.repeat_button {
+  font-size: 0.8em;
+  background-color: #ededed;
+  margin-left: 0.5em;
+}
+
+i.repeat_button_add::before {
+    color: #46A939;
+    content: "\f067";
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-weight: normal;
+}
+
+i.repeat_button_remove::before {
+    color: #E52638;
+    content: "\f068";
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-weight: normal;
+}
+
+span.toggle_button {
+	margin-left: 0px;
+}
+
+span.repeat_button {
+	margin-left: 0px;
+}
+

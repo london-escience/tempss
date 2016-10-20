@@ -25,6 +25,8 @@ public class TempssUserValidator implements Validator {
 	@Autowired
 	TempssUserDao tempssUserDao;
 	
+	private static final String[] _ldapPrefixes = {"IC/"};
+	
 	@Override
 	public boolean supports(Class<?> pClazz) {
 		if(TempssUser.class.equals(pClazz)) {
@@ -44,7 +46,19 @@ public class TempssUserValidator implements Validator {
 			pErrors.rejectValue("username", "USER_EXISTS", "A user with this "
 					+ "username already exists. Please select a different "
 					+ "username.");
-					
+		}
+		
+		for(String prefix : _ldapPrefixes) {
+			if(u.getUsername().startsWith(prefix)) {
+				pErrors.rejectValue("username", "INVALID_PREFIX", "A username "
+						+ "cannot begin with the prefix " + prefix + ".");
+				break;
+			}
+		}
+		
+		if(u.getUsername().contains("/")) {
+			pErrors.rejectValue("username", "INVALID_CHARACTER", "A username "
+					+ "cannot contain a '/' character.");
 		}
 		
 		if(!u.getPassword().equals(u.getPassword2())) {

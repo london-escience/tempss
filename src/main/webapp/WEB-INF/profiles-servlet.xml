@@ -21,7 +21,14 @@
         	<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
     	</mvc:argument-resolvers>
     </mvc:annotation-driven>
-        
+    
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="uk.ac.imperial.libhpc2.schemaservice.security.TempssInactiveUserInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    
     <bean id="pebbleEngine" class="com.mitchellbosecke.pebble.PebbleEngine">
 		<property name="loader">
 			<bean class="com.mitchellbosecke.pebble.spring.PebbleTemplateLoader" />

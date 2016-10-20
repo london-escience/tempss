@@ -35,10 +35,62 @@
 		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
 	</http>
 	
+	<b:bean id="tempssLdapContextMapper" 
+            class="uk.ac.imperial.libhpc2.schemaservice.security.TempssLdapContextMapper"/>
+	
+	<!-- Local LDAP config used for testing purposes -->
+	<!--
+	<ldap-server ldif="classpath:users-test.ldif" root="dc=ic,dc=ac,dc=uk"/>
+	
+    <b:bean id="contextSource"
+            class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+        <b:constructor-arg value="ldap://localhost:33389/dc=ic,dc=ac,dc=uk"/>
+        <b:property name="userDn" value="uid=admin,ou=system"/>
+        <b:property name="password" value="secret"/>
+        <b:property name="base" value="dc=ic,dc=ac,dc=uk"/>
+    </b:bean>
+    
+    <b:bean id="ldapUserSearch" 
+            class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+        <b:constructor-arg value=""/>
+        <b:constructor-arg value="(cn={0})"/>
+        <b:constructor-arg ref="contextSource"/>
+    </b:bean>
+	
+	<b:bean id="ldapAuthenticationProvider"
+            class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+        <b:constructor-arg>
+            <b:bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
+                <b:constructor-arg ref="contextSource"/>
+                <b:property name="userSearch" ref="ldapUserSearch"/>
+            </b:bean>
+        </b:constructor-arg>
+        <b:constructor-arg>
+            <b:bean class="org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator">
+                <b:constructor-arg ref="contextSource"/>
+                <b:constructor-arg value=""/>
+            </b:bean>
+        </b:constructor-arg>
+        <b:property name="userDetailsContextMapper" ref="tempssLdapContextMapper" />
+	</b:bean>
+	-->
+	
+	<!-- IC Remote LDAP configuration used for production deployment -->
+	<b:bean id="ldapAuthenticationProvider"
+            class="org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider">
+        <b:constructor-arg value="[YOUR LDAP DOMAIN HERE]" />
+        <b:constructor-arg value="ldaps://[YOUR LDAP SERVER HERE]" />
+        <b:constructor-arg value="[YOUR BASE DOMAIN HERE]" />
+        <b:property name="searchFilter" value="(userPrincipalName={0})" />
+        <!-- <b:property name="searchByBindPrincipal" value="false" />  -->
+        <b:property name="userDetailsContextMapper" ref="tempssLdapContextMapper" />
+	</b:bean>
+	
 	<authentication-manager>
 		<authentication-provider user-service-ref="tempssUserDetailsService">
 		  <password-encoder ref="bCryptPasswordEncoder" />
 		</authentication-provider>
+		<!-- <authentication-provider ref="ldapAuthenticationProvider"/> -->
 	</authentication-manager>
-
+	
 </b:beans>

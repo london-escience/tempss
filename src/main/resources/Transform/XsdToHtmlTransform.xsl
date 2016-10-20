@@ -1,16 +1,14 @@
-﻿<?xml version="1.0"?>
-<xsl:stylesheet version="1.0"
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           xmlns:xalan="http://xml.apache.org/xslt"
+           xmlns:saxon="http://saxon.sf.net/"
            exclude-result-prefixes="xs"
-
 >
 
-  <!-- PA trying to get Greek letter my displaying properly -->
-  <!--xsl:output encoding="ISO-8859-1"/-->
-
-  <xsl:output method="html"/>
+  <xsl:output method="html" indent="yes" xalan:indent-amount="2"/>
   <!-- ignore white space. Otherwise you get a great long html output full of new lines -->
   <xsl:strip-space elements="xs:schema xs:element xs:complexType xs:simpleType xs:restriction"/>
   <xsl:strip-space elements="xs:sequence xs:choice xs:minExclusive xs:simpleContent xs:extension"/>
@@ -19,11 +17,24 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <!--xsl:template match="xs:element[@type]" mode="findChildNodes"-->
   <xsl:template match="xs:element" mode="findChildNodes">
     <xsl:param name="path" />
-    <xsl:param name="node" select="@name"/>
+    <xsl:param name="nodeName" select="@name"/>
+    <!-- libhpc:trueName can be used to define true parameter name if it needed
+         to be sanitised to produce correct XML in the schema node name -->
+    <xsl:param name="trueNodeName">
+      <xsl:choose>
+        <xsl:when test="@libhpc:trueName">
+          <xsl:value-of select="@libhpc:trueName"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$nodeName"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:param>
     <xsl:param name="type" select="@type"/>
-    <xsl:param name="this_path" select="concat($path,concat('.',$node))"/>
+    <xsl:param name="this_path" select="concat($path,concat('.',$nodeName))"/>
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
     <xsl:param name="units" select="xs:annotation/xs:appinfo/libhpc:units"/>
+    <xsl:param name="editable_units" select="xs:annotation/xs:appinfo/libhpc:editableUnits"/>
     <xsl:param name="badge_type">
       <xsl:choose>
         <xsl:when test="./xs:complexType/xs:choice or /xs:schema/xs:complexType[@name=$type]/xs:choice">badge badge-warning</xsl:when>
@@ -31,7 +42,19 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:otherwise>badge badge-info</xsl:otherwise>
       </xsl:choose>
     </xsl:param>
-    <ul role="group">
+    <!-- Test to work out whether an element is optional or not -->
+    <xsl:param name="optional" select="@minOccurs = '0'"/>
+    <!-- Test to see if element is repeatable, based on maxOccurs -->
+    <xsl:param name="repeatable" select="@maxOccurs and @maxOccurs != '1'"/>
+    <xsl:element name="ul">
+      <!-- If this is a repeatable element, add a count with the data-repeat
+           attribute.  -->
+      <xsl:choose>
+        <xsl:when test="$repeatable">
+          <xsl:attribute name="data-repeat">1</xsl:attribute>
+        </xsl:when>
+      </xsl:choose>
+      <xsl:attribute name="role">group</xsl:attribute>
       <xsl:if test="../../xs:choice">
         <xsl:attribute name="choice-id">
           <xsl:value-of select="@name" />
@@ -41,22 +64,65 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:attribute>
         <xsl:attribute name="chosen">false</xsl:attribute>
       </xsl:if>
+      <xsl:choose>
+        <xsl:when test="$optional">
+          <!-- Add optional data attribute -->
+          <xsl:attribute name="data-optional">true</xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="data-optional">false</xsl:attribute>
+        </xsl:otherwise>
+      </xsl:choose>
+      <!-- If multiple copies of the element are allowed add data attribute-->
+      <xsl:choose>
+        <xsl:when test="$repeatable">
+          <xsl:attribute name="data-max-occurs">
+            <xsl:value-of select="@maxOccurs"/>
+          </xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="data-max-occurs">1</xsl:attribute>
+        </xsl:otherwise>
+      </xsl:choose>
       <!-- Test if it's a leaf by looking at the badge colour ... -->
       <xsl:if test="$badge_type = 'badge badge-info'">
-        <xsl:attribute name="leaf">true</xsl:attribute>
+        <xsl:attribute name="data-leaf">true</xsl:attribute>
       </xsl:if>
-      <li class="parent_li" role="treeitem">
+      <xsl:element name="li">
+        <xsl:attribute name="class">parent_li</xsl:attribute>
+        <xsl:attribute name="role">treeitem</xsl:attribute>
         <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
-          <xsl:attribute name="documentation">
+          <xsl:attribute name="data-documentation">
             <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
           </xsl:attribute>
         </xsl:if>
-        <span>
-          <xsl:attribute name="class">
-            <xsl:value-of select="$badge_type"/>
-          </xsl:attribute>
+        <xsl:attribute name="data-fqname">
+          <xsl:value-of select="$nodeName"/>
+        </xsl:attribute>
+        <xsl:element name="span">
+          <!-- Add optional class if required, and optional data attribute -->
+          <xsl:choose>
+            <xsl:when test="$optional">
+              <xsl:attribute name="data-optional">true</xsl:attribute>
+              <xsl:attribute name="class">
+                <xsl:value-of select="concat($badge_type, ' ', 'optional')"></xsl:value-of>
+              </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:attribute name="data-optional">false</xsl:attribute>
+              <xsl:attribute name="class">
+                <xsl:value-of select="$badge_type"></xsl:value-of>
+              </xsl:attribute>
+            </xsl:otherwise>
+          </xsl:choose>
+          <!-- Test to see if multiple copies of the element are allowed -->
+          <xsl:if test="$repeatable">
+            <xsl:attribute name="data-max-occurs">
+              <xsl:value-of select="@maxOccurs"/>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:attribute name="data-fqname">
-            <xsl:value-of select="$node"/>
+            <xsl:value-of select="$nodeName"/>
           </xsl:attribute>
           <xsl:attribute name="title">
             <xsl:value-of select="$documentation"/>
@@ -74,9 +140,30 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:locationInFile"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:value-of select="$node"/>
-        </span>
-        <xsl:text> </xsl:text>
+          <xsl:value-of select="$trueNodeName"/>
+        </xsl:element><!-- </span> -->
+        <!-- Add optional toggle button here, javascript addition is too slow -->
+        <xsl:if test="$optional">
+          <xsl:element name="span">
+            <xsl:attribute name="class">toggle_button</xsl:attribute>
+            <xsl:attribute name="title">Optional branch inactive - click to activate</xsl:attribute>
+            <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:element name="i">
+              <xsl:attribute name="class">toggle_button enable_button</xsl:attribute>
+            </xsl:element>
+          </xsl:element>
+        </xsl:if>
+        <!-- Add repeatable add section button here, javascript addition is too slow -->
+        <xsl:if test="$repeatable">
+          <xsl:element name="span">
+            <xsl:attribute name="class">repeat_button repeat_button_add</xsl:attribute>
+            <xsl:attribute name="title">This branch is repeatable - click to add another</xsl:attribute>
+            <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:element name="i">
+              <xsl:attribute name="class">repeat_button repeat_button_add</xsl:attribute>
+            </xsl:element>
+          </xsl:element>
+        </xsl:if>
         <xsl:if test="substring($type,1,3)='xs:'">
           <xsl:variable name="apos">'</xsl:variable>
           <xsl:variable name="onchange" select="concat('validateEntries($(this), ', $apos, $type, $apos, ');')"/>
@@ -100,9 +187,23 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:apply-templates mode="findChildNodes">
           <xsl:with-param name="path" select="$this_path"/>
         </xsl:apply-templates>
-        <xsl:text> </xsl:text><xsl:value-of select="$units" disable-output-escaping="yes"/>
-      </li>
-    </ul>
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="$units" disable-output-escaping="yes"/>
+        <xsl:if test="$editable_units">
+          <xsl:element name="input">
+            <xsl:attribute name="type">text</xsl:attribute>
+            <xsl:attribute name="class">unit</xsl:attribute>
+            <xsl:attribute name="data-unit">true</xsl:attribute>
+            <xsl:attribute name="value">
+              <xsl:value-of select="$editable_units"/>
+            </xsl:attribute>
+            <xsl:if test="xs:annotation/xs:appinfo/libhpc:editDisabled">
+              <xsl:attribute name="disabled">disabled</xsl:attribute>
+            </xsl:if>
+          </xsl:element>
+        </xsl:if>
+      </xsl:element><!-- </li> -->
+    </xsl:element><!-- </ul> -->
   </xsl:template>
 
   <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='fileType']" mode="findChildNodes">
@@ -190,12 +291,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:call-template>
         <xsl:text>]}');</xsl:text>
       </xsl:attribute>
-      <option value="">Select from list</option>
+      <option value="Select from list">Select from list</option>
       <xsl:for-each select="xs:enumeration">
         <option>
           <xsl:attribute name="value">
             <xsl:value-of select="@value"/>
           </xsl:attribute>
+          <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
+            <xsl:attribute name="title">
+              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation"/>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:value-of select="@value"/>
         </option>
       </xsl:for-each>
@@ -249,9 +355,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
       </xsl:attribute>
-      <option>Select from list</option>
+      <option value="Select from list">Select from list</option>
       <xsl:for-each select="xs:element">
         <option>
+          <xsl:attribute name="value">
+            <xsl:value-of select="@name"/>
+          </xsl:attribute>
+          <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
+            <xsl:attribute name="title">
+              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
+            </xsl:attribute>
+          </xsl:if>
           <xsl:value-of select="@name"/>
         </option>
       </xsl:for-each>
@@ -283,20 +397,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:apply-templates>
   </xsl:template>
 
-  <xsl:template match="libhpc:documentation" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:units" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:locationInFile" mode="findChildNodes">
-  </xsl:template>
-  <xsl:template match="libhpc:refersToFile" mode="findChildNodes">
-  </xsl:template>
+  <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
+  <xsl:template match="libhpc:alias" mode="findChildNodes"/>
+  <xsl:template match="libhpc:units" mode="findChildNodes"/>
+  <xsl:template match="libhpc:editableUnits" mode="findChildNodes"/>
+  <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>
+  <xsl:template match="libhpc:refersToFile" mode="findChildNodes"/>
 
   <xsl:template match="*">
     <xsl:message terminate="no">
       WARNING: Unmatched element: <xsl:value-of select="name()"/>
     </xsl:message>
-
     <xsl:apply-templates/>
   </xsl:template>
 
@@ -309,41 +420,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <xsl:template match="xs:schema/xs:element">
     <xsl:param name="node" select="@name"/>
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
-
-    <!-- PA: This schema used to generate a full html page.
-    Comment out the header and footer just leaving the tree
-    Use ?ignore (a non-existant processing instruction) to comment out blocks that include comments-->
-    <?ignore
-    <html lang="en">
-      <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-        <meta charset="utf-8"/>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>Job Configuration</title>
-        <!-- Bootstrap -->
-        <link href="./assets/css/bootstrap-3.0.3/bootstrap.css" rel="stylesheet" />
-        <!-- Local styles -->
-        <link href="./assets/css/style.css" rel="stylesheet" media="screen" />
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-      </head>
-      <body>
-        <h1>
-          Job Specification
-        </h1>
-        <span>
-          Load from Library <input type="file" name="libraryxml" />
-          <div class="btn btn-info" onclick="loadlibrary();">
-            Load
-          </div>
-        </span>
-        <br />
-        ?>
         <div id="schema-tree">
           <div class="tree">
             <ul role="tree">
@@ -364,27 +440,5 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             </ul>
           </div>
         </div>
-<?ignore
-    <div>
-          <div class="btn btn-info" onclick="generateParameterXML();">
-            View XML
-          </div>
-          <div class="btn btn-info" onclick="submitXML();">
-            Submit XML
-          </div>
-          <div id="xml-results"></div>
-        </div>
-        <div id="xml-content">
-        </div>
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script type="text/javascript" src="./assets/js/jquery-1.11.0.min.js"></script>
-        <script type="text/javascript" src="./assets/js/bootstrap-tree.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <!-- Latest compiled and minified JavaScript -->
-        <script type="text/javascript" src="./assets/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="./assets/js/libhpc-parameter-tree.js"></script>
-      </body>
-    </html>
-    ?>
   </xsl:template>
 </xsl:stylesheet>
