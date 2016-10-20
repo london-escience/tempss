@@ -130,7 +130,7 @@ function displayTemplate(templateID, templateText) {
         method:   'get',
         url:      '/tempss/api/template/id/' + templateID,
         headers: { 
-            Accept : "text/html",
+            Accept : "application/json",
         }
     });
     
@@ -139,7 +139,7 @@ function displayTemplate(templateID, templateText) {
         function(data) {
             log('Got HTML tree from server');
             // Data that comes back is the raw HTML to place into the page
-            $templateContainer.html(data);
+            $templateContainer.html(data.TreeHtml);
             // Instantiate the tree plugin on the tree
             $templateContainer.LibhpcParameterTree();
 
@@ -147,7 +147,12 @@ function displayTemplate(templateID, templateText) {
 
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
-            disableProfileButtons(false);
+            if(data.authenticated) {
+            	disableProfileButtons(false);
+            }
+            else {
+            	disableProfileButtons(true);
+            }
             hideTreeExpandCollapseButtons(false);
             // Add click/change handlers
             attachChangeHandlers();
@@ -336,6 +341,9 @@ function saveProfile(templateId, profileName) {
 	                    break;
 	                case 'RESPONSE_DATA':
 	                    errorText = "Unable to prepare JSON response data. Profile may have saved successfully";
+	                    break;
+	                case 'PERMISSION_DENIED':
+	                    errorText = result.error;
 	                    break;
 	                default:
 	                    errorText = "An unknown error has occurred.";
