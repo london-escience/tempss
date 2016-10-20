@@ -500,7 +500,8 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
                     </libhpc:documentation>
                   </xs:appinfo>
                 </xs:annotation>
-                <xs:choice>
+                <xs:complexType>
+                  <xs:choice>
                   <xs:element name="Laplace" type="LaplaceEqnType">
 			        <xs:annotation>
 			          <xs:appinfo>
@@ -581,7 +582,8 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
 			          </xs:appinfo>
 			        </xs:annotation>
 			      </xs:element>
-                </xs:choice>
+                  </xs:choice>
+                </xs:complexType>
               </xs:element>
               
               <xs:element name="GeometryAndBoundaryConditions" type="geometryFileAndBoundaryConditions">
