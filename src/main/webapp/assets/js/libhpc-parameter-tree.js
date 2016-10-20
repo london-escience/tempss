@@ -918,6 +918,9 @@ function extractEntriesFromFile(event, path) {
                         if (typeof dataFromXml === "undefined") {
                             dataFromXml = "NotProvided";
                         }
+                        else if( (typeof attribute === "undefined") && (dataFromXml != 'D') && (dataFromXml != 'N')) {
+                        	dataFromXml = "NotProvided";
+                        }
                         $(item2).siblings("input, select").first().val(dataFromXml).change();
 
 

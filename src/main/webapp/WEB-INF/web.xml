@@ -5,6 +5,11 @@
          version="3.0"> 
          
   <display-name>Libhpc Schema Service</display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
   <!-- Resource cleanup for fileupload cleaner -->
   <context-param>
     <param-name>log4jConfigLocation</param-name>
