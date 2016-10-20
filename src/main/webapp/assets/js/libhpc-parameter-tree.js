@@ -632,11 +632,22 @@ function isInteger(valueToCheck) {
      * Repeat this branch.
      */
     var repeatBranch = function(elementUL) {
-        // Copy this UL and insert into the tree directly after.
-        if ($(elementUL).children('li.parent_li').children('span.repeat_button_remove').length > 0) {
-            $(elementUL).clone(true).insertAfter($(elementUL));
-        } else {
-            $(elementUL).clone(true).insertAfter($(elementUL)).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
+        // Get the name of the item we're repeating
+    	var ul = $(elementUL);
+    	var choice_path = ul.find('select.choice').attr('choice-path');
+    	
+    	var newElement = $(elementUL).clone(true);
+    	// Add an additional parameter to this node so we know which number
+        // of a repeated element it is.
+        var numElements = $(elementUL).parent().find('select[choice-path="' + choice_path + '"]').length;
+        newElement.attr('data-repeat', numElements+1);
+    	
+    	// Copy this UL and insert into the tree directly after.
+        if ($(elementUL).children('li.parent_li').children('span.repeat_button_remove').length == 0) {
+        	newElement.insertAfter($(elementUL)).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
+        }
+        else {
+        	newElement.insertAfter($(elementUL));
         }
     };
 
@@ -1158,6 +1169,12 @@ function validateEntries($caller, validationType, restrictionsJSON) {
 
 function selectChoiceItem(event) {
     var $selectElement = $(event.target);
+
+    // Get the parent UL from which we restrict selection of the branch
+    // Without this, if the branch is repeated, making a selection results in 
+    // all copies of the branch being expanded.
+    var $parentUL = $selectElement.parent().parent();
+    
     // This relies on the option value being the same as the
     // text displayed <option value="text">text</option>
     var selectedText = $selectElement.val();
@@ -1165,7 +1182,7 @@ function selectChoiceItem(event) {
     var fullPath = choicePath + "." + selectedText;
 
     // Selected branch
-    var $selectedUL = $('[path="' + fullPath + '"]');
+    var $selectedUL = $parentUL.find('ul[path="' + fullPath + '"]');
 
     // Expand the selected branch in the tree
     $selectedUL.show('fast');

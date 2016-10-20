@@ -47,6 +47,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <!-- Test to see if element is repeatable, based on maxOccurs -->
     <xsl:param name="repeatable" select="@maxOccurs and @maxOccurs != '1'"/>
     <xsl:element name="ul">
+      <!-- If this is a repeatable element, add a count with the data-repeat
+           attribute.  -->
+      <xsl:choose>
+        <xsl:when test="$repeatable">
+          <xsl:attribute name="data-repeat">1</xsl:attribute>
+        </xsl:when>
+      </xsl:choose>
       <xsl:attribute name="role">group</xsl:attribute>
       <xsl:if test="../../xs:choice">
         <xsl:attribute name="choice-id">
