@@ -237,6 +237,65 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     </xs:sequence>
   </xs:complexType>
   
+  <xs:complexType name="INSInitialConditions2DType"> 
+    <xs:sequence>
+      <xs:element name="u" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="v" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="p" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the pressure.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="INSInitialConditions3DType">
+    <xs:sequence>
+      <xs:element name="u" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="v" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="w" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the z direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="p" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the pressure.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>  
+  </xs:complexType>
+  
   <xs:complexType name="INSNumericalAlgorithm">
     <xs:sequence>
       <xs:element name="Projection">
@@ -428,30 +487,25 @@ The boundary conditions may be overridden on a per-run basis, but this will not 
                   </xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="u" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                    <xs:element name="v" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                    <xs:element name="p" type="xs:double">
-                      <xs:annotation>
-                        <xs:appinfo>
-                          <libhpc:documentation>The initial condition for the pressure.</libhpc:documentation>
-                        </xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
-                  </xs:sequence>
-                </xs:complexType>
+                <xs:choice>
+			     <xs:element name="Problem2D" type="INSInitialConditions2DType">
+			       <xs:annotation>
+			         <xs:appinfo>
+			           <libhpc:documentation>Initial conditions for 2D problem.</libhpc:documentation>
+			           <libhpc:units></libhpc:units>
+			         </xs:appinfo>
+			       </xs:annotation>
+			     </xs:element>
+			     <xs:element name="Problem3D" type="INSInitialConditions3DType">
+			       <xs:annotation>
+			         <xs:appinfo>
+			           <libhpc:documentation>Initial conditions for 3D problem.</libhpc:documentation>
+			           <libhpc:units></libhpc:units>
+			         </xs:appinfo>
+			       </xs:annotation>
+			     </xs:element>
+			    </xs:choice>
+			    </xs:complexType>
               </xs:element>
               <xs:element name="Expansion" type ="Expansion">
                 <xs:annotation>

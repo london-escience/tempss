@@ -317,6 +317,134 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  
+  <xs:complexType name="CFSInitialConditions1DType"> 
+    <xs:sequence>
+      <xs:element name="rho" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for rho.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoU" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="e" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for e.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>  
+  
+  <xs:complexType name="CFSInitialConditions2DType"> 
+    <xs:sequence>
+      <xs:element name="rho" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for rho.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoU" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoV" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="e" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for e.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="CFSInitialConditions3DType"> 
+    <xs:sequence>
+      <xs:element name="rho" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for rho.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoU" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoV" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rhoW" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The initial condition for the velocity in the z direction.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="e" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The value for e.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>    
+  </xs:complexType>
+  
+  <xs:complexType name="CFSInitialConditionsType">
+    <xs:choice>
+      <xs:element name="Problem1D" type="CFSInitialConditions1DType">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Initial conditions for 1D problem.</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+     <xs:element name="Problem2D" type="CFSInitialConditions2DType">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Initial conditions for 2D problem.</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+     <xs:element name="Problem3D" type="CFSInitialConditions3DType">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Initial conditions for 3D problem.</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+    </xs:choice>
+  </xs:complexType>
 
   <xs:complexType name="EquationSystem">
     <xs:choice>
@@ -451,6 +579,13 @@ Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
                 <xs:annotation>
                   <xs:appinfo>
                     <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="InitialConditions" type="CFSInitialConditionsType">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Provide the initial solution at time 0.</libhpc:documentation>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
