@@ -101,6 +101,12 @@ WallViscous: Wall (Navier-Stokes)
                   <xs:enumeration value="TimeDependent"/>
                   <xs:enumeration value="Wall"/>
                   <xs:enumeration value="WallViscous"/>
+                  <xs:enumeration value="WallAdiabatic"/>
+                  <xs:enumeration value="Symmetry"/>
+                  <xs:enumeration value="RiemannInvariant"/>
+                  <xs:enumeration value="PressureOutflowNonReflective"/>
+                  <xs:enumeration value="PressureOutflow"/>
+                  <xs:enumeration value="ExtrapOrder0"/>
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
@@ -161,6 +167,12 @@ WallViscous: Wall (Navier-Stokes)
                   <xs:enumeration value="TimeDependent"/>
                   <xs:enumeration value="Wall"/>
                   <xs:enumeration value="WallViscous"/>
+                  <xs:enumeration value="WallAdiabatic"/>
+                  <xs:enumeration value="Symmetry"/>
+                  <xs:enumeration value="RiemannInvariant"/>
+                  <xs:enumeration value="PressureOutflowNonReflective"/>
+                  <xs:enumeration value="PressureOutflow"/>
+                  <xs:enumeration value="ExtrapOrder0"/>
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
@@ -221,6 +233,12 @@ WallViscous: Wall (Navier-Stokes)
                   <xs:enumeration value="TimeDependent"/>
                   <xs:enumeration value="Wall"/>
                   <xs:enumeration value="WallViscous"/>
+                  <xs:enumeration value="WallAdiabatic"/>
+                  <xs:enumeration value="Symmetry"/>
+                  <xs:enumeration value="RiemannInvariant"/>
+                  <xs:enumeration value="PressureOutflowNonReflective"/>
+                  <xs:enumeration value="PressureOutflow"/>
+                  <xs:enumeration value="ExtrapOrder0"/>
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
@@ -281,6 +299,12 @@ WallViscous: Wall (Navier-Stokes)
                   <xs:enumeration value="TimeDependent"/>
                   <xs:enumeration value="Wall"/>
                   <xs:enumeration value="WallViscous"/>
+                  <xs:enumeration value="WallAdiabatic"/>
+                  <xs:enumeration value="Symmetry"/>
+                  <xs:enumeration value="RiemannInvariant"/>
+                  <xs:enumeration value="PressureOutflowNonReflective"/>
+                  <xs:enumeration value="PressureOutflow"/>
+                  <xs:enumeration value="ExtrapOrder0"/>
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
