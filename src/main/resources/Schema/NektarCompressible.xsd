@@ -351,14 +351,14 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoU" type="xs:double">
+      <xs:element name="rhou" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="e" type="xs:double">
+      <xs:element name="E" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>
@@ -377,21 +377,21 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoU" type="xs:double">
+      <xs:element name="rhou" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoV" type="xs:double">
+      <xs:element name="rhov" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="e" type="xs:double">
+      <xs:element name="E" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>
@@ -410,28 +410,28 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoU" type="xs:double">
+      <xs:element name="rhou" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoV" type="xs:double">
+      <xs:element name="rhov" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhoW" type="xs:double">
+      <xs:element name="rhow" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the z direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="e" type="xs:double">
+      <xs:element name="E" type="xs:double">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>

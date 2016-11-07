@@ -255,7 +255,7 @@ LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulatio
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="SuccessiveRHS" type="xs:boolean">
+      <xs:element name="SuccessiveRHS" type="positiveIncDouble">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>When SuccessiveRHS is set to true, a number of previous solutions to the linear solver are used to extrapolate an initial guess for the current solve
@@ -500,6 +500,7 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <!--
       <xs:element name="GlobalOptimizationParameters" type="GlobalOptimizationParameters">
         <xs:annotation>
           <xs:appinfo>
@@ -515,6 +516,7 @@ operators.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      -->
     </xs:sequence>
   </xs:complexType>
 

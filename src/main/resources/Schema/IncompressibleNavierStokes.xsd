@@ -361,6 +361,7 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
           </xs:restriction>
         </xs:simpleType>  
       </xs:element>
+      <!--
       <xs:element name="GlobalOptimizationParameters" type="GlobalOptimizationParameters">
         <xs:annotation>
           <xs:appinfo>
@@ -376,6 +377,7 @@ operators.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      -->
     </xs:sequence>
   </xs:complexType>
   
