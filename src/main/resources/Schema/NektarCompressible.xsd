@@ -344,21 +344,21 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
   
   <xs:complexType name="CFSInitialConditions1DType"> 
     <xs:sequence>
-      <xs:element name="rho" type="xs:double">
+      <xs:element name="rho" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for rho.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhou" type="xs:double">
+      <xs:element name="rhou" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="E" type="xs:double">
+      <xs:element name="E" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>
@@ -370,28 +370,28 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
   
   <xs:complexType name="CFSInitialConditions2DType"> 
     <xs:sequence>
-      <xs:element name="rho" type="xs:double">
+      <xs:element name="rho" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for rho.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhou" type="xs:double">
+      <xs:element name="rhou" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhov" type="xs:double">
+      <xs:element name="rhov" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="E" type="xs:double">
+      <xs:element name="E" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>
@@ -403,35 +403,35 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
   
   <xs:complexType name="CFSInitialConditions3DType"> 
     <xs:sequence>
-      <xs:element name="rho" type="xs:double">
+      <xs:element name="rho" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for rho.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhou" type="xs:double">
+      <xs:element name="rhou" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the x direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhov" type="xs:double">
+      <xs:element name="rhov" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the y direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="rhow" type="xs:double">
+      <xs:element name="rhow" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The initial condition for the velocity in the z direction.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="E" type="xs:double">
+      <xs:element name="E" type="xs:string">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>The value for e.</libhpc:documentation>
@@ -470,6 +470,43 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     </xs:choice>
   </xs:complexType>
 
+  <xs:simpleType name="EqnSysAdvectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotSpecified"/>
+      <xs:enumeration value="WeakDG"/>
+      <xs:enumeration value="FRDG"/>
+      <xs:enumeration value="FRSD"/>
+      <xs:enumeration value="FRHU"/>
+      <xs:enumeration value="FRcmin"/>
+      <xs:enumeration value="FRcinf"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EqnSysEulerDiffusionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotSpecified"/>
+      <xs:enumeration value="LDG"/>
+      <xs:enumeration value="LFRDG"/>
+      <xs:enumeration value="LFRSD"/>
+      <xs:enumeration value="LFRHU"/>
+      <xs:enumeration value="LFRcmin"/>
+      <xs:enumeration value="LFRcinf"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EqnSysNSDiffusionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotSpecified"/>
+      <xs:enumeration value="LDGNS"/>
+      <xs:enumeration value="LFRDGNS"/>
+      <xs:enumeration value="LFRSDNS"/>
+      <xs:enumeration value="LFRHUNS"/>
+      <xs:enumeration value="LFRcminNS"/>
+      <xs:enumeration value="LFRcinfNS"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
   <xs:complexType name="EquationSystem">
     <xs:choice>
       <xs:element name="EulerCFE">
@@ -478,6 +515,73 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
             <libhpc:documentation>Simulate using the Euler equations</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="AdvectionType" type="EqnSysAdvectionType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="EulerADCFE">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Simulate using the Euler Artifical Diffusion equations</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="mu" type="positiveIncDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="Skappa" type="positiveIncDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                  <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="Kappa" type="positiveIncDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                  <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="mu0" type="positiveIncDouble">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                  <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="AdvectionType" type="EqnSysAdvectionType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="DiffusionType" type="EqnSysEulerDiffusionType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
       <xs:element name="NavierStokesCFE">
         <xs:annotation>
@@ -507,6 +611,20 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
                 <xs:appinfo>
                   <libhpc:documentation>Prandtl number (http://en.wikipedia.org/wiki/Prandtl_number)</libhpc:documentation>
                   <libhpc:units>m</libhpc:units>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="AdvectionType" type="EqnSysAdvectionType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="DiffusionType" type="EqnSysNSDiffusionType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>Documentation pending...</libhpc:documentation>
                 </xs:appinfo>
               </xs:annotation>
             </xs:element>
