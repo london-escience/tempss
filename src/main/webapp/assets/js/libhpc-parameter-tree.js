@@ -657,7 +657,7 @@ function isInteger(valueToCheck) {
     var removeBranch = function(elementUL) {
         $(elementUL).remove();
     };
-
+    
     /**
      * Load a given XML tree into this HTML tree.
      *
@@ -694,13 +694,19 @@ function isInteger(valueToCheck) {
             if ($(owningUL).data('loaded') === true) {
                 console.log('Branch already populated: ', owningUL);
                 if ($(owningUL).data('max-occurs') != 1) {
-                    //repeatBranch(owningUL);
-                    $(elementLI).children('span.repeat_button_add').click();
+                	//repeatBranch(owningUL);
+                	$(elementLI).children('span.repeat_button_add').click();
+                    
                     //$(owningUL).find('*').removeData('loaded');
                     elementLI = getTreeLiElement($parentHTMLElement, nodeName);
+                    
                     owningUL = $(elementLI).parent('ul');
                     //$(owningUL).show('fast');
                     $(owningUL).find('ul').removeData('loaded')
+                    // This attempt to set the styles doesn't seem to be working correctly
+                    // There is still a major issues with additional repeatable elements
+                    // not expanding when clicked if they have a select box.
+                    // Fix is applied below after the select.change()
                     $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
                     console.log('New UL: ', owningUL);
                 }
@@ -737,6 +743,19 @@ function isInteger(valueToCheck) {
                 }
                 else {
                 	$(elementLI).children("select").val(childSelect.nodeName).change();
+                	
+                	// If this select is part of a repeated block then we need
+                	// to apply the fix that updates the style attributes since
+                	// cloning a hidden element seems to include some unwanted
+                	// values that prevent the block from being displayed later.
+                	var $parentRepeat = $(elementLI).closest('[data-repeat]')
+                	if($parentRepeat.length) {
+                		var repeatVal = parseInt($parentRepeat.attr('data-repeat'),10);
+                		if(repeatVal > 1) {
+                			var $choiceElement = $(elementLI).find('li.parent_li[data-fqname="' + childSelect.nodeName + '"]').parent();
+                			fixRepeatedChoiceElementStyles($choiceElement);
+                		}
+                	}
                 }
             }
 
@@ -745,6 +764,24 @@ function isInteger(valueToCheck) {
 
             loadXMLIntoTree($(this), $(elementLI));
         });
+    };
+    
+    /**
+     * Fix styles for elements that are within a repeated choice block
+     */
+    var fixRepeatedChoiceElementStyles = function($element) {
+    	if($element.attr('style') != undefined) {
+    		if($element.attr('style').startsWith('display: block')) { 
+    	      $element.attr('style','display: block;');
+    	    } 
+
+    	    if($element.attr('style').startsWith('display: list-item')) {
+    	      $element.attr('style','display: list-item;');
+    	    }
+    	}
+    	$element.children().each(function() { 
+    		fixRepeatedChoiceElementStyles($(this)); 
+    	});
     };
 
     /**
