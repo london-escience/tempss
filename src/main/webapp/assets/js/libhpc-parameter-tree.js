@@ -737,11 +737,16 @@ function isInteger(valueToCheck) {
             	// name since we will set the select to this value. There  
             	// should be only one child node
                 // (PA) Question: do more general xsds break this? We won't worry for now.
-                var childSelect = $(this)[0].children[0];
-                if (typeof childSelect === "undefined") {
+            	// Safari 6 (and others?) seems not to support the children 
+            	// attribute on element objects, using a custom function to test
+            	// and work around this
+            	//var childSelect = $(this)[0].children[0];
+                var childSelectList = getElementChildren($(this)[0]);
+                if (typeof childSelectList === "undefined") {
                     // do nothing
                 }
                 else {
+                	var childSelect = childSelectList[0];
                 	$(elementLI).children("select").val(childSelect.nodeName).change();
                 	
                 	// If this select is part of a repeated block then we need
@@ -767,15 +772,34 @@ function isInteger(valueToCheck) {
     };
     
     /**
+     * Get the children for an XML element node in a browser independent manner
+     */
+    var getElementChildren = function(el) {
+    	// If we don't have a children attribute on the element object then
+    	// extract the required values via getChildNodes
+    	if(el.children == undefined) {
+    		var childNodes = el.childNodes;
+    		children = []
+    		for(var i = 0; i < childNodes.length; i++) {
+    			if(childNodes[i].nodeType == 1) {
+    				children.push(childNodes[i]);
+    			}
+    		}
+    		return children;
+    	}
+    	return el.children;
+    }
+    
+    /**
      * Fix styles for elements that are within a repeated choice block
      */
     var fixRepeatedChoiceElementStyles = function($element) {
     	if($element.attr('style') != undefined) {
-    		if($element.attr('style').startsWith('display: block')) { 
+    		if($element.attr('style').indexOf('display: block') == 0) { 
     	      $element.attr('style','display: block;');
     	    } 
 
-    	    if($element.attr('style').startsWith('display: list-item')) {
+    	    if($element.attr('style').indexOf('display: list-item') == 0) {
     	      $element.attr('style','display: list-item;');
     	    }
     	}
