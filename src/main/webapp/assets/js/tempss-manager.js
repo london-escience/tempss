@@ -35,6 +35,8 @@ function templateChanged(selectedValue, selectedText) {
     displayTemplate(selectedValue, selectedText);
     // Update the profile list to match the selected template
     updateProfileList(selectedValue);
+    window.templateEdited = false
+    window.profileLoaded = false
 }
 
 /**
@@ -134,6 +136,7 @@ function displayTemplate(templateID, templateText) {
         }
     });
     
+    var dfd = $.Deferred();
     templateHTMLCall.then(
         // success callback function
         function(data) {
@@ -159,13 +162,16 @@ function displayTemplate(templateID, templateText) {
             setEditingProfileName("");
 
             $("#template-tree-loading").hide(0);
+            dfd.resolve();
         },
         // Error callback function
         function(data) {
             log('Error getting HTML tree: ' + JSON.stringify(data));
             $("#template-tree-loading").hide(0);
+            dfd.reject();
         }
     );
+    return dfd.promise();
 }
 
 /**
@@ -357,11 +363,52 @@ function saveProfile(templateId, profileName) {
 	);
 }
 
+// Before loading the profile, we need to clear any existing loaded  
+// profile from the tree and check that the user is happy with this.
+// Use the same approach as when loading a new tree - check that the current
+// tree is unmodified or display a warning before loading the new profile.
+function loadProfilePreCheck(templateId, profileId) {
+    log("Checking if we can load profile <" + profileId + "> for template <" 
+    		+ templateId + "> or whether we need to display a confirmation");
+    
+    if(window.profileLoaded) {
+    	var modal = $('#confirm-load-profile-modal');
+    	modal.data('templateId', templateId);
+    	modal.data('profileId', profileId);
+    	modal.modal('show');
+    }
+    else {
+    	loadProfileClearCheck(templateId, profileId);
+    }
+}
+    
 // Load the specified profile into the currently displayed template.
-function loadProfile(templateId, profileId) {
-    log("Request to load profile <" + profileId + "> for template <" + templateId + ">");
+function loadProfileClearCheck(templateId, profileId) {
+    log("Load profile clear check for profile <" + profileId 
+    		+ "> and template <" + templateId + ">");
+   
     $("#template-profile-loading").show();
     
+    // If we have a previously loaded profile, need to refresh template first.
+    if(window.profileLoaded) {
+    	var promise = clearProfileContentInTemplate();
+    	promise.done(function() {
+    		loadProfile(templateId, profileId);
+    	}).fail(function() {
+    		$('#profile-err-modal-text').html("Error refreshing template to load profile.");
+    		$("#template-profile-loading").hide();
+    	});
+    	
+    }
+    else {
+    	loadProfile(templateId, profileId);
+    }
+}
+
+function loadProfile(templateId, profileId) {
+	log("Load profile <" + profileId + "> for template <" + templateId + ">");
+	$("#template-profile-loading").show();
+
 	var savedProfileCall = $.ajax({
         method:   'GET',
         url:      '/tempss/api/profile/' + templateId + '/' + profileId,
@@ -373,6 +420,8 @@ function loadProfile(templateId, profileId) {
             function(data) {
                 // Check if save succeeded
                 if (data.status == 'OK') {
+                	// Set the profile loaded flag to true
+                	window.profileLoaded = true;
                     // Extract the profile data and load it into
                     // the template
                     var profileXml = data.profile;
@@ -561,7 +610,8 @@ function clearProfileContentInTemplate() {
         $templateContainer.data(treePluginName).destroy();
     }
 
-    displayTemplate(templateId, 'REFRESH');
+    var promise = displayTemplate(templateId, 'REFRESH');
+    return promise;
 }
 
 // Process the job profile currently displayed in the template,

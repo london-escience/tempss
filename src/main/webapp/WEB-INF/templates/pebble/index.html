@@ -181,12 +181,12 @@
         <h4 class="modal-title">Load profile</h4>
       </div>
       <div class="modal-body">
-		  <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p>
-		  <p>Any unsaved changes entered into the current template will be lost.</p></div>
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p></h5>
+		  <p class="text-danger">Any unsaved changes entered into the current template will be lost.</p></div>
       </div>
       <div class="modal-footer">
-        <button type="button" id="load-profile-btn-modal" class="btn btn-danger" data-dismiss="modal">Continue</button>
-        <button id="cancel-load-btn-modal" type="button" class="btn btn-success">Cancel</button>
+        <button type="button" id="cancel-load-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="load-profile-btn-modal" type="button" class="btn btn-success">Continue</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -230,6 +230,26 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="confirm-load-profile-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Load profile confirmation</h4>
+      </div>
+      <div class="modal-body">
+          <p><strong>The current template has been edited.</strong></p>
+		  <div id="confirm-load-text"><h5><p>Are you sure you want to load a new profile?</p></h5>
+		  <p class="text-danger">Any unsaved changes entered into the current template will be lost.</p></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-change-template-btn-modal" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="change-template-btn-modal" type="button" class="btn btn-success">Continue</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <div id="change-profile-state-modal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -253,6 +273,22 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="profile-error-modal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Error loading profile</h4>
+      </div>
+      <div class="modal-body">
+        <p id="profile-err-modal-text"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 {% endblock modals %}
 
@@ -271,6 +307,9 @@
 
 		// Variable to check whether a template has been edited
 		window.templateEdited = false;
+		// Variable to check whether a profile has been loaded - used to 
+		// determine whether to refresh the template when loading a profile
+		window.profileLoaded = false;
 		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
@@ -356,10 +395,12 @@
 
 		// Add click event listeners for items in the profile list
 		$('#profile-list').on('click', '.profile-link', function(e) {
+			// Before loading the profile, check if the current template has
+			// been modified. 
 			// Load selected profile into the template
 			var profileId = $(e.currentTarget).data('pid');
 			var templateId = $('input[name=componentname]').val();
-			loadProfile(templateId, profileId);
+			loadProfilePreCheck(templateId, profileId);
 			e.preventDefault();
 		});
 
@@ -451,6 +492,25 @@
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         });
+		
+        $('#load-profile-btn-modal').on('click', function(e) {
+        	var modal = $('#confirm-load-profile-modal');
+        	var templateId = modal.data('templateId');
+        	var profileId = modal.data('profileId');
+        	modal.modal('hide');
+        	loadProfileClearCheck(templateId, profileId);   	
+        });
+        
+        $('#load-profile-btn-modal').on('hide.bs.modal', function(e) {
+        	var modal = $('#confirm-load-profile-modal');
+        	modal.removeData('templateId');
+        	modal.removeData('profileId');
+        });
+        
+        $('#profile-error-modal').on('hide.bs.modal', function(e) {
+        	$('#profile-err-modal-text').html("");
+        });
+        
 	});
 </script>
 {% endblock script %}
