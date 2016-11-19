@@ -122,9 +122,13 @@
     <script src="../assets/js/tempss-manager.js"></script>
     <script type="text/javascript">
 	$(document).ready( function() {
-		$('#sign-out').on('click', function(e) {
+		$('body').on('click', '#sign-out', function(e) {
 			e.preventDefault();
 			$('#logout-form').submit();
+		});
+		
+		$('#login-form').on('submit', function(e) {
+			handleAjaxLogin(e);
 		});
 	});
 	</script>

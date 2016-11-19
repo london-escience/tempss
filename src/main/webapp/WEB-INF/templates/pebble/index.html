@@ -363,7 +363,7 @@
 		// When the "Save as profile" button is clicked below a
 		// template that has had values entered into it, open
 		// the save profile modal to prompt the user for a profile name
-		$('#save-as-profile-btn').on('click', function(e) {
+		$('#template-tree').on('click', '#save-as-profile-btn', function(e) {
 			$('#profileName').val("");
 			if($('#profileName').val() == "") {
 				$('#save-profile-btn-modal').prop('disabled', true);

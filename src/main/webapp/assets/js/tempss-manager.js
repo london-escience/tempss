@@ -666,6 +666,71 @@ function expandTree() {
     $templateContainer.data(treePluginName).expandTree();
 }
 
+/**
+ * When an AJAX login is made, we need to:
+ * 1) update dropdown menu to place the logged in user's name in the menu bar
+ * If we're on the template display:
+ * 2) Enable the save profile button so that a current profile can be saved.
+ * 3) If we're on the template page and a template is selected, reload profiles
+ * 
+ */
+function handleAjaxLogin(e) {
+	e.preventDefault();
+	log('AJAX login requested...');
+
+	var logoutFormPart1 = 
+		'<form id="logout-form" method="POST" action="/tempss/logout" style="display:none;">' +
+		'  <input type="hidden" name="_csrf" value="{{ csrf_token }}"/>' +
+		'</form>' +
+		'<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"' + 
+		'   aria-haspopup="true" aria-expanded="false">';
+	var logoutFormPart2 =
+		'  <span class="caret"></span>' +
+		'</a>' +
+		'<ul class="dropdown-menu dropdown-menu-right">' +
+		'  <li role="separator" class="divider"></li>' +
+		'  <li><a id="sign-out" href="#">Sign out</a></li>' +
+		'</ul>';
+	var saveBtn = '<span id="save-btn-wrapper">' +
+                  '<button class="btn btn-default" id="save-as-profile-btn">' +
+                  '<i class="glyphicon glyphicon-floppy-disk"></i>' +
+                  ' Save profile</button>' +
+                  '</span>';
+	
+	var data = $('#login-form').serialize();
+	$.ajax({
+	    'type': 'POST',
+	    'url': '/tempss/login',
+	    'data': data
+	}).done(function(data, textStatus, jqXHR) {
+		if(('result' in data) && (data['result'] == 'OK')) {
+			var firstname = data['firstname'];
+			var lastname = data['lastname'];
+			var csrf_token = jqXHR.getResponseHeader('X-CSRF-TOKEN'); //data['csrf'];
+			log('Login successful for user <' + firstname + ' ' +
+					lastname + '>...');
+			// Now we update the user name display in the menu bar
+			logoutFormPart1 = logoutFormPart1.replace("{{ csrf_token }}", csrf_token);
+			var logoutForm = logoutFormPart1 + firstname + ' ' + lastname + logoutFormPart2;
+			$('#login-form').parent().parent().html(logoutForm);
+			$('#save-btn-wrapper').replaceWith(saveBtn);
+			
+			// If the profile list is present on this page, schedule a request
+			// to update it
+			if( $('#profile-list').length ) {
+				// Get the template ID to pass to the profile update function
+				var tSelect = $('#template-select').find(":selected");
+				setTimeout(updateProfileList(tSelect.val()), 0);
+			}
+			
+			$('#navbar .dropdown-toggle').dropdown('toggle');
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown) {
+		log('Error logging user in....');
+	});
+	
+}
+
 // Utility function for displaying log messages
 function log(message) {
     if(console && console.log) {
