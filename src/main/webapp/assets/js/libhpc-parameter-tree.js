@@ -742,7 +742,8 @@ function isInteger(valueToCheck) {
             	// and work around this
             	//var childSelect = $(this)[0].children[0];
                 var childSelectList = getElementChildren($(this)[0]);
-                if (typeof childSelectList === "undefined") {
+                if ( (typeof childSelectList === "undefined") ||
+                	 (childSelectList.length == 0) ) {
                     // do nothing
                 }
                 else {
