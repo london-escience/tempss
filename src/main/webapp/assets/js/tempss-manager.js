@@ -722,11 +722,24 @@ function handleAjaxLogin(e) {
 				var tSelect = $('#template-select').find(":selected");
 				setTimeout(updateProfileList(tSelect.val()), 0);
 			}
-			
+			// Close the signin drop down	
 			$('#navbar .dropdown-toggle').dropdown('toggle');
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown) {
 		log('Error logging user in....');
+		// Close the signin drop down
+		$('#navbar .dropdown-toggle').dropdown('toggle');
+		BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_DANGER,
+			title: 'Login failed',
+            message: 'Invalid credentials entered, login failed. Please retry.',
+            buttons: [{
+                label: 'Close',
+                action: function(dialog) {
+                    dialog.close();
+                }
+            }]
+        });
 	});
 	
 }
