@@ -61,8 +61,8 @@
               <ul class="dropdown-menu dropdown-menu-right">
                 <form id="login-form" class="form-horizontal" 
                       method="POST" action="/tempss/login">
-				  <input type="text" name="username" class="form-control" id="login-username" placeholder="Username">
-				  <input type="password" name="password" class="form-control" id="login-password" placeholder="Password">
+				  <input type="text" name="username" class="form-control" id="username" placeholder="Username">
+				  <input type="password" name="password" class="form-control" id="password" placeholder="Password">
 				  <input type="hidden" name="{{ _csrf.parameterName }}"
 				                       value="{{ _csrf.token }}"/>
 				  <button type="submit" class="btn btn-primary">Sign in</button>
@@ -132,7 +132,11 @@
 		});
 		
 		$('#login-form').on('submit', function(e) {
-			handleAjaxLogin(e);
+			handleAjaxLogin(e, false);
+		});
+
+		$('body').on('submit', '#login-form-modal', function(e) {
+			handleAjaxLogin(e, true);
 		});
 	});
 	</script>

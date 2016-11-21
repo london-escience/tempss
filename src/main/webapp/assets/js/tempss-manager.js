@@ -674,8 +674,12 @@ function expandTree() {
  * 3) If we're on the template page and a template is selected, reload profiles
  * 
  */
-function handleAjaxLogin(e) {
+function handleAjaxLogin(e, modalSource) {
 	e.preventDefault();
+	if(modalSource) {
+		$('#signin-form-errors').html('&nbsp;');
+	}
+	
 	log('AJAX login requested...');
 
 	var logoutFormPart1 = 
@@ -685,7 +689,7 @@ function handleAjaxLogin(e) {
 		'<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"' + 
 		'   aria-haspopup="true" aria-expanded="false">';
 	var logoutFormPart2 =
-		'  <span class="caret"></span>' +
+		'<span class="caret"></span>' +
 		'</a>' +
 		'<ul class="dropdown-menu dropdown-menu-right">' +
 		'  <li role="separator" class="divider"></li>' +
@@ -697,7 +701,14 @@ function handleAjaxLogin(e) {
                   ' Save profile</button>' +
                   '</span>';
 	
-	var data = $('#login-form').serialize();
+	
+	var data;
+	if(modalSource) {
+		data = $('#login-form-modal').serialize();
+	}
+	else {
+		data = $('#login-form').serialize();
+	}
 	$.ajax({
 	    'type': 'POST',
 	    'url': '/tempss/login',
@@ -722,13 +733,26 @@ function handleAjaxLogin(e) {
 				var tSelect = $('#template-select').find(":selected");
 				setTimeout(updateProfileList(tSelect.val()), 0);
 			}
-			// Close the signin drop down	
-			$('#navbar .dropdown-toggle').dropdown('toggle');
+			// Close the signin drop down or modal depending on login source
+			if(modalSource) {
+				$(e.currentTarget).closest('.modal').modal('hide');
+			}
+			else {
+				$('#navbar .dropdown-toggle').dropdown('toggle');	
+			}
+			
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown) {
 		log('Error logging user in....');
-		// Close the signin drop down
-		$('#navbar .dropdown-toggle').dropdown('toggle');
+		if(!modalSource) {
+			// Close the signin drop down
+			$('#navbar .dropdown-toggle').dropdown('toggle');
+			displayLoginForm(modalSource);
+		}
+		else {
+			$('#signin-form-errors').html('An incorrect user name or password was entered. Login failed.');
+		}
+		/*
 		BootstrapDialog.show({
             type: BootstrapDialog.TYPE_DANGER,
 			title: 'Login failed',
@@ -740,8 +764,85 @@ function handleAjaxLogin(e) {
                 }
             }]
         });
+        */
 	});
 	
+}
+
+function displayLoginForm(modalSource) {
+	var loginForm = 
+		'<div class="well">' +
+		'  <h3 style="padding-bottom: 20px; margin-top: 10px;">TemPSS Sign In</h3>' +
+		'  <form id="login-form-modal" class="form-horizontal">' +
+		'    <div id="signin-form-errors" class="text-danger">{{ signin_form_errors }}</div>' +
+		'	 <div class="row">' +
+		'	   <div class="col-sm-2"></div>' +
+		'      <div id="signin-errors" class="text-danger col-sm-5"></div>' +
+		'	   <div class="col-sm-2"></div>' +
+		'    </div>' +
+		'    <div class="form-group">' +
+		'      <label for="username" class="col-sm-4 control-label">Username</label>' +
+		'      <div class="col-sm-5">' +
+		'        <input id="username" name="username" type="text" class="form-control" placeholder="" value="{{ username }}"/>' +
+		'      </div>' + 
+		'      <div class="col-sm-4">' +  
+		'        <div id="signin-errors-username" class="form-error text-danger"/>' +
+		'      </div>' +
+		'    </div>' +
+		'    <div class="form-group">' +
+		'      <label for="password" class="col-sm-4 control-label">Password</label>' +
+		'      <div class="col-sm-5">' +
+		'        <input id="password" type="password" name="password" class="form-control" placeholder=""/>' +
+		'      </div>' +
+		'      <div class="col-sm-3">' + 
+		'        <div id="signin-errors-password" class="form-error text-danger"/>' +
+		'      </div>' +
+		'    </div>' +
+		'    <input type="hidden" name="_csrf" value="{{ csrf_token }}"/>' +
+		'    <div class="form-group text-right">' +
+		'      <div class="col-sm-4" style="padding-top: 15px;">' +
+		'        <a href="register" target="_blank"><i class="glyphicon glyphicon-edit"></i> Create account</a>' +
+		'      </div>' +
+		'      <div class="col-sm-7">' +
+		'        <button type="submit" class="btn btn-success">Sign In</button>' +
+		'      </div>' +
+		'    </div>' +
+		'  </form>' +
+		'</div>';
+	
+	var csrf_token = $('#login-form input[name="_csrf"]').val();
+	loginForm = loginForm.replace("{{ csrf_token }}", csrf_token);
+	var signinFormErrors = '&nbsp;';
+	if(!modalSource) {
+		signinFormErrors = 'An incorrect user name or password was entered. Login failed.';
+	}
+	loginForm = loginForm.replace("{{ signin_form_errors }}", signinFormErrors);
+	
+	// Get the username from the header login form and put it in the input box
+	var username = '';
+	var $usernameInput = $('#login-form #username');
+	var $passwordInput = $('#login-form #password');
+	if($usernameInput.length) {
+		username = $usernameInput.val();
+	}
+	$usernameInput.val("");
+	$passwordInput.val("");
+	loginForm = loginForm.replace("{{ username }}", username);
+	
+	BootstrapDialog.show({
+        type: BootstrapDialog.TYPE_DEFAULT,
+		title: '',
+        message: loginForm,
+        onhidden: function(dialog) {
+        	$('#signin-form-errors').html('&nbsp;');
+        },
+        buttons: [{
+            label: 'Close',
+            action: function(dialog) {
+                dialog.close();
+            }
+        }]
+    });
 }
 
 // Utility function for displaying log messages
