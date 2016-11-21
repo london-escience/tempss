@@ -93,6 +93,44 @@ PA: why is this necessary?
     </xs:sequence>
   </xs:complexType>
   
+  <!-- Matrix Inversion types -->
+  <xs:complexType name="MatrixInversionType">
+   <xs:choice>
+     <xs:element name="Direct" type="DirectMatrixInversion">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+     <xs:element name="Iterative" type="IterativeMatrixInversion">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Invert the matrix iteratively using the conjugate gradient approach. Uses repeated matrix multiplication to converge to a solution to the matrix inverse problem rather than direcly inverting the matrix.</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+     <xs:element name="Xxt" type="XxtMatrixInversion">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+     <xs:element name="PETSc" type="PETScMatrixInversion">
+       <xs:annotation>
+         <xs:appinfo>
+           <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
+           <libhpc:units></libhpc:units>
+         </xs:appinfo>
+       </xs:annotation>
+     </xs:element>
+   </xs:choice>
+ </xs:complexType>
+  
   <!-- This version of the filename entry allows elements from the file to be repeated in the schema
        Used to allow the boundary conditions to be saved in the geometry file, but output and displayed
        in the gui. 
@@ -217,7 +255,7 @@ LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulatio
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="SuccessiveRHS" type="xs:boolean">
+      <xs:element name="SuccessiveRHS" type="positiveIncDouble">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>When SuccessiveRHS is set to true, a number of previous solutions to the linear solver are used to extrapolate an initial guess for the current solve
@@ -278,41 +316,37 @@ LowEnergyWithLinearSpace: available for use on the pressure in 3D flow simulatio
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="MatrixInversion">
-    <xs:choice>
-      <xs:element name="Direct" type="DirectMatrixInversion">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="Iterative" type="IterativeMatrixInversion">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Invert the matrix iteratively using the conjugate gradient approach. Uses repeated matrix multiplication to converge to a solution to the matrix inverse problem rather than direcly inverting the matrix.</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="Xxt" type="XxtMatrixInversion">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="PETSc" type="PETScMatrixInversion">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:choice>
+  <xs:complexType name="GlobalSysSolutionType">
+    <xs:sequence>
+    <xs:element name="MatrixInversion" minOccurs="1" maxOccurs="unbounded">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Parameter controlling how matrix inversion is performed for a given field.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element name="Field" type="xs:string">
+            <xs:annotation>
+		       <xs:appinfo>
+		         <libhpc:documentation>The variable name for the field that this matrix inversion applies to.</libhpc:documentation>
+		         <libhpc:units></libhpc:units>
+		       </xs:appinfo>
+		     </xs:annotation>
+          </xs:element>
+          <xs:element name="InversionType" type="MatrixInversionType">
+            <xs:annotation>
+		       <xs:appinfo>
+		         <libhpc:documentation>The inversion type for this field.</libhpc:documentation>
+		         <libhpc:units></libhpc:units>
+		       </xs:appinfo>
+		     </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+	 </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="ElementalEvaluationOptions">
     <xs:restriction base="xs:string">
@@ -458,7 +492,7 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="MatrixInversion" type="MatrixInversion">
+      <xs:element name="GlobalSysSolution" type="GlobalSysSolutionType" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
@@ -466,6 +500,7 @@ DiscontinuousGalerkin: doesn't enforce continuity, but better at capturing shock
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <!--
       <xs:element name="GlobalOptimizationParameters" type="GlobalOptimizationParameters">
         <xs:annotation>
           <xs:appinfo>
@@ -481,6 +516,7 @@ operators.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      -->
     </xs:sequence>
   </xs:complexType>
 

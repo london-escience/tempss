@@ -35,6 +35,8 @@ function templateChanged(selectedValue, selectedText) {
     displayTemplate(selectedValue, selectedText);
     // Update the profile list to match the selected template
     updateProfileList(selectedValue);
+    window.templateEdited = false
+    window.profileLoaded = false
 }
 
 /**
@@ -130,16 +132,17 @@ function displayTemplate(templateID, templateText) {
         method:   'get',
         url:      '/tempss/api/template/id/' + templateID,
         headers: { 
-            Accept : "text/html",
+            Accept : "application/json",
         }
     });
     
+    var dfd = $.Deferred();
     templateHTMLCall.then(
         // success callback function
         function(data) {
             log('Got HTML tree from server');
             // Data that comes back is the raw HTML to place into the page
-            $templateContainer.html(data);
+            $templateContainer.html(data.TreeHtml);
             // Instantiate the tree plugin on the tree
             $templateContainer.LibhpcParameterTree();
 
@@ -147,20 +150,28 @@ function displayTemplate(templateID, templateText) {
 
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
-            disableProfileButtons(false);
+            if(data.authenticated) {
+            	disableProfileButtons(false);
+            }
+            else {
+            	disableProfileButtons(true);
+            }
             hideTreeExpandCollapseButtons(false);
             // Add click/change handlers
             attachChangeHandlers();
             setEditingProfileName("");
 
             $("#template-tree-loading").hide(0);
+            dfd.resolve();
         },
         // Error callback function
         function(data) {
             log('Error getting HTML tree: ' + JSON.stringify(data));
             $("#template-tree-loading").hide(0);
+            dfd.reject();
         }
     );
+    return dfd.promise();
 }
 
 /**
@@ -337,6 +348,9 @@ function saveProfile(templateId, profileName) {
 	                case 'RESPONSE_DATA':
 	                    errorText = "Unable to prepare JSON response data. Profile may have saved successfully";
 	                    break;
+	                case 'PERMISSION_DENIED':
+	                    errorText = result.error;
+	                    break;
 	                default:
 	                    errorText = "An unknown error has occurred.";
 	            }
@@ -349,11 +363,52 @@ function saveProfile(templateId, profileName) {
 	);
 }
 
+// Before loading the profile, we need to clear any existing loaded  
+// profile from the tree and check that the user is happy with this.
+// Use the same approach as when loading a new tree - check that the current
+// tree is unmodified or display a warning before loading the new profile.
+function loadProfilePreCheck(templateId, profileId) {
+    log("Checking if we can load profile <" + profileId + "> for template <" 
+    		+ templateId + "> or whether we need to display a confirmation");
+    
+    if(window.profileLoaded) {
+    	var modal = $('#confirm-load-profile-modal');
+    	modal.data('templateId', templateId);
+    	modal.data('profileId', profileId);
+    	modal.modal('show');
+    }
+    else {
+    	loadProfileClearCheck(templateId, profileId);
+    }
+}
+    
 // Load the specified profile into the currently displayed template.
-function loadProfile(templateId, profileId) {
-    log("Request to load profile <" + profileId + "> for template <" + templateId + ">");
+function loadProfileClearCheck(templateId, profileId) {
+    log("Load profile clear check for profile <" + profileId 
+    		+ "> and template <" + templateId + ">");
+   
     $("#template-profile-loading").show();
     
+    // If we have a previously loaded profile, need to refresh template first.
+    if(window.profileLoaded) {
+    	var promise = clearProfileContentInTemplate();
+    	promise.done(function() {
+    		loadProfile(templateId, profileId);
+    	}).fail(function() {
+    		$('#profile-err-modal-text').html("Error refreshing template to load profile.");
+    		$("#template-profile-loading").hide();
+    	});
+    	
+    }
+    else {
+    	loadProfile(templateId, profileId);
+    }
+}
+
+function loadProfile(templateId, profileId) {
+	log("Load profile <" + profileId + "> for template <" + templateId + ">");
+	$("#template-profile-loading").show();
+
 	var savedProfileCall = $.ajax({
         method:   'GET',
         url:      '/tempss/api/profile/' + templateId + '/' + profileId,
@@ -365,6 +420,8 @@ function loadProfile(templateId, profileId) {
             function(data) {
                 // Check if save succeeded
                 if (data.status == 'OK') {
+                	// Set the profile loaded flag to true
+                	window.profileLoaded = true;
                     // Extract the profile data and load it into
                     // the template
                     var profileXml = data.profile;
@@ -553,7 +610,8 @@ function clearProfileContentInTemplate() {
         $templateContainer.data(treePluginName).destroy();
     }
 
-    displayTemplate(templateId, 'REFRESH');
+    var promise = displayTemplate(templateId, 'REFRESH');
+    return promise;
 }
 
 // Process the job profile currently displayed in the template,
@@ -606,6 +664,84 @@ function collapseTree() {
 
 function expandTree() {
     $templateContainer.data(treePluginName).expandTree();
+}
+
+/**
+ * When an AJAX login is made, we need to:
+ * 1) update dropdown menu to place the logged in user's name in the menu bar
+ * If we're on the template display:
+ * 2) Enable the save profile button so that a current profile can be saved.
+ * 3) If we're on the template page and a template is selected, reload profiles
+ * 
+ */
+function handleAjaxLogin(e) {
+	e.preventDefault();
+	log('AJAX login requested...');
+
+	var logoutFormPart1 = 
+		'<form id="logout-form" method="POST" action="/tempss/logout" style="display:none;">' +
+		'  <input type="hidden" name="_csrf" value="{{ csrf_token }}"/>' +
+		'</form>' +
+		'<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"' + 
+		'   aria-haspopup="true" aria-expanded="false">';
+	var logoutFormPart2 =
+		'  <span class="caret"></span>' +
+		'</a>' +
+		'<ul class="dropdown-menu dropdown-menu-right">' +
+		'  <li role="separator" class="divider"></li>' +
+		'  <li><a id="sign-out" href="#">Sign out</a></li>' +
+		'</ul>';
+	var saveBtn = '<span id="save-btn-wrapper">' +
+                  '<button class="btn btn-default" id="save-as-profile-btn">' +
+                  '<i class="glyphicon glyphicon-floppy-disk"></i>' +
+                  ' Save profile</button>' +
+                  '</span>';
+	
+	var data = $('#login-form').serialize();
+	$.ajax({
+	    'type': 'POST',
+	    'url': '/tempss/login',
+	    'data': data
+	}).done(function(data, textStatus, jqXHR) {
+		if(('result' in data) && (data['result'] == 'OK')) {
+			var firstname = data['firstname'];
+			var lastname = data['lastname'];
+			var csrf_token = jqXHR.getResponseHeader('X-CSRF-TOKEN'); //data['csrf'];
+			log('Login successful for user <' + firstname + ' ' +
+					lastname + '>...');
+			// Now we update the user name display in the menu bar
+			logoutFormPart1 = logoutFormPart1.replace("{{ csrf_token }}", csrf_token);
+			var logoutForm = logoutFormPart1 + firstname + ' ' + lastname + logoutFormPart2;
+			$('#login-form').parent().parent().html(logoutForm);
+			$('#save-btn-wrapper').replaceWith(saveBtn);
+			
+			// If the profile list is present on this page, schedule a request
+			// to update it
+			if( $('#profile-list').length ) {
+				// Get the template ID to pass to the profile update function
+				var tSelect = $('#template-select').find(":selected");
+				setTimeout(updateProfileList(tSelect.val()), 0);
+			}
+			// Close the signin drop down	
+			$('#navbar .dropdown-toggle').dropdown('toggle');
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown) {
+		log('Error logging user in....');
+		// Close the signin drop down
+		$('#navbar .dropdown-toggle').dropdown('toggle');
+		BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_DANGER,
+			title: 'Login failed',
+            message: 'Invalid credentials entered, login failed. Please retry.',
+            buttons: [{
+                label: 'Close',
+                action: function(dialog) {
+                    dialog.close();
+                }
+            }]
+        });
+	});
+	
 }
 
 // Utility function for displaying log messages

@@ -657,7 +657,7 @@ function isInteger(valueToCheck) {
     var removeBranch = function(elementUL) {
         $(elementUL).remove();
     };
-
+    
     /**
      * Load a given XML tree into this HTML tree.
      *
@@ -694,13 +694,19 @@ function isInteger(valueToCheck) {
             if ($(owningUL).data('loaded') === true) {
                 console.log('Branch already populated: ', owningUL);
                 if ($(owningUL).data('max-occurs') != 1) {
-                    //repeatBranch(owningUL);
-                    $(elementLI).children('span.repeat_button_add').click();
+                	//repeatBranch(owningUL);
+                	$(elementLI).children('span.repeat_button_add').click();
+                    
                     //$(owningUL).find('*').removeData('loaded');
                     elementLI = getTreeLiElement($parentHTMLElement, nodeName);
+                    
                     owningUL = $(elementLI).parent('ul');
                     //$(owningUL).show('fast');
                     $(owningUL).find('ul').removeData('loaded')
+                    // This attempt to set the styles doesn't seem to be working correctly
+                    // There is still a major issues with additional repeatable elements
+                    // not expanding when clicked if they have a select box.
+                    // Fix is applied below after the select.change()
                     $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
                     console.log('New UL: ', owningUL);
                 }
@@ -731,12 +737,31 @@ function isInteger(valueToCheck) {
             	// name since we will set the select to this value. There  
             	// should be only one child node
                 // (PA) Question: do more general xsds break this? We won't worry for now.
-                var childSelect = $(this)[0].children[0];
-                if (typeof childSelect === "undefined") {
+            	// Safari 6 (and others?) seems not to support the children 
+            	// attribute on element objects, using a custom function to test
+            	// and work around this
+            	//var childSelect = $(this)[0].children[0];
+                var childSelectList = getElementChildren($(this)[0]);
+                if ( (typeof childSelectList === "undefined") ||
+                	 (childSelectList.length == 0) ) {
                     // do nothing
                 }
                 else {
+                	var childSelect = childSelectList[0];
                 	$(elementLI).children("select").val(childSelect.nodeName).change();
+                	
+                	// If this select is part of a repeated block then we need
+                	// to apply the fix that updates the style attributes since
+                	// cloning a hidden element seems to include some unwanted
+                	// values that prevent the block from being displayed later.
+                	var $parentRepeat = $(elementLI).closest('[data-repeat]')
+                	if($parentRepeat.length) {
+                		var repeatVal = parseInt($parentRepeat.attr('data-repeat'),10);
+                		if(repeatVal > 1) {
+                			var $choiceElement = $(elementLI).find('li.parent_li[data-fqname="' + childSelect.nodeName + '"]').parent();
+                			fixRepeatedChoiceElementStyles($choiceElement);
+                		}
+                	}
                 }
             }
 
@@ -745,6 +770,43 @@ function isInteger(valueToCheck) {
 
             loadXMLIntoTree($(this), $(elementLI));
         });
+    };
+    
+    /**
+     * Get the children for an XML element node in a browser independent manner
+     */
+    var getElementChildren = function(el) {
+    	// If we don't have a children attribute on the element object then
+    	// extract the required values via getChildNodes
+    	if(el.children == undefined) {
+    		var childNodes = el.childNodes;
+    		children = []
+    		for(var i = 0; i < childNodes.length; i++) {
+    			if(childNodes[i].nodeType == 1) {
+    				children.push(childNodes[i]);
+    			}
+    		}
+    		return children;
+    	}
+    	return el.children;
+    }
+    
+    /**
+     * Fix styles for elements that are within a repeated choice block
+     */
+    var fixRepeatedChoiceElementStyles = function($element) {
+    	if($element.attr('style') != undefined) {
+    		if($element.attr('style').indexOf('display: block') == 0) { 
+    	      $element.attr('style','display: block;');
+    	    } 
+
+    	    if($element.attr('style').indexOf('display: list-item') == 0) {
+    	      $element.attr('style','display: list-item;');
+    	    }
+    	}
+    	$element.children().each(function() { 
+    		fixRepeatedChoiceElementStyles($(this)); 
+    	});
     };
 
     /**

@@ -55,7 +55,7 @@ curl -i -H "Accept: application/json" -X GET http://localhost:8080/tempss/api/te
 {
   "components": [
     {
-      "schema":"NektarElectroCardiology.xsd",
+      "schema":"NektarCardiacElectrophysiology.xsd",
       "transform":"LibhpcNektarToTrueNektar.xsl",
       "name":"Nektar++ Cardiac Electrophysiology Solver",
       "id":"nektar-cardiac-electrophysiology"

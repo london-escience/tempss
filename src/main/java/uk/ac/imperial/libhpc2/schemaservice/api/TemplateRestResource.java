@@ -66,6 +66,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
@@ -239,6 +241,7 @@ public class TemplateRestResource {
         	// Keys used for compatibility with old API
             templateObj.put("ComponentName", templateId);
             templateObj.put("TreeHtml", templateHtml);
+            templateObj.put("authenticated", !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken));
         } catch (JSONException e) {
             sLog.error("Unable to add template HTML for template <" 
             		+ templateId + "> to JSON object: " + e.getMessage());

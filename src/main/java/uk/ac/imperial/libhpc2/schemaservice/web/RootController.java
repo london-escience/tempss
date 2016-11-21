@@ -149,33 +149,51 @@ public class RootController {
 	
 	@RequestMapping("/about")
 	public ModelAndView about(Model pModel,
-                              @AuthenticationPrincipal Principal principal) {
+                              @AuthenticationPrincipal Principal principal,
+                              HttpServletRequest pRequest) {
 	
 		TempssUserDetails userDetails = getUserDetails(principal);
+				
+        ModelAndView mav = new ModelAndView("about");
 		
-		ModelAndView mav = new ModelAndView("about");
-		mav.addObject("user", userDetails);
+        String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+        mav.addObject("_csrf", token);
+        
+        mav.addObject("user", userDetails);
 		return mav;
 	}
 	
 	@RequestMapping("/docs")
 	public ModelAndView docs(Model pModel,
-                             @AuthenticationPrincipal Principal principal) {
+                             @AuthenticationPrincipal Principal principal,
+                             HttpServletRequest pRequest) {
 	
 		TempssUserDetails userDetails = getUserDetails(principal);
 		
 		ModelAndView mav = new ModelAndView("docs");
+		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+        mav.addObject("_csrf", token);
+		
 		mav.addObject("user", userDetails);
 		return mav;
 	}
 	
 	@RequestMapping("/contact")
 	public ModelAndView contact(Model pModel,
-                                @AuthenticationPrincipal Principal principal) {
+                                @AuthenticationPrincipal Principal principal,
+                                HttpServletRequest pRequest) {
 	
 		TempssUserDetails userDetails = getUserDetails(principal);
 		
 		ModelAndView mav = new ModelAndView("contact");
+		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+        mav.addObject("_csrf", token);
+        
 		mav.addObject("user", userDetails);
 		return mav;
 	}
