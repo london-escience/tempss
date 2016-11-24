@@ -561,7 +561,7 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
                 </xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="Skappa" type="positiveIncDouble">
+            <xs:element name="Skappa" type="xs:double">
               <xs:annotation>
                 <xs:appinfo>
                   <libhpc:documentation>Documentation pending...</libhpc:documentation>
