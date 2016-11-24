@@ -506,6 +506,25 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:complexType name="TimeStepType">
+    <xs:choice>
+      <xs:element name="Constant" type="positiveIncDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Length of time step (0 for auto-timestep)</libhpc:documentation>
+            <libhpc:units>s</libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CFL" type="positiveDouble">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>CFL safety factor (ignored if TimeStep > 0)</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
 
   <xs:complexType name="EquationSystem">
     <xs:choice>
@@ -748,18 +767,10 @@ Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="TimeStep" type="positiveIncDouble">
+              <xs:element name="TimeStep" type="TimeStepType">
                 <xs:annotation>
                   <xs:appinfo>
-                    <libhpc:documentation>Length of time step (0 for auto-timestep)</libhpc:documentation>
-                    <libhpc:units>s</libhpc:units>
-                  </xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="CFL" type="positiveDouble">
-                <xs:annotation>
-                  <xs:appinfo>
-                    <libhpc:documentation>CFL safety factor (ignored if TimeStep > 0)</libhpc:documentation>
+                    <libhpc:documentation>Constant timestep or CFL-based timestepping</libhpc:documentation>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
