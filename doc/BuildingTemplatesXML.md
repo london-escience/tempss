@@ -87,7 +87,7 @@ The above structure, with the `Direct` option selected would render like this:
 
 ###### Input nodes
 
-Input nodes can take the form of either a dropdown list containing possible options for a value, or a text input box where a value can be entered by the user. The `inputType` attribute should be set to either `choice` or `text` to determine the type of input node. Validation information can be added to `text` input nodes so that the user interface can validate the value entered by a user and provide feedback on whether the user has entered a correct value or not. More information on validation is provided in the _[Additional elements](#add-elements)_ section. 
+Input nodes can take the form of either a dropdown list containing possible options for a value, or a text input box where a value can be entered by the user. The `inputType` attribute should be set to either `choice` or `text` to determine the type of input node. Validation information can be added to `text` input nodes so that the user interface can validate the value entered by a user and provide feedback on whether the user has entered a correct value or not. More information on validation is provided in the _[Additional elements](#additional-elements)_ section. 
 
 To specify a text input node, you would write something similar to the following:
 
@@ -118,7 +118,7 @@ When the select box is clicked, the options will be shown for the user to make a
 
 #### Additional elements
 
-In addition to the flexible, free-form nature of the element structure for specifying template parameter nodes, there are some pre-defined elements that can be used to define additional template properties. These elements include the ability to specify _parameter documentation_, _validation details_ and _parameter constraints_.
+In addition to the flexible, free-form nature of the element structure for specifying template parameter nodes, there are some pre-defined elements that can be used to define additional template properties. These elements include the ability to specify _parameter documentation_ and _validation details_, and an element to link in a separate _parameter constraint_.
 
 These additional elements belong to the TemPSS _Template Annotations_ schema. This can be imported as the _tempss_ namespace by adding the following attributes to the root node of your XML template definition:
 
@@ -140,8 +140,19 @@ Details of how to add validation information and details of parameter value unit
 
 ###### Constraints
 
-Details of how to specify constraints on different parameters. The constraint information will need to explain how template developers only add constraint information to source constraints in a tree and this is then processed on the client side to highlight target nodes and verify/process constraints.
+Constraints are specified using a separate constraint file. See the [_Specifying constraints_](#specifying-constraints) section for details on how to write this file. A `constraintFile` tag is provided in the Template Annotation schema to link the constraint file with the template. The constraintFile tag must be placed as a direct descendent of the root tag. A constraint file is linked as follows:
+
+```
+<CardiacElectrophysiology>
+  <tempss:constraintFile file="./NektarCardiacElectrphysiologyConstraints.xml"/>
+  ...
+</CardiacElectrophysiology>
+```
 
 ## Template conversion
 
 Information about how template conversion is carried out.
+
+## Specifying constraints
+
+Constraints between parameters in a template tree are specified in a separate file. In this section we describe the XML constraint file format and explain how to define constraints between parameters. 
