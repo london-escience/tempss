@@ -38,6 +38,8 @@ In addition to the root node, there are three different types of nodes that may 
 2. _Choice node_: A choice node is rendered in orange and includes a drop down select box containing a set of value choices for the parameter in question. Selecting one of these choices will open a new branch containing additional nodes to be completed.
 3. _Input node_: An input node is rendered in blue and may contain a standard input box for keyboard input or a dropdown list containing a set of valid choices for the parameter.
 
+_In some cases, giving a node the name you want may be impractical due to XML element naming constraints. As such, any one of the above node types that you write in a template XML description may be given a `name` attribute that will be used in preference to the element name wwhere possible._
+
 ###### Group nodes
 
 A group node can be specified simply by adding an XML tag into the XML template definition. By then adding child nodes to this tag, you are denoting this as a group node. All child nodes will be displayed when the group node is clicked. So, for example, to specify a group node representing _Physics_ properties of a problem that consist of _Model_ and _CellModel_ details, you might add something similar to the following to your XML:
@@ -87,7 +89,7 @@ The above structure, with the `Direct` option selected would render like this:
 
 ###### Input nodes
 
-Input nodes can take the form of either a dropdown list containing possible options for a value, or a text input box where a value can be entered by the user. The `inputType` attribute should be set to either `choice` or `text` to determine the type of input node. Validation information can be added to `text` input nodes so that the user interface can validate the value entered by a user and provide feedback on whether the user has entered a correct value or not. More information on validation is provided in the _[Additional elements](#additional-elements)_ section. 
+Input nodes can take the form of either a dropdown list containing possible options for a value, or a text input box where a value can be entered by the user. The `inputType` attribute should be set to either `choice`, `text` or `file` to determine the type of input node. Validation information can be added to `text` input nodes and `file` input nodes so that the user interface can validate the value entered by a user and provide feedback on whether the user has entered a correct value or not. More information on validation is provided in the _[Additional elements](#additional-elements)_ section. 
 
 To specify a text input node, you would write something similar to the following:
 
@@ -103,8 +105,8 @@ To specify a choice input node, you would write XML similar to the following:
 
 ```
 <Projection inputType="choice">
-  <libhpc:item>ContinuousGalerkin</libhpc:item>
-  <libhpc:item>DiscontinuousGalerkin</libhpc:item>
+  <tempss:item>ContinuousGalerkin</tempss:item>
+  <tempss:item>DiscontinuousGalerkin</tempss:item>
 </Projection>
 ```
 

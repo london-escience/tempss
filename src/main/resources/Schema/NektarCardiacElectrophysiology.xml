@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CardiacElectrophysiology>
+  <Physics>
+    <Model paramType="choice">
+      <Monodomain>
+        <documentation></documentation>
+        <Chi></Chi>
+        <Cm></Cm>
+        <IsotropicConductivity paramType="choice"/>
+          <Conductivity inputType="text"></Conductivity>
+          <Intensity>
+            <Intensity inputType="text"></Intensity>
+            <DMin name="d_min" inputType="text"></DMin>
+            <DMax name="d_max" inputType="text"></DMax>
+          </Intensity>
+          <NotProvided/>
+      </Monodomain>
+      <Bidomain>
+        <Sigmai inputType="text"></Sigmai>
+        <Sigmaix inputType="text"></Sigmaix>
+        <Sigmaiy inputType="text"></Sigmaiy>
+        <Sigmaiz inputType="text"></Sigmaiz>
+      </Bidomain>
+    </Model>
+    <CellModel>
+      <CellModelType paramType="choice">
+        <CourtemancheRamirezNattel98>
+          <CellModelVariant inputType="choice">
+            <tempss:item>Original</tempss:item>
+            <tempss:item>AF</tempss:item>
+          </CellModelVariant>
+        </CourtemancheRamirezNattel98>
+        <FitzhughNagumo>
+        </FitzhughNagumo>
+        <TenTusscher>
+          <CellModelVariant inputType="choice">
+            <tempss:item>Endocardium</tempss:item>
+            <tempss:item>Epicardium</tempss:item>
+            <tempss:item>Mid</tempss:item>
+          </CellModelVariant>
+        </TenTusscher>
+        <AlievPanfilov>
+          <A inputType="text"></A>
+          <Eps inputType="text"></Eps>
+          <K inputType="text"></K>
+          <Mu1 inputType="text"></Mu1>
+          <Mu2 inputType="text"></Mu2>
+        </AlievPanfilov>
+        <FentonKarma>
+        </FentonKarma>
+      </CellModelType>
+      <SubSteps inputType="text"/>
+    </CellModel>
+  </Physics>
+  <ProblemSpecification>
+    <GeometryAndBoundaryConditions>
+      <Geometry inputType="file"/>
+      <BoundaryCondition minOccurs="1" maxOccurs="unbounded">
+        <Variable inputType="text"/>
+        <Comment inputType="text"/>
+        <Variable inputType="text"/>
+        <Type inputType="choice">
+          <tempss:item>NotProvided</tempss:item>
+          <tempss:item>D</tempss:item>
+          <tempss:item>N</tempss:item>
+        </Type>
+        <Value inputType="text"/>
+        <UserDefinedType inputType="choice">
+          <tempss:item>NotProvided</tempss:item>
+          <tempss:item>TimeDependent</tempss:item>
+        </UserDefinedType>
+      </BoundaryCondition>
+    </GeometryAndBoundaryConditions>
+    <InitialConditions paramType="choice">
+      <Function inputType="text"/>
+      <File inputType="file"/>
+    </InitialConditions>
+    <Stimuli>
+      <Stimulus>
+        <StimulusType paramType="choice">
+          <StimulusPoint>
+            <PStrength name="p_strength" inputType="text" units="uA"/>
+          </StimulusPoint>
+          <StimulusCircle>
+            <PStrength name="p_strength" inputType="text" units="uA mm-3"/>
+            <Px1 name="p_x1" inputType="text" units="mm"/>
+            <Py1 name="p_y1" inputType="text" units="mm"/>
+            <Pz1 name="p_z1" inputType="text" units="mm"/>
+            <Pr1 name="p_x2" inputType="text" units="mm"/>
+            <PIs name="p_is" inputType="text"/>
+          </StimulusCircle>
+          <StimulusRectangle>
+            <PStrength name="p_strength" inputType="text"/>
+            <Px1 name="p_x1" inputType="text" units="mm"/>
+            <Py1 name="p_y1" inputType="text" units="mm"/>
+            <Pz1 name="p_z1" inputType="text" units="mm"/>
+            <Px2 name="p_x2" inputType="text" units="mm"/>
+            <Py2 name="p_y2" inputType="text" units="mm"/>
+            <Pz2 name="p_z2" inputType="text" units="mm"/>
+            <PIs name="p_is" inputType="text"/>
+          </StimulusRectangle>
+        </StimulusType>
+        <Protocol>
+          <ProtocolS1S2>
+            <Start inputType="text" units="ms"/>
+            <Duration inputType="text" units="ms"/>
+            <S1CycleLength inputType="text" units="ms"/>
+            <Num_S1 inputType="text"/>
+            <S2CycleLength inputType="text" units="ms"/>
+          </ProtocolS1S2>
+          <ProtocolS1>
+            <Start inputType="text" units="ms"/>
+            <Duration inputType="text" units="ms"/>
+            <S1CycleLength inputType="text" units="ms"/>
+            <Num_S1 inputType="text"/>
+          </ProtocolS1>
+          <ProtocolSingle>
+            <Start inputType="text" units="ms"/>
+            <Duration inputType="text" units="ms"/>
+          </ProtocolSingle>
+        </Protocol>
+      </Stimulus>
+    </Stimuli>
+    <Expansion>
+      <PolynomialOrder inputType="text"/>
+      <BasisType inputType="chocie">
+        <tempss:item>MODIFIED</tempss:item>
+        <tempss:item>GAUSS_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
+        <tempss:item>CHEBYSHEV</tempss:item>
+      </BasisType>
+    </Expansion>
+    <FinalTime inputType="text"/>
+    <TimeStep inputType="text"/>
+  </ProblemSpecification>
+  <NumericalAlgorithm>
+    <Projection inputType="choice">
+      <tempss:item>ContinuousGalerkin</tempss:item>
+      <tempss:item>DiscontinuousGalerkin</tempss:item>
+    </Projection>
+    <TimeIntegration>
+      <TimeIntegrationMethod inputType="choice">
+        <tempss:item>IMEXOrder1</tempss:item>
+        <tempss:item>IMEXOrder2</tempss:item>
+        <tempss:item>IMEXOrder3</tempss:item>
+        <tempss:item>DIRKOrder1</tempss:item>
+        <tempss:item>ForwardEuler</tempss:item>
+        <tempss:item>BackwardEuler</tempss:item>
+        <tempss:item>ClassicalRungeKutta4</tempss:item>
+      </TimeIntegrationMethod>
+      <DiffusionAdvancement inputType="choice">
+        <tempss:item>Implicit</tempss:item>
+        <tempss:item>Explicit</tempss:item>
+      </DiffusionAdvancement>
+    </TimeIntegration>
+    <MatrixInversion paramType="choice">
+      <Direct>
+        <SubStructuring inputType="choice">
+          <tempss:item>Full</tempss:item>
+          <tempss:item>StaticCondensation</tempss:item>
+        </SubStructuring>
+      </Direct>
+      <Iterative>
+        <SubStructuring inputType="choice">
+          <tempss:item>Full</tempss:item>
+          <tempss:item>StaticCondensation</tempss:item>
+        </SubStructuring>
+        <Preconditioner inputType="choice">
+          <tempss:item>LowEnergy</tempss:item>
+          <tempss:item>Diagonal</tempss:item>
+          <tempss:item>BlockDiagonal</tempss:item>
+          <tempss:item>LowEnergyWithLinearSpace</tempss:item>
+        </Preconditioner>
+        <SuccessiveRHS inputType="text"/>
+        <IterativeSolverTolerance inputType="text"/>
+      </Iterative>
+    </MatrixInversion>
+    <GlobalOptimizationParameters>
+      <BackwardTransform paramType="choice">
+        <GlobalMatrixEvaluation />
+        <ElementalEvaluation>
+          <Triangles inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Triangles>
+          <Quadrilaterals inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Quadrilaterals>
+        </ElementalEvaluation>
+      </BackwardTransform>
+      <InnerProductWRTBase paramType="choice">
+        <GlobalMatrixEvaluation />
+        <ElementalEvaluation>
+          <Triangles inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Triangles>
+          <Quadrilaterals inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Quadrilaterals>
+        </ElementalEvaluation>
+      </InnerProductWRTBase>
+      <MassMatrixOp paramType="choice">
+        <GlobalMatrixEvaluation />
+        <ElementalEvaluation>
+          <Triangles inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Triangles>
+          <Quadrilaterals inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Quadrilaterals>
+        </ElementalEvaluation>
+      </MassMatrixOp>
+      <HelmholtzMatrixOp paramType="choice">
+        <GlobalMatrixEvaluation />
+        <ElementalEvaluation>
+          <Triangles inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Triangles>
+          <Quadrilaterals inputType="choice">
+            <tempss:item>SumFactorization</tempss:item>
+            <tempss:item>LocalMatrix</tempss:item>
+          </Quadrilaterals>
+        </ElementalEvaluation>
+      </HelmholtzMatrixOp>
+    </GlobalOptimizationParameters>
+  </NumericalAlgorithm>
+  <Admin>
+    <IO_CheckSteps inputType="text"/>
+    <IO_InfoSteps inputType="text"/>
+  </Admin>
+</CardiacElectrophysiology>
