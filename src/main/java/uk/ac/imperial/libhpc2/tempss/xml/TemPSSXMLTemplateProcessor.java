@@ -1,10 +1,16 @@
 package uk.ac.imperial.libhpc2.tempss.xml;
 
 import java.io.File;
+import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * This class is the main entry point for handling the processing of 
@@ -37,7 +43,18 @@ public class TemPSSXMLTemplateProcessor {
 		LOG.debug("XML template processor running - input file {}...",args[0]);
 	
 		TemPSSXMLTemplateProcessor proc = new TemPSSXMLTemplateProcessor(inputFile);
-		proc.parseXML();
+		if(!proc.parseXML()) {
+			LOG.debug("Unable to parse the XML file <" + args[0] + ">");
+			System.exit(0);
+		}
+		
+		String result = proc.getConvertedResult();
+		if(result != null) {
+			LOG.debug("CONVERTED RESULT:\n" + result);
+		}
+		else {
+			LOG.error("Conversion failed, result was null");
+		}
 	}
 	
 	private static void printUsage(String pMsg) {
@@ -51,9 +68,44 @@ public class TemPSSXMLTemplateProcessor {
 		this._file = inputFile;
 	}
 
-	public void parseXML() {
-		// TODO: Create document builder (via factory) and parse the XML 
-		// document attached to this instance of the processor.
+	public boolean parseXML() {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = null;
+		try {
+			db = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			LOG.debug("Error getting document builder: " + e.getMessage());
+			return false;
+		}
+		
+		try {
+			LOG.info("Parsing XML input file: <" + this._file.getName() + ">");
+			this._xml = db.parse(this._file);
+			LOG.info("XML parsed successfully...");
+		} catch (SAXException e) {
+			LOG.debug("Parse error for XML file <" + this._file.getName() + 
+					">: " + e.getMessage());
+			return false;
+		} catch (IOException e) {
+			LOG.debug("Error reading the XML file <" + this._file.getName() + 
+					">: " + e.getMessage());
+			return false;
+		}
+		
+		return true;		
+	}
+	
+	public String getConvertedResult() {
+		TemPSSSchemaBuilder tsb = null;
+		try {
+			tsb = new TemPSSSchemaBuilder();
+		} catch (ParserConfigurationException e) {
+			LOG.debug("Unable to create schema builder: " + e.getMessage());
+			return null;
+		}
+		
+		Document doc = tsb.convertXMLTemplateToSchema(this._xml);
+		return tsb.getDocumentAsString(doc);
 		
 	}
 }
