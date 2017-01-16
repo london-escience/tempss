@@ -251,17 +251,49 @@ public class TemPSSSchemaBuilder {
 			// Now check if we have any units provided. Units and documentation
 			// are added into new sub-elements libhpc:units and 
 			// libhpc:documentation respectively.
+			boolean haveUnits = false;
+			String units = "";
 			if( (((Element)pNode).getAttribute("units") != null) &&
 					!((Element)pNode).getAttribute("units").equals("") ) {
 				
-				String units = ((Element)pNode).getAttribute("units");
+				units = ((Element)pNode).getAttribute("units");
+				haveUnits = true;
+			}
+			
+			// Now see if there is a <libhpc:documentation> element as the 
+			// first child of the element we're currently processing. If so, 
+			// we'll add this into the appinfo block along with any units
+			// that we need to add.
+			boolean haveDoc = false;
+			String doc = "";
+			NodeList annotChildNodes = ((Element)pNode).getElementsByTagName("libhpc:documentation");
+			if( (annotChildNodes.getLength() > 0) &&
+				(annotChildNodes.item(0).getNodeType() == Node.ELEMENT_NODE) ) {
+				Node node0 = annotChildNodes.item(0);
+				doc = ((Text)node0.getFirstChild()).getData();
+				haveDoc = true;
+				node0.getParentNode().removeChild(node0);
+			}
+
+			// If we have either units or documentation, add the data
+			if(haveUnits || haveDoc) {
 				Element annot = _schema.createElement("xs:annotation");
 				Element appinf = _schema.createElement("xs:appinfo");
-				Element unitsEl = _schema.createElement("libhpc:units");
-				Text unitsText = _schema.createTextNode(units);
-				e.appendChild(annot).appendChild(appinf).appendChild(unitsEl).appendChild(unitsText);
+				if(haveDoc) {
+					Element docEl = _schema.createElement("libhpc:documentation");
+					Text docText = _schema.createTextNode(doc);
+					docEl.appendChild(docText);
+					appinf.appendChild(docEl);
+				}
+				if(haveUnits) {
+					Element unitsEl = _schema.createElement("libhpc:units");
+					Text unitsText = _schema.createTextNode(units);
+					unitsEl.appendChild(unitsText);
+					appinf.appendChild(unitsEl);
+				}
+				e.appendChild(annot).appendChild(appinf);
 			}
-									
+						
 			String inputTypeAttr = ((Element)pNode).getAttribute("inputType");
 			// Process a choice element and build the simpleType for it.
 			if((inputTypeAttr != null) && (inputTypeAttr.equals("choice"))) {

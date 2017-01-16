@@ -5,7 +5,14 @@
   <Physics>
     <Model paramType="choice">
       <Monodomain>
-        <documentation></documentation>
+        <libhpc:documentation>
+          The monodomain model is a reduction of the bidomain model of the 
+          electrical propagation in myocardial tissue. The reduction comes 
+          from assuming that the intra- and extracellular domains have equal 
+          anisotropy ratios. Although not as physiologically accurate as the 
+          bidomain model, it is still adequate in some cases, and has reduced 
+          complexity. http://en.wikipedia.org/wiki/Monodomain_model
+        </libhpc:documentation>
         <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;"></Chi>
         <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;"></Cm>
         <IsotropicConductivity paramType="choice">
@@ -19,6 +26,11 @@
         </IsotropicConductivity>
       </Monodomain>
       <Bidomain>
+        <libhpc:documentation>
+          Model of the electrical properties of cardiac muscle that takes 
+          into account the anisotropy of both the intracellular and 
+          extracellular spaces. http://en.wikipedia.org/wiki/Bidomain_model 
+        </libhpc:documentation>
         <Sigmai inputType="text"></Sigmai>
         <Sigmaix inputType="text"></Sigmaix>
         <Sigmaiy inputType="text"></Sigmaiy>
