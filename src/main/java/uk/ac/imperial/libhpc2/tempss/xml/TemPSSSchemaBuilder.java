@@ -71,7 +71,7 @@ public class TemPSSSchemaBuilder {
 		StreamResult res = new StreamResult(writer);
 		
 		TransformerFactory tf = TransformerFactory.newInstance();
-		//tf.setAttribute("indent-number", 2);
+		tf.setAttribute("indent-number", 2);
 		try {
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -130,15 +130,66 @@ public class TemPSSSchemaBuilder {
 		}
 		// If we have a non-text node or a text node that isn't empty...
 		if(nodeData == null || nodeData.length() != 0) {
-			_processNodeInfo(pNode, "BEGIN");
+			Element e = null;
 			if(pNode.hasChildNodes()) {
+				e = _processNode(pNode);
+				_printNodeInfo(pNode, "BEGIN");
+				
+				Element nextIterElement = null;
+				if(e != null) {
+					// If the returned node (e) contains a simpleType element then
+					// we don't append a complexType element to it - the child 
+					// nodes that have led us to this part of the code have already
+					// been processed within _processNode for simpleType blocks.
+					if(e.getElementsByTagName("xs:simpleType").getLength() == 0) {
+						Element complexType = _schema.createElement("xs:complexType");
+						Element seq = _schema.createElement("xs:sequence");
+						complexType.appendChild(seq);
+						e.appendChild(complexType);
+						nextIterElement = seq;
+					}
+					else {
+						LOG.debug("This node has a simpleType, not appending complexType.");
+						nextIterElement = e;
+					}
+					pDocument.appendChild(e);
+				}
+				/*
+				else {
+					pDocument.appendChild(complexType);
+				}
+				*/
+				
+				// If the element currently being processed has an inputType 
+				// attribute with a value of "choice" then the sub elements of 
+				// this element will already have been processed so we don't 
+				// call processTopDown on this element.
+				String inputTypeAttr = ((Element)pNode).getAttribute("inputType");
+				if((inputTypeAttr != null) && (inputTypeAttr.equals("choice"))) {
+					_printNodeInfo(pNode, "END");
+					return;
+				}
+				
 				NodeList nl = pNode.getChildNodes();
 				for(int i = 0; i < nl.getLength(); i++) {
-					processNodeTopDown(nl.item(i), false, pDocument);
+					processNodeTopDown(nl.item(i), false, nextIterElement);
+					/*
+					if(e != null) {
+						processNodeTopDown(nl.item(i), false, e);
+					}
+					else {
+						processNodeTopDown(nl.item(i), false, pDocument);
+					}
+					*/
 				}
-				//pDocument.appendChild(complexType);
 			}
-			_processNodeInfo(pNode, "END");
+			else {
+				e = _processNode(pNode);
+				_printNodeInfo(pNode, "BEGIN");
+								
+				pDocument.appendChild(e);
+			}
+			_printNodeInfo(pNode, "END");
 		}
 		else {
 			//System.out.println("Ignoring empty text node...");
@@ -146,7 +197,7 @@ public class TemPSSSchemaBuilder {
 					
 	}
 		
-	private Node _processNodeInfo(Node pNode, String msg) {
+	private void _printNodeInfo(Node pNode, String msg) {
 		switch(pNode.getNodeType()) {
 		case Node.ELEMENT_NODE:
 			if(msg != null) {
@@ -155,7 +206,7 @@ public class TemPSSSchemaBuilder {
 			else {
 				System.out.println("Handling ELEMENT node: " + ((Element)pNode).getTagName());
 			}
-			return null;
+			break;
 		case Node.TEXT_NODE:
 			if(msg != null) {
 				System.out.println(msg + ": Handling TEXT node: " + ((Text)pNode).getData());
@@ -163,7 +214,7 @@ public class TemPSSSchemaBuilder {
 			else {
 				System.out.println("Handling TEXT node: " + ((Text)pNode).getData());
 			}
-			return null;
+			break;
 		default:
 			if(msg != null) {
 				System.out.println(msg + ": Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
@@ -171,6 +222,86 @@ public class TemPSSSchemaBuilder {
 			else {
 				System.out.println("Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
 			}
+		}
+	}
+	
+	private Element _processNode(Node pNode) {
+		Element e = null;
+		String name = "";
+		
+		switch(pNode.getNodeType()) {
+		case Node.ELEMENT_NODE:
+			// If the element has a name attribute, we use this name, otherwise
+			// we use the tag name.
+			name = ((Element)pNode).getTagName();
+			if( (((Element)pNode).getAttribute("name") != null) &&
+				!((Element)pNode).getAttribute("name").equals("") ) {
+				name = ((Element)pNode).getAttribute("name");
+			}
+			e = _schema.createElement("xs:element");
+			e.setAttribute("name", name);
+			
+			// If the source XML node has a type attribute, we add this to the 
+			// new element
+			if( (((Element)pNode).getAttribute("type") != null) &&
+				!((Element)pNode).getAttribute("type").equals("") ) {
+				e.setAttribute("type", ((Element)pNode).getAttribute("type"));
+			}
+			
+			// Now check if we have any units provided. Units and documentation
+			// are added into new sub-elements libhpc:units and 
+			// libhpc:documentation respectively.
+			if( (((Element)pNode).getAttribute("units") != null) &&
+					!((Element)pNode).getAttribute("units").equals("") ) {
+				
+				String units = ((Element)pNode).getAttribute("units");
+				Element annot = _schema.createElement("xs:annotation");
+				Element appinf = _schema.createElement("xs:appinfo");
+				Element unitsEl = _schema.createElement("libhpc:units");
+				Text unitsText = _schema.createTextNode(units);
+				e.appendChild(annot).appendChild(appinf).appendChild(unitsEl).appendChild(unitsText);
+			}
+									
+			String inputTypeAttr = ((Element)pNode).getAttribute("inputType");
+			// Process a choice element and build the simpleType for it.
+			if((inputTypeAttr != null) && (inputTypeAttr.equals("choice"))) {
+				Element simpleType = _schema.createElement("xs:simpleType");
+				Element restriction = _schema.createElement("xs:restriction");
+				
+				String typeAttr = ((Element)pNode).getAttribute("type");
+				if( (typeAttr == null) || (typeAttr.equals("")) ) {
+					typeAttr = "xs:string";
+				}
+				restriction.setAttribute("base", typeAttr);
+				
+				// Now we need to look for the <libhpc:item> child elements
+				// and add the values as xs:enumeration items.
+				NodeList childNodes = pNode.getChildNodes();
+				for(int i = 0; i < childNodes.getLength(); i++) {
+					if(childNodes.item(i).getNodeType() != Node.ELEMENT_NODE) {
+						continue;
+					}
+					Element item = (Element)childNodes.item(i);
+					if(item.getTagName() == "tempss:item") {
+						String data = ((Text)item.getFirstChild()).getData();
+						Element val = _schema.createElement("xs:enumeration");
+						val.setAttribute("value", data);
+						restriction.appendChild(val);
+					}
+				}
+				
+				simpleType.appendChild(restriction);				
+				e.appendChild(simpleType);
+			}
+			
+			return e;
+		case Node.TEXT_NODE:
+			LOG.debug("Processing text node...");
+			name = ((Text)pNode).getData();
+			e = _schema.createElement("xs:element");
+			e.setAttribute("name", name);
+			return e;
+		default:
 			return null;
 		}
 	}

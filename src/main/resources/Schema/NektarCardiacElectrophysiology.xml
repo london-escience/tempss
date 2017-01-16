@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
 <CardiacElectrophysiology>
   <Physics>
     <Model paramType="choice">
       <Monodomain>
         <documentation></documentation>
-        <Chi></Chi>
-        <Cm></Cm>
-        <IsotropicConductivity paramType="choice"/>
-          <Conductivity inputType="text"></Conductivity>
+        <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;"></Chi>
+        <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;"></Cm>
+        <IsotropicConductivity paramType="choice">
+          <Conductivity type="xs:double" inputType="text" units="mS mm&lt;sup&gt;-1&lt;/sup&gt;"></Conductivity>
           <Intensity>
-            <Intensity inputType="text"></Intensity>
-            <DMin name="d_min" inputType="text"></DMin>
-            <DMax name="d_max" inputType="text"></DMax>
+            <Intensity type="xs:double" inputType="text"></Intensity>
+            <DMin name="d_min" type="xs:double" inputType="text"></DMin>
+            <DMax name="d_max" type="xs:double" inputType="text"></DMax>
           </Intensity>
           <NotProvided/>
+        </IsotropicConductivity>
       </Monodomain>
       <Bidomain>
         <Sigmai inputType="text"></Sigmai>
@@ -25,7 +28,7 @@
     <CellModel>
       <CellModelType paramType="choice">
         <CourtemancheRamirezNattel98>
-          <CellModelVariant inputType="choice">
+          <CellModelVariant type="xs:string" inputType="choice">
             <tempss:item>Original</tempss:item>
             <tempss:item>AF</tempss:item>
           </CellModelVariant>
@@ -123,7 +126,7 @@
     </Stimuli>
     <Expansion>
       <PolynomialOrder inputType="text"/>
-      <BasisType inputType="chocie">
+      <BasisType inputType="choice">
         <tempss:item>MODIFIED</tempss:item>
         <tempss:item>GAUSS_LAGRANGE</tempss:item>
         <tempss:item>GLL_LAGRANGE</tempss:item>
