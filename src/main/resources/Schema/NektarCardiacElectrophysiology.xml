@@ -2,7 +2,15 @@
 <!-- Types available from the tempss schema: 
      positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
 <CardiacElectrophysiology>
+  <libhpc:documentation>
+    The Nektar++ finite element PDE solver for cardiac electrophysiology.
+    Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
+  </libhpc:documentation>
   <Physics>
+    <libhpc:documentation>
+      This section contains the parameters that define the physics of the 
+      problem or, equivalently, the PDE coefficients.
+    </libhpc:documentation>
     <Model paramType="choice">
       <Monodomain>
         <libhpc:documentation>
@@ -13,10 +21,28 @@
           bidomain model, it is still adequate in some cases, and has reduced 
           complexity. http://en.wikipedia.org/wiki/Monodomain_model
         </libhpc:documentation>
-        <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;"></Chi>
-        <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;"></Cm>
+        <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;">
+          <libhpc:documentation>Membrane surface to volume ratio</libhpc:documentation>
+        </Chi>
+        <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;">
+          <libhpc:documentation>Membrane capacitance per unit area</libhpc:documentation>
+        </Cm>
         <IsotropicConductivity paramType="choice">
-          <Conductivity type="xs:double" inputType="text" units="mS mm&lt;sup&gt;-1&lt;/sup&gt;"></Conductivity>
+          <libhpc:documentation>
+            The isotropicConductivity specifies the conductivity of the tissue, 
+            assuming it is the same in the x-, y- and z-coordinate directions. 
+            Nektar++ also allows anisotropic conductivity to be specified, to 
+            allow for fibres in the heart which conduct better along their 
+            length than across their breadth. (Anisotropic conductivity not 
+            currently supported by the libhpc/nekkloud tree).
+            
+            Choose between providing the conductivity directly, or by 
+            providing the intensity from an MRI scan, from which the 
+            conductivity will be approximated internally.
+          </libhpc:documentation>
+          <Conductivity type="xs:double" inputType="text" units="mS mm&lt;sup&gt;-1&lt;/sup&gt;">
+            <libhpc:documentation>The constant conductvity.</libhpc:documentation>
+          </Conductivity>
           <Intensity>
             <Intensity type="xs:double" inputType="text"></Intensity>
             <DMin name="d_min" type="xs:double" inputType="text"></DMin>
@@ -38,6 +64,14 @@
       </Bidomain>
     </Model>
     <CellModel>
+      <libhpc:documentation>
+        The action potential of a cardiac cell can be modelled at either a 
+        biophysical level of detail, including a number of transmembrane 
+        currents, or as a phenomenological model, to reproduce the features 
+        of the action potential, with fewer variables. Each cell model will 
+        include a unique system of ODEs to represent the gating variables of 
+        that model.
+      </libhpc:documentation>
       <CellModelType paramType="choice">
         <CourtemancheRamirezNattel98>
           <CellModelVariant type="xs:string" inputType="choice">
@@ -68,6 +102,10 @@
     </CellModel>
   </Physics>
   <ProblemSpecification>
+    <libhpc:documentation>
+      Specification of the particular problem to solve, including geometry 
+      initial and boundary conditions, etc.
+    </libhpc:documentation>
     <GeometryAndBoundaryConditions>
       <Geometry inputType="file"/>
       <BoundaryCondition minOccurs="1" maxOccurs="unbounded">
