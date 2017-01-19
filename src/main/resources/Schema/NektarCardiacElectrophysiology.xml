@@ -139,58 +139,58 @@
       </BoundaryCondition>
     </GeometryAndBoundaryConditions>
     <InitialConditions paramType="choice">
-      <Function inputType="text"/>
-      <File inputType="file"/>
+      <Function type="xs:string" inputType="text"/>
+      <File type="fileName" inputType="file"/>
     </InitialConditions>
     <Stimuli>
       <Stimulus>
         <StimulusType paramType="choice">
           <StimulusPoint>
-            <PStrength name="p_strength" inputType="text" units="uA"/>
+            <PStrength type="xs:double" name="p_strength" units="uA"/>
           </StimulusPoint>
           <StimulusCircle>
-            <PStrength name="p_strength" inputType="text" units="uA mm-3"/>
-            <Px1 name="p_x1" inputType="text" units="mm"/>
-            <Py1 name="p_y1" inputType="text" units="mm"/>
-            <Pz1 name="p_z1" inputType="text" units="mm"/>
-            <Pr1 name="p_x2" inputType="text" units="mm"/>
-            <PIs name="p_is" inputType="text"/>
+            <PStrength type="xs:double" name="p_strength" units="uA mm-3"/>
+            <Px1 type="xs:double" name="p_x1" units="mm"/>
+            <Py1 type="xs:double" name="p_y1" units="mm"/>
+            <Pz1 type="xs:double" name="p_z1" units="mm"/>
+            <Pr1 type="positiveDouble" name="p_r1" units="mm"/>
+            <PIs type="xs:double" name="p_is" />
           </StimulusCircle>
           <StimulusRectangle>
-            <PStrength name="p_strength" inputType="text"/>
-            <Px1 name="p_x1" inputType="text" units="mm"/>
-            <Py1 name="p_y1" inputType="text" units="mm"/>
-            <Pz1 name="p_z1" inputType="text" units="mm"/>
-            <Px2 name="p_x2" inputType="text" units="mm"/>
-            <Py2 name="p_y2" inputType="text" units="mm"/>
-            <Pz2 name="p_z2" inputType="text" units="mm"/>
-            <PIs name="p_is" inputType="text"/>
+            <PStrength type="xs:double" name="p_strength"/>
+            <Px1 type="xs:double" name="p_x1" units="mm"/>
+            <Py1 type="xs:double" name="p_y1" units="mm"/>
+            <Pz1 type="xs:double" name="p_z1" units="mm"/>
+            <Px2 type="xs:double" name="p_x2" units="mm"/>
+            <Py2 type="xs:double" name="p_y2" units="mm"/>
+            <Pz2 type="xs:double" name="p_z2" units="mm"/>
+            <PIs type="xs:double" name="p_is" />
           </StimulusRectangle>
         </StimulusType>
         <Protocol>
           <ProtocolS1S2>
-            <Start inputType="text" units="ms"/>
-            <Duration inputType="text" units="ms"/>
-            <S1CycleLength inputType="text" units="ms"/>
-            <Num_S1 inputType="text"/>
-            <S2CycleLength inputType="text" units="ms"/>
+            <Start type="xs:double" units="ms"/>
+            <Duration type="xs:double" units="ms"/>
+            <S1CycleLength type="xs:double" units="ms"/>
+            <Num_S1 type="xs:positiveInteger"/>
+            <S2CycleLength type="xs:double" units="ms"/>
           </ProtocolS1S2>
           <ProtocolS1>
-            <Start inputType="text" units="ms"/>
-            <Duration inputType="text" units="ms"/>
-            <S1CycleLength inputType="text" units="ms"/>
-            <Num_S1 inputType="text"/>
+            <Start type="xs:double" units="ms"/>
+            <Duration type="xs:double" units="ms"/>
+            <S1CycleLength type="xs:double" units="ms"/>
+            <Num_S1 type="xs:positiveInteger"/>
           </ProtocolS1>
           <ProtocolSingle>
-            <Start inputType="text" units="ms"/>
-            <Duration inputType="text" units="ms"/>
+            <Start type="xs:double" units="ms"/>
+            <Duration type="xs:double" units="ms"/>
           </ProtocolSingle>
         </Protocol>
       </Stimulus>
     </Stimuli>
     <Expansion>
-      <PolynomialOrder inputType="text"/>
-      <BasisType inputType="choice">
+      <PolynomialOrder type="xs:positiveInteger"/>
+      <BasisType type="xs:string" inputType="choice">
         <tempss:item>MODIFIED</tempss:item>
         <tempss:item>GAUSS_LAGRANGE</tempss:item>
         <tempss:item>GLL_LAGRANGE</tempss:item>
@@ -198,16 +198,16 @@
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
     </Expansion>
-    <FinalTime inputType="text"/>
-    <TimeStep inputType="text"/>
+    <FinalTime type="positiveDouble"/>
+    <TimeStep type="positiveDouble"/>
   </ProblemSpecification>
   <NumericalAlgorithm>
-    <Projection inputType="choice">
+    <Projection type="xs:string"  inputType="choice">
       <tempss:item>ContinuousGalerkin</tempss:item>
       <tempss:item>DiscontinuousGalerkin</tempss:item>
     </Projection>
     <TimeIntegration>
-      <TimeIntegrationMethod inputType="choice">
+      <TimeIntegrationMethod type="xs:string" inputType="choice">
         <tempss:item>IMEXOrder1</tempss:item>
         <tempss:item>IMEXOrder2</tempss:item>
         <tempss:item>IMEXOrder3</tempss:item>
@@ -216,42 +216,42 @@
         <tempss:item>BackwardEuler</tempss:item>
         <tempss:item>ClassicalRungeKutta4</tempss:item>
       </TimeIntegrationMethod>
-      <DiffusionAdvancement inputType="choice">
+      <DiffusionAdvancement type="xs:string"  inputType="choice">
         <tempss:item>Implicit</tempss:item>
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>
     <MatrixInversion paramType="choice">
       <Direct>
-        <SubStructuring inputType="choice">
+        <SubStructuring type="xs:string"  inputType="choice">
           <tempss:item>Full</tempss:item>
           <tempss:item>StaticCondensation</tempss:item>
         </SubStructuring>
       </Direct>
       <Iterative>
-        <SubStructuring inputType="choice">
+        <SubStructuring type="xs:string" inputType="choice">
           <tempss:item>Full</tempss:item>
           <tempss:item>StaticCondensation</tempss:item>
         </SubStructuring>
-        <Preconditioner inputType="choice">
+        <Preconditioner type="xs:string"  inputType="choice">
           <tempss:item>LowEnergy</tempss:item>
           <tempss:item>Diagonal</tempss:item>
           <tempss:item>BlockDiagonal</tempss:item>
           <tempss:item>LowEnergyWithLinearSpace</tempss:item>
         </Preconditioner>
-        <SuccessiveRHS inputType="text"/>
-        <IterativeSolverTolerance inputType="text"/>
+        <SuccessiveRHS type="positiveIncDouble" />
+        <IterativeSolverTolerance type="positiveDouble" />
       </Iterative>
     </MatrixInversion>
     <GlobalOptimizationParameters>
       <BackwardTransform paramType="choice">
         <GlobalMatrixEvaluation />
         <ElementalEvaluation>
-          <Triangles inputType="choice">
+          <Triangles type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Triangles>
-          <Quadrilaterals inputType="choice">
+          <Quadrilaterals type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Quadrilaterals>
@@ -260,11 +260,11 @@
       <InnerProductWRTBase paramType="choice">
         <GlobalMatrixEvaluation />
         <ElementalEvaluation>
-          <Triangles inputType="choice">
+          <Triangles type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Triangles>
-          <Quadrilaterals inputType="choice">
+          <Quadrilaterals type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Quadrilaterals>
@@ -273,11 +273,11 @@
       <MassMatrixOp paramType="choice">
         <GlobalMatrixEvaluation />
         <ElementalEvaluation>
-          <Triangles inputType="choice">
+          <Triangles type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Triangles>
-          <Quadrilaterals inputType="choice">
+          <Quadrilaterals type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Quadrilaterals>
@@ -286,11 +286,11 @@
       <HelmholtzMatrixOp paramType="choice">
         <GlobalMatrixEvaluation />
         <ElementalEvaluation>
-          <Triangles inputType="choice">
+          <Triangles type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Triangles>
-          <Quadrilaterals inputType="choice">
+          <Quadrilaterals type="xs:string" inputType="choice">
             <tempss:item>SumFactorization</tempss:item>
             <tempss:item>LocalMatrix</tempss:item>
           </Quadrilaterals>
@@ -299,7 +299,7 @@
     </GlobalOptimizationParameters>
   </NumericalAlgorithm>
   <Admin>
-    <IO_CheckSteps inputType="text"/>
-    <IO_InfoSteps inputType="text"/>
+    <IO_CheckSteps type="xs:positiveInteger" />
+    <IO_InfoSteps type="xs:positiveInteger" />
   </Admin>
 </CardiacElectrophysiology>

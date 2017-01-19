@@ -331,7 +331,7 @@ public class TemPSSSchemaBuilderJDom {
 				Element simpleType = new Element("simpleType", _namespaces.get("xs"));
 				Element restriction = new Element("restriction", _namespaces.get("xs"));
 				
-				String typeAttr = null;((Element)pNode).getAttribute("type");
+				String typeAttr = null;
 				if( node.hasAttributes() && (node.getAttribute("type") != null)
 						&& !node.getAttribute("type").equals("") ) {
 					typeAttr = node.getAttribute("type").getValue();
@@ -343,7 +343,7 @@ public class TemPSSSchemaBuilderJDom {
 				
 				// Now we need to look for the <libhpc:item> child elements
 				// and add the values as xs:enumeration items.
-				List<Element> childNodes = node.getChildren("item", _namespaces.get("libhpc"));
+				List<Element> childNodes = node.getChildren("item", _namespaces.get("tempss"));
 				for(int i = 0; i < childNodes.size(); i++) {
 					Element item = childNodes.get(i);
 					Element val = new Element("enumeration", _namespaces.get("xs"));

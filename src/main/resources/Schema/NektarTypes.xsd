@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+  <xs:simpleType name="positiveDouble">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="positiveIncDouble01">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="positiveIncDouble">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="NotProvided"/>
+
+  <xs:complexType name="fileName">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileType" type="xs:string" fixed="XML" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:simpleType name="OnOffType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Off"/>
+      <xs:enumeration value="On"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="NektarBooleanType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="True"/>
+      <xs:enumeration value="False"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
