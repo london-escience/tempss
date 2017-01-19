@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Types available from the tempss schema: 
      positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
-<CardiacElectrophysiology>
+<CardiacElectrophysiology xmlns="http://www.libhpc.imperial.ac.uk"
+                          xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                          xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
   <libhpc:documentation>
     The Nektar++ finite element PDE solver for cardiac electrophysiology.
     Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
@@ -24,7 +26,7 @@
         <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;">
           <libhpc:documentation>Membrane surface to volume ratio</libhpc:documentation>
         </Chi>
-        <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;">
+        <Cm  type="positiveDouble" inputType="text">
           <libhpc:documentation>Membrane capacitance per unit area</libhpc:documentation>
         </Cm>
         <IsotropicConductivity paramType="choice">
@@ -57,10 +59,10 @@
           into account the anisotropy of both the intracellular and 
           extracellular spaces. http://en.wikipedia.org/wiki/Bidomain_model 
         </libhpc:documentation>
-        <Sigmai inputType="text"></Sigmai>
-        <Sigmaix inputType="text"></Sigmaix>
-        <Sigmaiy inputType="text"></Sigmaiy>
-        <Sigmaiz inputType="text"></Sigmaiz>
+        <Sigmai type="positiveDouble"></Sigmai>
+        <Sigmaix type="positiveDouble"></Sigmaix>
+        <Sigmaiy type="positiveDouble"></Sigmaiy>
+        <Sigmaiz type="positiveDouble"></Sigmaiz>
       </Bidomain>
     </Model>
     <CellModel>
@@ -82,23 +84,35 @@
         <FitzhughNagumo>
         </FitzhughNagumo>
         <TenTusscher>
-          <CellModelVariant inputType="choice">
+          <CellModelVariant type="xs:string" inputType="choice">
             <tempss:item>Endocardium</tempss:item>
             <tempss:item>Epicardium</tempss:item>
             <tempss:item>Mid</tempss:item>
           </CellModelVariant>
         </TenTusscher>
         <AlievPanfilov>
-          <A inputType="text"></A>
-          <Eps inputType="text"></Eps>
-          <K inputType="text"></K>
-          <Mu1 inputType="text"></Mu1>
-          <Mu2 inputType="text"></Mu2>
+          <A type="xs:double" inputType="text"></A>
+          <Eps type="positiveDouble" inputType="text"></Eps>
+          <K type="positiveDouble" inputType="text"></K>
+          <Mu1 type="positiveDouble" inputType="text"></Mu1>
+          <Mu2 type="positiveDouble" inputType="text"></Mu2>
         </AlievPanfilov>
         <FentonKarma>
+          <CellModelVariant type="xs:string" inputType="choice">
+            <tempss:item>BR</tempss:item>
+            <tempss:item>MBR</tempss:item>
+            <tempss:item>MLR1</tempss:item>
+            <tempss:item>GP</tempss:item>
+            <tempss:item>CF1</tempss:item>
+            <tempss:item>CF2a</tempss:item>
+            <tempss:item>CF2b</tempss:item>
+            <tempss:item>CF2c</tempss:item>
+            <tempss:item>CF3a</tempss:item>
+            <tempss:item>CF3b</tempss:item>
+          </CellModelVariant>
         </FentonKarma>
       </CellModelType>
-      <SubSteps inputType="text"/>
+      <SubSteps type="xs:positiveInteger"/>
     </CellModel>
   </Physics>
   <ProblemSpecification>

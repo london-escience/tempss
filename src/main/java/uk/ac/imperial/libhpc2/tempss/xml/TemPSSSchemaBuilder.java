@@ -131,6 +131,29 @@ public class TemPSSSchemaBuilder {
 		// If we have a non-text node or a text node that isn't empty...
 		if(nodeData == null || nodeData.length() != 0) {
 			Element e = null;
+			// If the node has only a documentation child node
+			// then its not the start of a new complex type (or simple type) so
+			// we just process it as though it was just a leaf node...
+			// However, the node will also appear as having a text node so need
+			// to check for node length two where the second item is doc node
+			/* BEGIN DEBUG OUTPUT */
+			if(pNode.hasChildNodes()) {
+				LOG.debug("Node <{}> has <{}> child nodes.\n",
+						((Element)pNode).getTagName(), pNode.getChildNodes().getLength());
+				String childNodes = "Child nodes for <" + ((Element)pNode).getTagName() + ">: ";
+				for(int i = 0; i < pNode.getChildNodes().getLength(); i++) {
+					Node n = pNode.getChildNodes().item(i);
+					if(n.getNodeType() == Node.ELEMENT_NODE) {
+						childNodes += ((Element)n).getTagName() + "  ";
+					}
+					else if(n.getNodeType() == Node.TEXT_NODE) {
+						String text = ((Text)n).getData().replace("\n", "NL");
+						childNodes += "Text[" + text + "]   ";
+					}
+				}
+				System.err.println(childNodes);
+			}
+			/* END DEBUG OUTPUT */
 			if(pNode.hasChildNodes()) {
 				e = _processNode(pNode);
 				_printNodeInfo(pNode, "BEGIN");
@@ -143,10 +166,26 @@ public class TemPSSSchemaBuilder {
 					// been processed within _processNode for simpleType blocks.
 					if(e.getElementsByTagName("xs:simpleType").getLength() == 0) {
 						Element complexType = _schema.createElement("xs:complexType");
-						Element seq = _schema.createElement("xs:sequence");
-						complexType.appendChild(seq);
+						// We now need to open a seuqwnce or choice block. This
+						// depends on whether the current element has a 
+						// paramType attribute with the value of choice.
+						Element elType = null;
+						boolean hasParamType = ((Element)pNode).hasAttribute("paramType");
+						String paramType = null;
+						if(hasParamType) {
+							paramType = ((Element)pNode).getAttribute("paramType");
+						}
+						
+						if( ((Element)pNode).hasAttribute("paramType") &&
+							((Element)pNode).getAttribute("paramType").equals("choice") ) {
+							elType = _schema.createElement("xs:choice");
+						}
+						else {
+							elType = _schema.createElement("xs:sequence");
+						}
+						complexType.appendChild(elType);
 						e.appendChild(complexType);
-						nextIterElement = seq;
+						nextIterElement = elType;
 					}
 					else {
 						LOG.debug("This node has a simpleType, not appending complexType.");
@@ -201,26 +240,26 @@ public class TemPSSSchemaBuilder {
 		switch(pNode.getNodeType()) {
 		case Node.ELEMENT_NODE:
 			if(msg != null) {
-				System.out.println(msg + ": Handling ELEMENT node: " + ((Element)pNode).getTagName());
+				System.err.println(msg + ": Handling ELEMENT node: " + ((Element)pNode).getTagName());
 			}
 			else {
-				System.out.println("Handling ELEMENT node: " + ((Element)pNode).getTagName());
+				System.err.println("Handling ELEMENT node: " + ((Element)pNode).getTagName());
 			}
 			break;
 		case Node.TEXT_NODE:
 			if(msg != null) {
-				System.out.println(msg + ": Handling TEXT node: " + ((Text)pNode).getData());
+				System.err.println(msg + ": Handling TEXT node: " + ((Text)pNode).getData());
 			}
 			else {
-				System.out.println("Handling TEXT node: " + ((Text)pNode).getData());
+				System.err.println("Handling TEXT node: " + ((Text)pNode).getData());
 			}
 			break;
 		default:
 			if(msg != null) {
-				System.out.println(msg + ": Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
+				System.err.println(msg + ": Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
 			}
 			else {
-				System.out.println("Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
+				System.err.println("Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
 			}
 		}
 	}
@@ -341,13 +380,13 @@ public class TemPSSSchemaBuilder {
 	private void _printNodeInfo(Node pNode) {
 		switch(pNode.getNodeType()) {
 		case Node.ELEMENT_NODE:
-			System.out.println("Handling ELEMENT node: " + ((Element)pNode).getTagName());
+			System.err.println("Handling ELEMENT node: " + ((Element)pNode).getTagName());
 			break;
 		case Node.TEXT_NODE:
-			System.out.println("Handling TEXT node: " + ((Text)pNode).getData());
+			System.err.println("Handling TEXT node: " + ((Text)pNode).getData());
 			break;
 		default:
-			System.out.println("Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
+			System.err.println("Handling UNKNOWN node of type <" + pNode.getNodeType() + ">");
 		}
 	}
 }
