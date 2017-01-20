@@ -3,14 +3,11 @@ package uk.ac.imperial.libhpc2.tempss.xml;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * This class is the main entry point for handling the processing of 
@@ -22,13 +19,13 @@ import org.xml.sax.SAXException;
  *   
  * @author jhc02
  */
-public class TemPSSXMLTemplateProcessor {
+public class TemPSSXMLTemplateProcessorJDom {
 
 	private File _file = null;
 	private Document _xml = null;
 	
 	private static final Logger LOG = 
-			LoggerFactory.getLogger(TemPSSXMLTemplateProcessor.class);
+			LoggerFactory.getLogger(TemPSSXMLTemplateProcessorJDom.class);
 	
 	public static void main(String[] args) {
 		if(args.length < 1) {
@@ -42,7 +39,7 @@ public class TemPSSXMLTemplateProcessor {
 		}
 		LOG.debug("XML template processor running - input file {}...",args[0]);
 	
-		TemPSSXMLTemplateProcessor proc = new TemPSSXMLTemplateProcessor(inputFile);
+		TemPSSXMLTemplateProcessorJDom proc = new TemPSSXMLTemplateProcessorJDom(inputFile);
 		if(!proc.parseXML()) {
 			LOG.debug("Unable to parse the XML file <" + args[0] + ">");
 			System.exit(0);
@@ -61,30 +58,19 @@ public class TemPSSXMLTemplateProcessor {
 		if(pMsg != null) {
 			System.err.println("ERROR: " + pMsg);	
 		}
-		System.err.println("Usage: TemPSSXMLTemplateProcessor <XML template file>");
+		System.err.println("Usage: TemPSSXMLTemplateProcessorJDom <XML template file>");
 	}
 	
-	public TemPSSXMLTemplateProcessor(File inputFile) {
+	public TemPSSXMLTemplateProcessorJDom(File inputFile) {
 		this._file = inputFile;
 	}
 
 	public boolean parseXML() {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setIgnoringElementContentWhitespace(true);
-		factory.setNamespaceAware(true);
-		DocumentBuilder db = null;
+		SAXBuilder parser = new SAXBuilder();
+		LOG.info("Parsing XML input file: <" + this._file.getName() + ">");
 		try {
-			db = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			LOG.debug("Error getting document builder: " + e.getMessage());
-			return false;
-		}
-		
-		try {
-			LOG.info("Parsing XML input file: <" + this._file.getName() + ">");
-			this._xml = db.parse(this._file);
-			LOG.info("XML parsed successfully...");
-		} catch (SAXException e) {
+			this._xml = parser.build(this._file);
+		} catch (JDOMException e) {
 			LOG.debug("Parse error for XML file <" + this._file.getName() + 
 					">: " + e.getMessage());
 			return false;
@@ -93,19 +79,13 @@ public class TemPSSXMLTemplateProcessor {
 					">: " + e.getMessage());
 			return false;
 		}
-		
+		LOG.info("XML parsed successfully...");
 		return true;		
 	}
 	
 	public String getConvertedResult() {
-		TemPSSSchemaBuilder tsb = null;
-		try {
-			tsb = new TemPSSSchemaBuilder();
-		} catch (ParserConfigurationException e) {
-			LOG.debug("Unable to create schema builder: " + e.getMessage());
-			return null;
-		}
 		
+		TemPSSSchemaBuilderJDom tsb = new TemPSSSchemaBuilderJDom();
 		Document doc = tsb.convertXMLTemplateToSchema(this._xml);
 		return tsb.getDocumentAsString(doc);
 		
