@@ -22,13 +22,13 @@ import org.xml.sax.SAXException;
  *   
  * @author jhc02
  */
-public class TemPSSXMLTemplateProcessor {
+public class TemPSSXMLTemplateProcessorJAXP {
 
 	private File _file = null;
 	private Document _xml = null;
 	
 	private static final Logger LOG = 
-			LoggerFactory.getLogger(TemPSSXMLTemplateProcessor.class);
+			LoggerFactory.getLogger(TemPSSXMLTemplateProcessorJAXP.class);
 	
 	public static void main(String[] args) {
 		if(args.length < 1) {
@@ -42,7 +42,7 @@ public class TemPSSXMLTemplateProcessor {
 		}
 		LOG.debug("XML template processor running - input file {}...",args[0]);
 	
-		TemPSSXMLTemplateProcessor proc = new TemPSSXMLTemplateProcessor(inputFile);
+		TemPSSXMLTemplateProcessorJAXP proc = new TemPSSXMLTemplateProcessorJAXP(inputFile);
 		if(!proc.parseXML()) {
 			LOG.debug("Unable to parse the XML file <" + args[0] + ">");
 			System.exit(0);
@@ -64,7 +64,7 @@ public class TemPSSXMLTemplateProcessor {
 		System.err.println("Usage: TemPSSXMLTemplateProcessor <XML template file>");
 	}
 	
-	public TemPSSXMLTemplateProcessor(File inputFile) {
+	public TemPSSXMLTemplateProcessorJAXP(File inputFile) {
 		this._file = inputFile;
 	}
 
@@ -98,9 +98,9 @@ public class TemPSSXMLTemplateProcessor {
 	}
 	
 	public String getConvertedResult() {
-		TemPSSSchemaBuilder tsb = null;
+		TemPSSSchemaBuilderJAXP tsb = null;
 		try {
-			tsb = new TemPSSSchemaBuilder();
+			tsb = new TemPSSSchemaBuilderJAXP();
 		} catch (ParserConfigurationException e) {
 			LOG.debug("Unable to create schema builder: " + e.getMessage());
 			return null;

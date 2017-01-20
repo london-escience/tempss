@@ -30,13 +30,13 @@ import org.w3c.dom.Text;
  *  
  * @author jhc02
  */
-public class TemPSSSchemaBuilder {
+public class TemPSSSchemaBuilderJAXP {
 
 	private static final Logger LOG = LoggerFactory.getLogger(
-										TemPSSSchemaBuilder.class.getName());
+										TemPSSSchemaBuilderJAXP.class.getName());
 	private Document _schema = null;
 	
-	public TemPSSSchemaBuilder() throws ParserConfigurationException {
+	public TemPSSSchemaBuilderJAXP() throws ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();

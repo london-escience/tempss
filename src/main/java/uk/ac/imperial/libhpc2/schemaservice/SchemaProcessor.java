@@ -55,7 +55,6 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,12 +70,17 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.FileUtils;
 import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.imperial.libhpc2.tempss.xml.TemPSSSchemaBuilder;
+import uk.ac.imperial.libhpc2.tempss.xml.TemPSSXMLTemplateProcessor;
 
 public class SchemaProcessor {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(SchemaProcessor.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaProcessor.class.getName());
 
     /**
      * Servlet context passed in on class creation
@@ -103,7 +107,7 @@ public class SchemaProcessor {
     public String processComponentSelector(TempssObject pComponentMetadata)
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
-        sLog.fine("ServletContext: " + _context);
+        LOG.debug("ServletContext: " + _context);
         String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
         //String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
@@ -129,6 +133,28 @@ public class SchemaProcessor {
             throw new IOException("Unable to read the schema file as a string...", e);
         }
 
+        // Updated Jan17: Adding support for new XML-based template format -
+        // if we have an XML-based template then run the converter to the 
+        // original XML Schema format now...
+        if(TemPSSXMLTemplateProcessor.isXMLTemplate(schemaString)) {
+        	LOG.debug("Converting an XML template to XML schema format...");
+        	// Convert to schema format template.
+        	TemPSSXMLTemplateProcessor proc = new TemPSSXMLTemplateProcessor(schemaString);
+    		if(!proc.parseXML()) {
+    			LOG.debug("Unable to parse the XML template content.");
+    			return "";
+    		}
+    		
+    		schemaString = proc.getConvertedResult();
+    		if(schemaString != null) {
+    			LOG.debug("Template XML successfully converted to schema format");
+    		}
+    		else {
+    			LOG.error("Conversion failed, result was null");
+    			return "";
+    		}
+        }
+        
         // Use regex to find and include files. First find the identifier
         // assigned to the schema namespace. Usually it's xs or xsd Need to
         // match pattern like: xmlns:xs="http://www.w3.org/2001/XMLSchema"

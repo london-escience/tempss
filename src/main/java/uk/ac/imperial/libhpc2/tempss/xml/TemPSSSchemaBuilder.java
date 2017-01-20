@@ -34,15 +34,15 @@ import org.w3c.dom.NodeList;
  *  
  * @author jhc02
  */
-public class TemPSSSchemaBuilderJDom {
+public class TemPSSSchemaBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(
-										TemPSSSchemaBuilderJDom.class.getName());
+										TemPSSSchemaBuilder.class.getName());
 	private Document _schema = null;
 	
 	private Map<String, Namespace> _namespaces = new HashMap<String, Namespace>();
 	
-	public TemPSSSchemaBuilderJDom() {
+	public TemPSSSchemaBuilder() {
 	
 	}
 	
