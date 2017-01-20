@@ -10,7 +10,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.jdom2.Attribute;
 import org.jdom2.Content;
+import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -267,6 +269,55 @@ public class TemPSSSchemaBuilderJDom {
 			}
 			e = new Element("element", _namespaces.get("xs"));
 			e.setAttribute("name", name);
+			
+			// Now see if we have optional or repeatable tags set to true
+			// If so, we add relevant minOccurs and maxOccurs attributes
+			if(node.hasAttributes()) {
+				Attribute optionalAttr = node.getAttribute("optional");
+				Attribute repeatableAttr = node.getAttribute("repeatable");
+				boolean optional = false;
+				if(optionalAttr != null) {
+					try {
+						if(optionalAttr.getBooleanValue()) {
+							optional = true;
+							e.setAttribute("minOccurs", "0");
+						}
+					} catch (DataConversionException e1) {
+						LOG.warn("Ignoring optional attribute for node <" +
+							node.getName() + ">. Value couldn't be parsed.");
+					}
+				}
+				if(repeatableAttr != null) {
+					if(!optional) {
+						e.setAttribute("minOccurs", "1");
+					}
+					String repeatable = repeatableAttr.getValue();
+					int repeatCount = -1;
+					try {
+						repeatCount = Integer.parseInt(repeatable);
+					} catch(NumberFormatException ex) {
+						LOG.debug("Couldn't parse int from repeatable param.");
+					}
+					
+					if(repeatable.equals("true")) {
+						e.setAttribute("maxOccurs", "unbounded");
+					}
+					else if(repeatCount > 0) {
+						e.setAttribute("maxOccurs", new Integer(repeatCount).toString());
+					}
+					else {
+						LOG.debug("Unexpected value for repeatable, setting maxOccurrs to 1");
+						e.setAttribute("maxOccurs", "1");
+					}
+				}
+				else {
+					// Don't need to put maxOccurs if we didn't have minOccurs
+					if(optionalAttr != null) {
+						e.setAttribute("maxOccurs", "1");
+					}
+				}
+			}
+			// END processing of optional/repeatable values
 			
 			// See if we have an inputType attribute and what its value is...
 			String inputType = "";

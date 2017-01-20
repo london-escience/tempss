@@ -121,21 +121,22 @@
       initial and boundary conditions, etc.
     </libhpc:documentation>
     <GeometryAndBoundaryConditions>
-      <Geometry inputType="file"/>
-      <BoundaryCondition minOccurs="1" maxOccurs="unbounded">
-        <Variable inputType="text"/>
-        <Comment inputType="text"/>
-        <Variable inputType="text"/>
-        <Type inputType="choice">
-          <tempss:item>NotProvided</tempss:item>
-          <tempss:item>D</tempss:item>
-          <tempss:item>N</tempss:item>
-        </Type>
-        <Value inputType="text"/>
-        <UserDefinedType inputType="choice">
-          <tempss:item>NotProvided</tempss:item>
-          <tempss:item>TimeDependent</tempss:item>
-        </UserDefinedType>
+      <Geometry type="fileName" inputType="file"/>
+      <BoundaryCondition repeatable="true">
+        <Comment type="xs:string"/>
+        <Variable repeatable="4">
+          <VariableName type="xs:string"/>
+          <Type inputType="choice">
+            <tempss:item>NotProvided</tempss:item>
+            <tempss:item>D</tempss:item>
+            <tempss:item>N</tempss:item>
+          </Type>
+          <Value type="xs:string"/>
+          <UserDefinedType inputType="choice">
+            <tempss:item>NotProvided</tempss:item>
+            <tempss:item>TimeDependent</tempss:item>
+          </UserDefinedType>
+        </Variable>
       </BoundaryCondition>
     </GeometryAndBoundaryConditions>
     <InitialConditions paramType="choice">
@@ -143,7 +144,7 @@
       <File type="fileName" inputType="file"/>
     </InitialConditions>
     <Stimuli>
-      <Stimulus>
+      <Stimulus optional="true" repeatable="true">
         <StimulusType paramType="choice">
           <StimulusPoint>
             <PStrength type="xs:double" name="p_strength" units="uA"/>
@@ -167,7 +168,7 @@
             <PIs type="xs:double" name="p_is" />
           </StimulusRectangle>
         </StimulusType>
-        <Protocol>
+        <Protocol paramType="choice">
           <ProtocolS1S2>
             <Start type="xs:double" units="ms"/>
             <Duration type="xs:double" units="ms"/>
@@ -221,6 +222,50 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>
+    <GlobalSysSolution optional="true">
+      <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+      <MatrixInversion repeatable="true">
+        <Field type="xs:string">
+          <libhpc:documentation>The variable name for the field that this matrix inversion applies to.</libhpc:documentation>
+        </Field>
+        <InversionType paramType="choice">
+          <Direct>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <SubStructuring type="xs:string" inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice">
+              <tempss:item>LowEnergy</tempss:item>
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>BlockDiagonal</tempss:item>
+              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble" />
+            <IterativeSolverTolerance type="positiveDouble" />
+          </Iterative>
+          <Xxt>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+    
+    <!--
     <MatrixInversion paramType="choice">
       <Direct>
         <SubStructuring type="xs:string"  inputType="choice">
@@ -297,6 +342,7 @@
         </ElementalEvaluation>
       </HelmholtzMatrixOp>
     </GlobalOptimizationParameters>
+     -->
   </NumericalAlgorithm>
   <Admin>
     <IO_CheckSteps type="xs:positiveInteger" />
