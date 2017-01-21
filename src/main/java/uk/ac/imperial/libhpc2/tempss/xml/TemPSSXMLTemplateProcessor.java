@@ -152,12 +152,23 @@ public class TemPSSXMLTemplateProcessor {
 				this._xml = parser.build(this._file);
 			}
 		} catch (JDOMException e) {
-			LOG.debug("Parse error for XML file <" + this._file.getName() + 
-					">: " + e.getMessage());
+			if(this._inputStr != null) {
+				LOG.debug("Parse error for XML file: " + e.getMessage());	
+			}
+			else {
+				LOG.debug("Parse error for XML file <" + this._file.getName() +
+						">: " + e.getMessage());
+			}
 			return false;
 		} catch (IOException e) {
-			LOG.debug("Error reading the XML file <" + this._file.getName() + 
-					">: " + e.getMessage());
+			if(this._inputStr != null) {
+				LOG.debug("Error reading the XML file: " + e.getMessage()); 	
+			}
+			else {
+				LOG.debug("Error reading the XML file <" + this._file.getName() + 
+						">: " + e.getMessage());
+			}
+			
 			return false;
 		}
 		LOG.info("XML parsed successfully...");
