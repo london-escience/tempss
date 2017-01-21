@@ -902,6 +902,12 @@ function extractEntriesFromFile(event, path) {
     // so we only try to read the xml once it's actually loaded.
     var selectedFile = event.target.files[0];
     var reader = new FileReader();
+    
+    // FIXME: ** This is a workaround to test the new boundary region processing
+    if(path == "CardiacElectrophysiology.ProblemSpecification.Geometry") {
+    	return processBoundaryRegions(event, path, selectedFile, reader)
+    }
+    
     reader.onload = function (event) {
         var fileXml = event.target.result;
 
@@ -995,6 +1001,39 @@ function extractEntriesFromFile(event, path) {
 
 }
 
+/**
+ * This function processes the boundary regions from a geometry file when one 
+ * is added into the template. This is triggered via extract entries from file 
+ * when we find that the target node is ProblemSpecification -> Geometry.
+ * 
+ * @param event The node that is the target of the event.
+ * @param path The path of the node that the 
+ */
+function processBoundaryRegions(event, path, selectedFile, reader) {
+	console.log("Undertaking custom boundary region processing...");
+    reader.onload = function (event) {
+        var fileXml = event.target.result;
+
+        var xmlDoc = $.parseXML(fileXml);
+        var $xml = $(xmlDoc); // The $ of $xml just reminds us it is a jquery object
+        
+        // Now we need to find out the dimension of the geometry in order to 
+        // see how many boundary conditions we need
+        var geomXPath = "NEKTAR/GEOMETRY";
+        var jqueryGeomXPath = geomXPath.split("/").join(" > ");
+        // Count the number of instances of the
+        var geomCount = $xml.find(jqueryGeomXPath).length;
+        if(geomCount != 1) {
+        	log("We have not been able to find valid GEOMETRY data in the " +
+        			"provided file");
+        	return;
+        }
+        else {
+        	log("Found valid GEOMETRY data in the provided file.");
+        }
+    }
+    reader.readAsText(selectedFile);
+}
 
 
 function validateList(caller, validationType, restrictionsJSON) {
