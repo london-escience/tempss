@@ -38,6 +38,14 @@
     </xs:simpleContent>
   </xs:complexType>
   
+  <xs:complexType name="geometryFileName">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="geometryFileType" type="xs:string" fixed="XML" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
   <xs:simpleType name="OnOffType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Off"/>

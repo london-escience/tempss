@@ -901,12 +901,7 @@ function extractEntriesFromFile(event, path) {
     // Need to use the javascript file reader to read in the xml. This allows us to set an onload handler
     // so we only try to read the xml once it's actually loaded.
     var selectedFile = event.target.files[0];
-    var reader = new FileReader();
-    
-    // FIXME: ** This is a workaround to test the new boundary region processing
-    if(path == "CardiacElectrophysiology.ProblemSpecification.Geometry") {
-    	return processBoundaryRegions(event, path, selectedFile, reader)
-    }
+    var reader = new FileReader(); 
     
     reader.onload = function (event) {
         var fileXml = event.target.result;
@@ -1009,7 +1004,12 @@ function extractEntriesFromFile(event, path) {
  * @param event The node that is the target of the event.
  * @param path The path of the node that the 
  */
-function processBoundaryRegions(event, path, selectedFile, reader) {
+function processGeometryFile(event, path, selectedFile, reader) {
+	var selectedFile = event.target.files[0];
+    var reader = new FileReader();
+    var $geomElement = $(event.currentTarget);
+    
+    var compositeTypeDim = {V: 0, E: 1, T: 2, Q: 2, A: 3, H: 3, P: 3, R: 3}
 	console.log("Undertaking custom boundary region processing...");
     reader.onload = function (event) {
         var fileXml = event.target.result;
@@ -1020,21 +1020,154 @@ function processBoundaryRegions(event, path, selectedFile, reader) {
         // Now we need to find out the dimension of the geometry in order to 
         // see how many boundary conditions we need
         var geomXPath = "NEKTAR/GEOMETRY";
+        var compositeXPath = "NEKTAR/GEOMETRY/COMPOSITE";
         var jqueryGeomXPath = geomXPath.split("/").join(" > ");
+        var jqueryCompositeXPath = compositeXPath.split("/").join(" > ");
         // Count the number of instances of the
-        var geomCount = $xml.find(jqueryGeomXPath).length;
+        var $geomNode = $xml.find(jqueryGeomXPath);
+        var geomCount = $geomNode.length;
         if(geomCount != 1) {
         	log("We have not been able to find valid GEOMETRY data in the " +
         			"provided file");
         	return;
         }
+        
+        log("Found valid GEOMETRY data in the provided file.");
+        var dimAttr = $geomNode.attr("DIM");
+        if(typeof dimAttr !== undefined) {
+        	log("Value of dimension attribute: " + dimAttr);
+        }
         else {
-        	log("Found valid GEOMETRY data in the provided file.");
+        	log("Couldn't find a dimension attribute in the GEOMETRY.");
+        	return;
+        }
+        
+        var compositeDim = dimAttr - 1;
+        log("Looking for composites of dimension: " + compositeDim);
+        var $compositeNode = $xml.find(jqueryCompositeXPath);
+        if($compositeNode.length < 1) {
+        	log("ERROR: Couldn't find required COMPOSITE node in the file.");
+        	return;
+        }
+        else if($compositeNode.length > 1) {
+        	log("ERROR: There is more than 1 COMPOSITE node in the file.");
+        	return;
+        }
+        var boundaryRegionCount = 0;
+        var boundaryRegions = [];
+        $compositeNode.children().each(function() {
+        	var compositeID = $(this).attr("ID");
+        	log("Found <" + this.nodeName + "> node with ID <" + compositeID + ">...");
+        	var nodeText = $(this).text().trim();
+        	log("Node text: " + nodeText);
+        	var nodeType = nodeText.substring(0,1);
+        	log("Node type <" + nodeType + "> has dimension <" + compositeTypeDim[nodeType] + ">.");
+        	if(compositeDim == compositeTypeDim[nodeType]) {
+        		log("Found a boundary region...");
+        		boundaryRegions.push({dim: compositeDim,
+        			                  type: nodeType,
+        			                  compositeID: compositeID});	
+        	}
+        });
+        
+        var $boundaryDetails = $geomElement.parent().parent().parent().parent().find('ul li.parent_li[data-fqname="BoundaryDetails"]');
+        log("Boundary details: " + $boundaryDetails);
+        for(var i = 0; i < boundaryRegions.length; i++) {
+        	$boundaryDetails.append(generateBoundaryRegion(null, (i+1)));
         }
     }
     reader.readAsText(selectedFile);
 }
 
+/**
+ * Generate a boundary region block to insert into the TemPSS HTML tree
+ * 
+ * @param regionType
+ * @param count
+ * @returns
+ */
+function generateBoundaryRegion(regionType, count, display) {
+	
+	function generateIndividualNode(type, name, repeat, display, widget, options) {
+		var $baseUL = $('<ul/>');
+		$baseUL.attr("role", "group");
+		if(repeat > 0) {
+			$baseUL.attr("data-repeat", repeat);
+		}
+		if(type == "leaf") {
+			$baseUL.attr("data-leaf", "true");
+		}
+		
+		var $li = $('<li/>');
+		$li.addClass("parent_li");
+		$li.attr("data-fqname", name);
+		$li.attr("role", "treeitem");
+		$li.css("display", (display) ? "list-item" : "none");
+		
+		var $span = $('<span/>');
+		if(type == "leaf") {
+			$span.addClass("badge badge-info");
+		}
+		else if(type == "group") {
+			$span.addClass("badge badge-success");
+		}
+		$span.attr("data-fqname", name);
+		$span.text(name);
+		$li.append($span);
+		if(widget != null) {
+			switch(widget) {
+			case "text":
+				var $item = $('<input class="data" type="text" onchange="validateEntries($(this), \'xs:string\');"/>');
+				$item.val("Boundary Region " + count);
+				$li.append($item);
+				break;
+			case "choice":
+				var enumStr = '[';
+				for(var i = 0; i < options.length; i++) {
+					enumStr += '"' + options[i] + '"';
+					if(i < options.length-1) {
+						enumStr += ', ';
+					}
+				}
+				enumStr += "]";
+				var $item = $('<select class="choice" onchange="validateEntries($(this), \'xs:string\', \'{"xs:enumeration": ' + enumStr + '}\');"/>');
+				$item.append($('<option value="Select from list">Select from list</option>'));
+				for(var i = 0; i < options.length; i++) {
+					$item.append($('<option value="' + options[i] + '">' + options[i] + '</option>'));	
+				}
+				$li.append($item);
+				break;
+			default:
+				log("Unknown widget type received for this boundary region.");
+			}
+			
+		}
+		$baseUL.append($li);
+		return $baseUL;
+	}
+	
+	var $baseUL = $('<ul role="group" data-condition-id="' + count + '"/>');
+	var $baseLI = $('<li/>');
+	$baseLI.attr("data-fqname", "BoundaryRegion");
+	$baseLI.attr("role", "treeitem");
+	$baseLI.addClass("parent_li");
+	$baseLI.css("display", "list-item");
+	var $baseSPAN = $('<span/>');
+	$baseSPAN.attr("data-fqname", "BoundaryRegion");
+	$baseSPAN.addClass("badge badge-success");
+	$baseSPAN.text('BoundaryRegion');
+	$baseLI.append($baseSPAN);
+	
+	// Now add additional nodes into the baseLI
+	// Boundary regions have a name input field, type dropdown
+	var $nameNode = generateIndividualNode("leaf", "Name", 0, false, "text");
+	$baseLI.append($nameNode);
+	var $typeNode = generateIndividualNode("leaf", "Type", 0, false, "choice", ["D", "N", "P", "R"]);
+	$baseLI.append($typeNode);
+	
+	$baseUL.append($baseLI);
+	return $baseUL;
+}
 
 function validateList(caller, validationType, restrictionsJSON) {
 
@@ -1185,6 +1318,9 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                     break;
                 case "xs:file":
                     // Any string filename will do for now, but extension will be checked below.
+                	// TODO: Look at adding a class or attribute to a file node 
+                	//       if processing fails. Then we can check for this 
+                	//       value here and mark the node as invalid as required
                 case "xs:string":
                     // Any string will do for now.
                     if ($caller.val().length > 0) {

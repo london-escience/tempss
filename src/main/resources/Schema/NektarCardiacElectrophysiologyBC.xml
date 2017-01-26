@@ -161,7 +161,7 @@
       Specification of the particular problem to solve, including geometry 
       initial and boundary conditions, etc.
     </libhpc:documentation>
-    <Geometry type="fileName" inputType="file">
+    <Geometry type="geometryFileName" inputType="file">
       <libhpc:documentation>
         The geometry on which the problem is being solved (usually a mesh 
         representing a heart). Provide a Nektar XML (with root NEKTAR element) 

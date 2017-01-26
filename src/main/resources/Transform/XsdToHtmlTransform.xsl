@@ -252,6 +252,28 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </input>
   </xsl:template>
 
+  <!-- Geometry files need special processing to identify boundary regions and
+       set these up in the template tree. We introduce a special 
+       geometryFileType to support this requirement. 
+  -->
+  <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='geometryFileType']" mode="findChildNodes">
+    <xsl:param name="path" />
+    <span>
+      <input type="file">
+        <xsl:attribute name="onchange">
+          <xsl:text>validateEntries($(this), 'xs:file', '{"xs:filetype": ["</xsl:text>
+          <xsl:value-of select="@fixed"/>
+          <xsl:text>"]}');processGeometryFile(event, '</xsl:text>
+          <xsl:value-of select="$path"/>
+          <xsl:text>')</xsl:text>
+        </xsl:attribute>
+        <xsl:attribute name="path">
+          <xsl:value-of select="$path"/>
+        </xsl:attribute>
+      </input>
+    </span>
+  </xsl:template>
+
   <!-- Recurse over the restrictions on xs:string to create json for use by javascript-->
   <xsl:template name="process-enumeration-restrictions">
     <xsl:param name="elements-to-process" select="/.."/>
