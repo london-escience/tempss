@@ -1009,7 +1009,8 @@ function processGeometryFile(event, path, selectedFile, reader) {
     var reader = new FileReader();
     var $geomElement = $(event.currentTarget);
     
-    var compositeTypeDim = {V: 0, E: 1, T: 2, Q: 2, A: 3, H: 3, P: 3, R: 3}
+    //var compositeTypeDim = {V: 0, E: 1, T: 2, Q: 2, A: 3, H: 3, P: 3, R: 3}
+    var compositeTypeDim = {V: 0, E: 1, F: 2};
 	console.log("Undertaking custom boundary region processing...");
     reader.onload = function (event) {
         var fileXml = event.target.result;
@@ -1072,8 +1073,21 @@ function processGeometryFile(event, path, selectedFile, reader) {
         
         var $boundaryDetails = $geomElement.parent().parent().parent().parent().find('ul li.parent_li[data-fqname="BoundaryDetails"]');
         log("Boundary details: " + $boundaryDetails);
+        // See if the BoundaryCondition(s) node(s) have display:none set. If 
+        // they do, then we also make the BoundaryRegion elements hidden.
+        var $boundaryCondition = $boundaryDetails.find('li.parent_li[data-fqname="BoundaryCondition"]');
+        
+        // Before we generate any new boundary regions, we remove any existing 
+        // BoundaryRegion nodes that may be present if a file has already been
+        // loaded
+        $boundaryDetails.find('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
+        	$(this).parent().remove();
+        });
+        
+        var display = ($($boundaryCondition[0]).css("display") == "none") ? false : true;
         for(var i = 0; i < boundaryRegions.length; i++) {
-        	$boundaryDetails.append(generateBoundaryRegion(null, (i+1)));
+        	var id = boundaryRegions[i]['compositeID'];
+        	$boundaryDetails.append(generateBoundaryRegion(null, (i+1), display, id));
         }
     }
     reader.readAsText(selectedFile);
@@ -1082,13 +1096,31 @@ function processGeometryFile(event, path, selectedFile, reader) {
 /**
  * Generate a boundary region block to insert into the TemPSS HTML tree
  * 
- * @param regionType
- * @param count
- * @returns
+ * @param regionType currently unused, pass null
+ * @param count the number of a boundary region (1-indexed) when there are 
+ *              multiple composites/boundary regions.
+ * @returns a jQuery object that is the root element of the boundary region XML
  */
-function generateBoundaryRegion(regionType, count, display) {
+function generateBoundaryRegion(regionType, count, display, id) {
 	
-	function generateIndividualNode(type, name, repeat, display, widget, options) {
+	function generateIndividualNode(type, name, display, options) {
+		// options is an object that can have the following properties: 
+		// repeat; defaultValue; widget; widgetOptions
+		var repeat = 0;
+		if(options.hasOwnProperty("repeat")) {
+			repeat = options.repeat;
+		}
+		var widget = null;
+		var widgetOptions = [];
+		if(options.hasOwnProperty("widget")) {
+			widget = options.widget;
+		}
+		if(widget != null && widget == "choice") {
+			if(options.hasOwnProperty("widgetOptions")) {
+				widgetOptions = options.widgetOptions;
+			}
+		}
+		
 		var $baseUL = $('<ul/>');
 		$baseUL.attr("role", "group");
 		if(repeat > 0) {
@@ -1117,8 +1149,14 @@ function generateBoundaryRegion(regionType, count, display) {
 		if(widget != null) {
 			switch(widget) {
 			case "text":
-				var $item = $('<input class="data" type="text" onchange="validateEntries($(this), \'xs:string\');"/>');
-				$item.val("Boundary Region " + count);
+				var readonly = "";
+				if(options.hasOwnProperty("readonly") && options.readonly) {
+					readonly = "readonly ";
+				}
+				var $item = $('<input class="data" ' + readonly + 'type="text" onchange="validateEntries($(this), \'xs:string\');"/>');
+				if(options.hasOwnProperty("defaultValue") && options.defaultValue != null) {
+					$item.val(options.defaultValue);
+				}
 				$li.append($item);
 				break;
 			case "choice":
@@ -1132,8 +1170,8 @@ function generateBoundaryRegion(regionType, count, display) {
 				enumStr += "]";
 				var $item = $('<select class="choice" onchange="validateEntries($(this), \'xs:string\', \'{"xs:enumeration": ' + enumStr + '}\');"/>');
 				$item.append($('<option value="Select from list">Select from list</option>'));
-				for(var i = 0; i < options.length; i++) {
-					$item.append($('<option value="' + options[i] + '">' + options[i] + '</option>'));	
+				for(var i = 0; i < widgetOptions.length; i++) {
+					$item.append($('<option value="' + widgetOptions[i] + '">' + widgetOptions[i] + '</option>'));	
 				}
 				$li.append($item);
 				break;
@@ -1151,7 +1189,7 @@ function generateBoundaryRegion(regionType, count, display) {
 	$baseLI.attr("data-fqname", "BoundaryRegion");
 	$baseLI.attr("role", "treeitem");
 	$baseLI.addClass("parent_li");
-	$baseLI.css("display", "list-item");
+	$baseLI.css("display", display ? "list-item" : "none");
 	var $baseSPAN = $('<span/>');
 	$baseSPAN.attr("data-fqname", "BoundaryRegion");
 	$baseSPAN.addClass("badge badge-success");
@@ -1160,10 +1198,12 @@ function generateBoundaryRegion(regionType, count, display) {
 	
 	// Now add additional nodes into the baseLI
 	// Boundary regions have a name input field, type dropdown
-	var $nameNode = generateIndividualNode("leaf", "Name", 0, false, "text");
-	$baseLI.append($nameNode);
-	var $typeNode = generateIndividualNode("leaf", "Type", 0, false, "choice", ["D", "N", "P", "R"]);
+	var $idNode = generateIndividualNode("leaf", "CompositeID", false, {repeat: 0, defaultValue: id, widget: "text", readonly: true});
+	$baseLI.append($idNode);
+	var $typeNode = generateIndividualNode("leaf", "BoundaryCondition", false, {repeat: 0, widget: "choice", widgetOptions: []});
 	$baseLI.append($typeNode);
+	var $commentNode = generateIndividualNode("leaf", "Comment", false, {repeat: 0, defaultValue: "Boundary Region " + count, widget: "text"});
+	$baseLI.append($commentNode);
 	
 	$baseUL.append($baseLI);
 	return $baseUL;

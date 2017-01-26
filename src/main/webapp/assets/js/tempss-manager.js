@@ -147,7 +147,7 @@ function displayTemplate(templateID, templateText) {
             $templateContainer.LibhpcParameterTree();
 
             treeRoot = $('#template-container ul[role="tree"]');
-
+            
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
             if(data.authenticated) {
@@ -639,10 +639,25 @@ function attachChangeHandlers() {
     treeRoot.on('nodeValid', function() {
         disableGenerateInputButton(false);
     });
-
+    
     treeRoot.on('nodeInvalid', function() {
         disableGenerateInputButton(true);
     });
+    
+    // Add an additional nodeValid/nodeInvalid handler to BoundaryCondition 
+    // nodes that triggers an update of the boundary region options when a 
+    // boundary condition becomes valid or invalid.
+    // Since we don't have a way of directly selecting BoundaryCondition ul 
+    // elements (we can only grab the li descendent of a BoundaryCondition
+    // element and there is no CSS parent selector), we add a class to identify 
+    // these nodes.
+    // TEST: Attaching handlers to input nodes instead of main bc node.
+    $('li.parent_li[data-fqname="BoundaryConditionName"]').parent(
+    	).addClass('boundary-condition').on('nodeValid', function(e) {
+    		updateBoundaryRegions(e, true);
+    	}).on('nodeInvalid', function(e) {
+    		updateBoundaryRegions(e, false);
+    	});
 }
 
 function removeChangeHandlers() {
@@ -843,6 +858,30 @@ function displayLoginForm(modalSource) {
             }
         }]
     });
+}
+
+function updateBoundaryRegions(event, valid) {
+	log("Update boundary regions - valid? " + valid);
+	// Iterate over all the BoundaryCondition elements and find those that have
+	// a name set. Compile a list of these names and then add them to each 
+	// BoundaryRegion/BoundaryCondition node.
+	var BCNames = [];
+	$('li.parent_li[data-fqname="BoundaryConditionName"] input').each(function() {
+		var value = $(this).val();
+		if(value != null && value != "") {
+			BCNames.push(value);
+		}
+	});
+	log("BCNames: " + BCNames);
+	$('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
+		var select = $(this).find('li.parent_li[data-fqname="BoundaryCondition"] select');
+		select.find('option').remove();
+		var optionHtml = '<option value="Select from list">Select from list</option>';
+		for(var i = 0; i < BCNames.length; i++) {
+			optionHtml += '<option value="' + BCNames[i] + '">' + BCNames[i] + '</option>';
+		}
+		select.innerHtml(optionHtml);
+	});
 }
 
 // Utility function for displaying log messages

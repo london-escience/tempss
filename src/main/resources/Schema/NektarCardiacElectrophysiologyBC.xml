@@ -183,36 +183,28 @@
           problem that you are solving. You will be able to allocate these 
           boundary conditions to boundary regions once you add a geometry file.
         </libhpc:documentation>
-        <Name type="xs:string"/>
-        <VariableName paramType="choice">
-          <u/>
-          <v/>
-          <w/>
-          <p/>
-          <Other>
-            <Variable type="xs:string"></Variable>
-          </Other>
-        </VariableName>
-        <Type paramType="choice">
-          <Function type="xs:string" inputType="text">
-      	  <libhpc:documentation>
-      	    Provide a function describing this boundary condition.
-      	  </libhpc:documentation>
-      	</Function>
-      	<File type="fileName" inputType="file">
-      	  <libhpc:documentation>
-      	    Provide a file describing this boundary condition - this will 
-      	    be a field file describing an edge of the mesh field.
-      	  </libhpc:documentation>
-      	</File>
-        </Type>
-        <Value type="xs:string"/>
-        <UserDefinedType inputType="choice">
-          <tempss:item>NotProvided</tempss:item>
-          <tempss:item>TimeDependent</tempss:item>
-        </UserDefinedType>
+        <BoundaryConditionName type="xs:string"/>
+        <Variable repeatable="true">
+          <VariableName type="xs:string"/>
+          <Type paramType="choice">
+            <Expression type="xs:string" inputType="text">
+      	      <libhpc:documentation>
+      	        Provide a function describing this boundary condition.
+      	      </libhpc:documentation>
+      	    </Expression>
+      	    <File type="fileName" inputType="file">
+      	      <libhpc:documentation>
+      	        Provide a file describing this boundary condition - this will 
+      	        be a field file describing an edge of the mesh field.
+      	      </libhpc:documentation>
+      	    </File>
+          </Type>
+          <UserDefinedType type="xs:string" inputType="choice">
+            <tempss:item>NotProvided</tempss:item>
+            <tempss:item>TimeDependent</tempss:item>
+          </UserDefinedType>
+        </Variable>
       </BoundaryCondition>
-      
     </BoundaryDetails>
     <InitialConditions paramType="choice">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
