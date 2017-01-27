@@ -30,6 +30,15 @@ The root tag should be based on the solver name and will be rendered as the base
 
 `<CardiacElectrophysiology>`
 
+######Namespace
+
+You are recommended to set the detault namespace for your schema document to *http://www.libhpc.imperial.ac.uk* by adding the namespace attribute `xmlns="http://www.libhpc.imperial.ac.uk"` to your root node. As detailed later in this document, some additional TemPSS XML tags that may be of use to you come from the libhpc and tempss namespaces which can be imported using the following attributes respectively: 
+
+```
+xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation"
+```
+
 ##### Node types
 
 In addition to the root node, there are three different types of nodes that may be rendered in a template tree:
@@ -44,7 +53,7 @@ _In some cases, giving a node the name you want may be impractical due to XML el
 
 A group node can be specified simply by adding an XML tag into the XML template definition. By then adding child nodes to this tag, you are denoting this as a group node. All child nodes will be displayed when the group node is clicked. So, for example, to specify a group node representing _Physics_ properties of a problem that consist of _Model_ and _CellModel_ details, you might add something similar to the following to your XML:
 
-```
+```xml
 <Physics>
     <Model ... > ... </Model>
     <CellModel ... > ... </CellModel>
@@ -63,7 +72,7 @@ A choice node is denoted by adding the attribute `nodeType` with a value of `cho
 
 A choice node may be specified as follows:
 
-```
+```xml
 <MatrixInversion nodeType="choice"> ... </MatrixInversion>
 ```
 
@@ -73,7 +82,7 @@ This node would be rendered like this:
 
 Choices within a choice node list are formed from its top level descendents, e.g.:
 
-```
+```xml
 <MatrixInversion nodeType="choice">
   <Direct>
     ...
@@ -93,7 +102,7 @@ Input nodes can take the form of either a dropdown list containing possible opti
 
 To specify a text input node, you would write something similar to the following:
 
-```
+```xml
 <SubSteps inputType="text"></SubSteps>
 ```
 
@@ -103,8 +112,8 @@ This would be rendered in the template tree as a text input node:
 
 To specify a choice input node, you would write XML similar to the following:
 
-```
-<Projection inputType="choice">
+```xml
+<Projection type="xs:string" inputType="choice">
   <tempss:item>ContinuousGalerkin</tempss:item>
   <tempss:item>DiscontinuousGalerkin</tempss:item>
 </Projection>
@@ -117,6 +126,32 @@ This will result in the node being rendered as shown:
 When the select box is clicked, the options will be shown for the user to make a selection:
 
 ![Example template choice input node showing dropdown list](./img/input-node-choice-list.png "Example template choice input node showing dropdown list")
+
+#### Data types
+
+Input or choice nodes must have their data type specified. Data types are specified using the `type` attribute, e.g.
+
+```xml
+<Conductivity type="xs:double"/>
+```
+
+Standard XML types such as `string`, `double`, `float` and `integer` are supported. See the [XML Datatypes documentation](http://www.w3.org/TR/xmlschema-2/) for more information.
+
+In addition to the standard XML types, TemPSS defines some additional types that extend the built-in standard types and can be specified in template definitions. These types are defined in `NektarTypes.xsd` which is automatically imported by the converter that reads your XML template description and converts it into an XML Schema-based format that TemPSS uses to generate the HTML tree that you see displayed in the TemPSS web interface. The additional types are in the *http://www.libhpc.imperial.ac.uk* namespace. If you have set up the default namespace in your XML template definition document as described in the Root tag->Namespace section at the start of this document then you can use these additional types without any prefix. If, however, you have set up another namespace for your template, you will need to set up a prefix for the *http://www.libhpc.imperial.ac.uk* namespace and use this on each of the instances of the following types.
+
+*__positiveDouble__*: A double value that is > 0
+
+*__positiveIncDouble__*: A double value that is >= 0
+
+*__positiveIncDouble01__*: A double value *x* where 0 >= *x* <= 1
+
+*__OnOffType__*: A complex type providing a drop down selection of two options *On* or *Off*
+
+*__NektarBooleanType__*: A complex type providing a drop down selection of two options *True* or *False*
+
+*__fileName__*: A complex type providing a file browse button to enable selection of a local file.
+
+*__geometryFileName__* and *__BoundaryDetails__*: These are special types that are detailed in the "*Handling input geometries and boundary conditions*" section below.
 
 #### Additional elements
 

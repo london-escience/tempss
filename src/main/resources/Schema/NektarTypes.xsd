@@ -121,37 +121,5 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  
-  <!-- 
-      <BoundaryCondition optional="true" repeatable="true">
-        <libhpc:documentation>
-          A boundary condition specifying the solution at one of the geometry 
-          boundaries. Add as many boundary conditions as required for the 
-          problem that you are solving. You will be able to allocate these 
-          boundary conditions to boundary regions once you add a geometry file.
-        </libhpc:documentation>
-        <BoundaryConditionName type="xs:string"/>
-        <Variable repeatable="true">
-          <VariableName type="xs:string"/>
-          <Type paramType="choice">
-            <Expression type="xs:string" inputType="text">
-      	      <libhpc:documentation>
-      	        Provide a function describing this boundary condition.
-      	      </libhpc:documentation>
-      	    </Expression>
-      	    <File type="fileName" inputType="file">
-      	      <libhpc:documentation>
-      	        Provide a file describing this boundary condition - this will 
-      	        be a field file describing an edge of the mesh field.
-      	      </libhpc:documentation>
-      	    </File>
-          </Type>
-          <UserDefinedType type="xs:string" inputType="choice">
-            <tempss:item>NotProvided</tempss:item>
-            <tempss:item>TimeDependent</tempss:item>
-          </UserDefinedType>
-        </Variable>
-      </BoundaryCondition>
-    </BoundaryDetails>
--->
+
 </xs:schema>
