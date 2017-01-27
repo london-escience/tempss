@@ -160,6 +160,9 @@ function displayTemplate(templateID, templateText) {
             // Add click/change handlers
             attachChangeHandlers();
             setEditingProfileName("");
+            
+            // Attach handlers for BoundaryCondition/BoundaryRegion processing
+            attachBoundaryConditionHandlers();
 
             $("#template-tree-loading").hide(0);
             dfd.resolve();
@@ -643,7 +646,15 @@ function attachChangeHandlers() {
     treeRoot.on('nodeInvalid', function() {
         disableGenerateInputButton(true);
     });
-    
+}
+
+function removeChangeHandlers() {
+    treeRoot.off('click');
+    treeRoot.off('nodeValid');
+    treeRoot.off('nodeInvalid');
+}
+
+function attachBoundaryConditionHandlers() {
     // Add an additional nodeValid/nodeInvalid handler to BoundaryCondition 
     // nodes that triggers an update of the boundary region options when a 
     // boundary condition becomes valid or invalid.
@@ -658,12 +669,6 @@ function attachChangeHandlers() {
     	}).on('nodeInvalid', function(e) {
     		updateBoundaryRegions(e, false);
     	});
-}
-
-function removeChangeHandlers() {
-    treeRoot.off('click');
-    treeRoot.off('nodeValid');
-    treeRoot.off('nodeInvalid');
 }
 
 function setEditingProfileName(profileName) {
@@ -867,20 +872,42 @@ function updateBoundaryRegions(event, valid) {
 	// BoundaryRegion/BoundaryCondition node.
 	var BCNames = [];
 	$('li.parent_li[data-fqname="BoundaryConditionName"] input').each(function() {
-		var value = $(this).val();
-		if(value != null && value != "") {
-			BCNames.push(value);
+		if(!$(this).parent().parent().parent().parent().hasClass('disabled')) {
+			var value = $(this).val();
+			if(value != null && value != "") {
+				BCNames.push(value);
+			}
 		}
 	});
+	
+	// Prepare a list of boundary condition names to place in the change handler
+	// and the list of option elements to add to each boundary region select.
 	log("BCNames: " + BCNames);
-	$('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
-		var select = $(this).find('li.parent_li[data-fqname="BoundaryCondition"] select');
-		select.find('option').remove();
-		var optionHtml = '<option value="Select from list">Select from list</option>';
-		for(var i = 0; i < BCNames.length; i++) {
-			optionHtml += '<option value="' + BCNames[i] + '">' + BCNames[i] + '</option>';
+	var BCNameList = "[";
+	var optionHtml = '<option value="Select from list">Select from list</option>';
+	for(var i = 0; i < BCNames.length; i++) {
+		optionHtml += '<option value="' + BCNames[i] + '">' + BCNames[i] + '</option>';
+		BCNameList += '"' + BCNames[i] + '"';
+		if(i < BCNames.length-1) {
+			BCNameList += ", ";
 		}
-		select.innerHtml(optionHtml);
+	}
+	BCNameList += ']';
+
+	$('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
+		var $select = $(this).find('li.parent_li[data-fqname="BoundaryCondition"] select');
+		// Before removing options from the existing list, get the current value
+		// from the select. If this is present in the new array, then we 
+		// re-select it after updating the available options. An alternative 
+		// would be to only remove an option if it is not in the list.
+		var previousValue = $select.find(":selected").val();
+		$select.find('option').remove();
+		$select.append($(optionHtml));
+		if(BCNames.indexOf(previousValue) >= 0) {
+			$select.val(previousValue);
+		}
+		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + BCNameList + "}');");
+		$select.trigger('change');
 	});
 }
 

@@ -1089,6 +1089,24 @@ function processGeometryFile(event, path, selectedFile, reader) {
         	var id = boundaryRegions[i]['compositeID'];
         	$boundaryDetails.append(generateBoundaryRegion(null, (i+1), display, id));
         }
+        $('span[data-fqname="CompositeID"] ~ input').trigger('change');
+        $('span[data-fqname="Comment"] ~ input').trigger('change');
+        
+        // Add a change handler to the BoundaryCondition enable/disable button
+        // to update boundary conditions
+        treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.toggle_button', function(e) {
+        	updateBoundaryRegions(e, true);
+        });
+        // Since the addition of a new boundary condition clones the condition
+        // on which the add icon was clicked, we don't update boundary regions
+        // until the name has been altered (or removed) since it will be the 
+        // same as the name of the previous BC.
+        //treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.repeat_button_add', function(e) {
+        //	updateBoundaryRegions(e, true);
+        //});
+        treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.repeat_button_remove', function(e) {
+        	updateBoundaryRegions(e, true);
+        });
     }
     reader.readAsText(selectedFile);
 }
@@ -1168,7 +1186,9 @@ function generateBoundaryRegion(regionType, count, display, id) {
 					}
 				}
 				enumStr += "]";
-				var $item = $('<select class="choice" onchange="validateEntries($(this), \'xs:string\', \'{"xs:enumeration": ' + enumStr + '}\');"/>');
+				var $item = $('<select class="choice" );"/>');
+				var itemChange = "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + enumStr + "}');";
+				$item.attr("onChange", itemChange);
 				$item.append($('<option value="Select from list">Select from list</option>'));
 				for(var i = 0; i < widgetOptions.length; i++) {
 					$item.append($('<option value="' + widgetOptions[i] + '">' + widgetOptions[i] + '</option>'));	
