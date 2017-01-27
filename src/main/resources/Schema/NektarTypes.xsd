@@ -59,5 +59,99 @@
       <xs:enumeration value="False"/>
     </xs:restriction>
   </xs:simpleType>
-
+  
+  <xs:complexType name="BoundaryDetails">
+    <xs:sequence>
+      <xs:element name="BoundaryCondition" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+              A boundary condition specifying the solution at one of the geometry 
+              boundaries. Add as many boundary conditions as required for the 
+              problem that you are solving. You will be able to allocate these 
+              boundary conditions to boundary regions once you add a geometry file.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BoundaryConditionName" type="xs:string"/>
+            <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="VariableName" type="xs:string"/>
+                  <xs:element name="Type">
+                    <xs:complexType>
+                      <xs:choice>
+                        <xs:element name="Expression" type="xs:string">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>
+      	                        Provide a function describing this boundary condition.
+      	                      </libhpc:documentation>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="File" type="fileName">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>
+      	                        Provide a file describing this boundary condition - this will 
+      	                        be a field file describing an edge of the mesh field.
+      	                      </libhpc:documentation>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:choice>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="UserDefinedType">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:enumeration value="NotProvided"/>
+                        <xs:enumeration value="TimeDependent"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- 
+      <BoundaryCondition optional="true" repeatable="true">
+        <libhpc:documentation>
+          A boundary condition specifying the solution at one of the geometry 
+          boundaries. Add as many boundary conditions as required for the 
+          problem that you are solving. You will be able to allocate these 
+          boundary conditions to boundary regions once you add a geometry file.
+        </libhpc:documentation>
+        <BoundaryConditionName type="xs:string"/>
+        <Variable repeatable="true">
+          <VariableName type="xs:string"/>
+          <Type paramType="choice">
+            <Expression type="xs:string" inputType="text">
+      	      <libhpc:documentation>
+      	        Provide a function describing this boundary condition.
+      	      </libhpc:documentation>
+      	    </Expression>
+      	    <File type="fileName" inputType="file">
+      	      <libhpc:documentation>
+      	        Provide a file describing this boundary condition - this will 
+      	        be a field file describing an edge of the mesh field.
+      	      </libhpc:documentation>
+      	    </File>
+          </Type>
+          <UserDefinedType type="xs:string" inputType="choice">
+            <tempss:item>NotProvided</tempss:item>
+            <tempss:item>TimeDependent</tempss:item>
+          </UserDefinedType>
+        </Variable>
+      </BoundaryCondition>
+    </BoundaryDetails>
+-->
 </xs:schema>

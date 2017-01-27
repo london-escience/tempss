@@ -169,7 +169,15 @@
         regions.
       </libhpc:documentation>
     </Geometry>
-    <BoundaryDetails>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+    </BoundaryDetails>
+      <!-- 
       <libhpc:documentation>
         Here you can set up your boundary conditions and name them. When you 
         add a geometry file, this will be parsed to identify and build the 
@@ -206,6 +214,7 @@
         </Variable>
       </BoundaryCondition>
     </BoundaryDetails>
+    -->
     <InitialConditions paramType="choice">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Function type="xs:string" inputType="text">
