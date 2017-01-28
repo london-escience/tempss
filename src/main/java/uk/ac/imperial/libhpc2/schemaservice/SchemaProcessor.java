@@ -52,6 +52,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -371,5 +373,63 @@ public class SchemaProcessor {
         transformOutputMap.put("TransformedDataFile", outputXmlFileName);
 
         return transformOutputMap;
+    }
+    
+    public static void main(String[] args) throws TransformerException {
+    	System.out.println("TemPSS Profile Conversion Test Tool");
+    	System.out.println("-----------------------------------\n");
+    	if(args.length != 2) {
+    		System.err.println("Usage: SchemaProcessor [XSLT transform] [TemPSS XML Profile]");
+    		System.exit(0);
+    	}
+    	
+    	File xslFile = new File(args[0]);
+    	File profileFile = new File(args[1]);
+    	if( (!xslFile.exists()) || (!profileFile.exists()) ) {
+    		System.err.println("A specified file does not exist.");
+    		System.err.println("Usage: SchemaProcessor [XSLT transform] [TemPSS XML Profile]");
+    		System.exit(0);
+    	}
+        Source xsl = new StreamSource(xslFile);
+        StringReader inputReader = null;
+        StreamSource xmlInput = null;
+        try {
+        	inputReader = new StringReader(new String(
+            	Files.readAllBytes(Paths.get(profileFile.getAbsolutePath()))));
+        	xmlInput = new StreamSource(inputReader);
+		} catch (IOException e) {
+			throw new TransformerException("Error creating stream for XML input data.", e);
+		}
+        StreamResult xmlOutput = new StreamResult(new StringWriter());
+        String outputXml = "";
+        Transformer transformer;
+
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer(xsl);
+        } catch (TransformerConfigurationException e) {
+            throw new TransformerException("Error creating transformer for the specified XSLT document <" + xslFile + ">", e);
+        } catch (TransformerFactoryConfigurationError e) {
+            throw new TransformerException("Configuration error creating transformer for the specified XSLT document <" + xslFile + ">", e);
+        }
+
+        LibhpcErrorListener errorHandler = new LibhpcErrorListener();
+        transformer.setErrorListener(errorHandler);
+
+        try {
+            transformer.transform(xmlInput, xmlOutput);
+        } catch (TransformerException e) {
+            throw new TransformerException("Error carrying out XSLT transform: " + errorHandler.getErrorMessages().toString(), e);
+        }
+        outputXml = xmlOutput.getWriter().toString();
+        try {
+            outputXml = SchemaProcessorUtils.prettyPrintXml(outputXml);
+        } catch (DocumentException e) {
+            throw new TransformerException("Document error formatting XML output data: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new TransformerException("IO error formatting XML output data: " + e.getMessage(), e);
+        }
+        
+        System.out.println("Output from XSLT conversion to Nektar++ input file: \n\n" + outputXml);
+
     }
 }
