@@ -1530,10 +1530,10 @@ function processJobProfile(treeRootNode, templateId) {
         // Just assume one file provided for each thing for now.
         uploadFile = element.files[0];
         // Only embed if an XML file, assume from extension!
-        var fileName = uploadFile.name;
-        log(fileName);
+        var fileName = (uploadFile && uploadFile.hasOwnProperty("name")) ? uploadFile.name : "";
+        log("Processing job file - name without extension: " + fileName);
         var extension = fileName.substr(fileName.lastIndexOf('.') + 1)
-        log(extension);
+        log("Processing job file - extension: " + extension);
         if ("xml".toUpperCase() !== extension.toUpperCase()) {
             uploadFile = null;
         }

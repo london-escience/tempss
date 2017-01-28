@@ -113,7 +113,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="ProblemSpecification" mode ="CompositeCardiac">
     <!-- We assume the composites required for the expansion match the domain -->
+    <xsl:choose>
+      <xsl:when test="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN">
+        <xsl:attribute name="COMPOSITE"><xsl:value-of select="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN"/></xsl:attribute>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:attribute name="COMPOSITE">C[0]</xsl:attribute>
+      </xsl:otherwise>
+    </xsl:choose>
+    <!-- Replaced this with the above check....
     <xsl:attribute name="COMPOSITE"><xsl:value-of select="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN"/></xsl:attribute>
+     -->
   </xsl:template>
   
   <xsl:template match="ProblemSpecification" mode ="CompositeCompressible">
@@ -136,7 +146,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="NumericalAlgorithm" mode ="Parameters">
     <xsl:if test="TimeIntegration/DiffusionAdvancement!='Explicit'">
-      <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
+      <xsl:choose>
+        <xsl:when test="MatrixInversion/Iterative/IterativeSolverTolerance">
+          <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
+        </xsl:when>
+        <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance">
+          <P>IterativeSolverTolerance = <xsl:value-of select="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance"/></P>
+        </xsl:when>
+      </xsl:choose>
     </xsl:if>
   </xsl:template>
 
@@ -263,6 +280,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
           <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
           <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+          <!-- Options for revised GlobalSysSolution with separate InversionType block -->
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
           <xsl:otherwise>
             <xsl:message terminate="yes">
               Error: unhandled matrix inversion approach -> cannot set GlobalSysSoln
@@ -330,6 +352,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:choose>
             <xsl:when test="InitialConditions/Constant">
               <xsl:value-of select="InitialConditions/Constant"/>
+            </xsl:when>
+            <xsl:when test="InitialConditions/Function">
+              <xsl:value-of select="InitialConditions/Function"/>
             </xsl:when>
             <xsl:otherwise>
               <xsl:message terminate="yes">
@@ -580,6 +605,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <BOUNDARYCONDITIONS>
               <xsl:apply-templates select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION" mode ="GetCardiacBoundaryConditions"/>
           </BOUNDARYCONDITIONS>
+          
+          <BOUNDARYREGIONS>
+            <!-- TODO: This may be blank for the cardiac solver - check details on this -->
+          </BOUNDARYREGIONS>
+          
           <xsl:apply-templates select="Physics" mode ="CardiacFunctions"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="CardiacFunctions"/>
       </CONDITIONS>        
