@@ -68,6 +68,14 @@
               <libhpc:documentation>d_max specifies the upper threshold 
               of the intensity.</libhpc:documentation>
             </DMax>
+            <OMin name="o_min" type="xs:double" inputType="text">
+              <libhpc:documentation>o_min specifies ... 
+              </libhpc:documentation>
+            </OMin>
+            <OMax name="o_max" type="xs:double" inputType="text">
+              <libhpc:documentation>o_max specifies ... 
+               </libhpc:documentation>
+            </OMax>
           </Intensity>
           <NotProvided/>
         </IsotropicConductivity>

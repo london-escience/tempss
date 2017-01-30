@@ -170,6 +170,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:if test="Model/Monodomain/IsotropicConductivity/Intensity">
         <P>d_min = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/d_min"/></P>
         <P>d_max = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/d_max"/></P>
+        <P>o_min = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/o_min"/></P>
+        <P>o_max = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/o_max"/></P>
       </xsl:if>
     </xsl:if>
     <xsl:if test="Model/Bidomain">
