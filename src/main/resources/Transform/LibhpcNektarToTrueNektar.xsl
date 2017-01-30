@@ -619,8 +619,19 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <GLOBALOPTIMIZATIONPARAMETERS>
         <xsl:apply-templates select="NumericalAlgorithm/GlobalOptimizationParameters/*" mode ="GlobalMatrixOpt"/>
       </GLOBALOPTIMIZATIONPARAMETERS>
-      <!-- Copy in the geometry -->
-      <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY"/>
+      <!-- Copy in the geometry - Update: Jan17 - with the new geometry handling 
+           that allows the use of a standard Nektar++ geometry, there are two 
+           possible locations that the geometry may be found in order to preserve
+           compatibility with the original approach.
+      -->
+      <xsl:choose>
+        <xsl:when test="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY">
+          <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY"/>
+        </xsl:when>
+        <xsl:when test="ProblemSpecification/Geometry/GEOMETRY">
+          <xsl:copy-of select="ProblemSpecification/Geometry/GEOMETRY"/>
+        </xsl:when>
+      </xsl:choose>
     </NEKTAR>
   </xsl:template>
 
