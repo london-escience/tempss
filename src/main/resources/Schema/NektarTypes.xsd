@@ -80,7 +80,16 @@
               <xs:complexType>
                 <xs:sequence>
                   <xs:element name="VariableName" type="xs:string"/>
-                  <xs:element name="Type">
+                  <xs:element name="ConditionType">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:enumeration value="Dirichlet (D)"/>
+                        <xs:enumeration value="Neumann (N)"/>
+                        <xs:enumeration value="Periodic (P)"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="ConditionValue">
                     <xs:complexType>
                       <xs:choice>
                         <xs:element name="Expression" type="xs:string">
@@ -109,6 +118,7 @@
                     <xs:simpleType>
                       <xs:restriction base="xs:string">
                         <xs:enumeration value="TimeDependent"/>
+                        <xs:enumeration value="HighOrderPressure - INS Only"/>
                       </xs:restriction>
                     </xs:simpleType>
                   </xs:element>
