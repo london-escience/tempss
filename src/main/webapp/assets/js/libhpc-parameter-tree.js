@@ -1107,6 +1107,11 @@ function processGeometryFile(event, path, selectedFile, reader) {
         treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.repeat_button_remove', function(e) {
         	updateBoundaryRegions(e, true);
         });
+        
+        // Trigger an update of BoundaryRegion nodes that we've just generated
+        // to fill out details of any boundary conditions that have already 
+        // been created.
+        updateBoundaryRegions(null, true);
     }
     reader.readAsText(selectedFile);
 }

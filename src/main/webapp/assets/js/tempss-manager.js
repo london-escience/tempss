@@ -865,6 +865,11 @@ function displayLoginForm(modalSource) {
     });
 }
 
+/**
+ * This function updates BoundaryRegion nodes by finding all the boundary 
+ * conditions that have a name set and then placing these names in the list of  
+ * available boundary conditions for each BoundaryRegion.
+ */
 function updateBoundaryRegions(event, valid) {
 	log("Update boundary regions - valid? " + valid);
 	// Iterate over all the BoundaryCondition elements and find those that have
