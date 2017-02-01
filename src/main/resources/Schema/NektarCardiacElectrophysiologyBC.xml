@@ -33,7 +33,7 @@
         <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;">
           <libhpc:documentation>Membrane capacitance per unit area</libhpc:documentation>
         </Cm>
-        <IsotropicConductivity paramType="choice">
+        <IsotropicConductivity paramType="choice" optional="true">
           <libhpc:documentation>
             The isotropicConductivity specifies the conductivity of the tissue, 
             assuming it is the same in the x-, y- and z-coordinate directions. 
@@ -77,7 +77,6 @@
                </libhpc:documentation>
             </OMax>
           </Intensity>
-          <NotProvided/>
         </IsotropicConductivity>
       </Monodomain>
       <Bidomain>
@@ -223,15 +222,23 @@
       </BoundaryCondition>
     </BoundaryDetails>
     -->
-    <InitialConditions paramType="choice">
+    <InitialConditions optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-      <Function type="xs:string" inputType="text">
-        <libhpc:documentation>Provide an initial value using a function.</libhpc:documentation>
-      </Function>
-      <File type="fileName" inputType="file">
-        <libhpc:documentation>Provide a file containing a function for the 
-        initial value (not currently supported by libhpc/nekkloud.</libhpc:documentation>
-      </File>
+      <Variable repeatable="true">
+        <VariableName type="xs:string"/>
+        <Type paramType="choice">
+          <Expression type="xs:string" inputType="text">
+      	    <libhpc:documentation>
+      	      Provide an expression describing the initial condition for this variable.
+      	    </libhpc:documentation>
+      	  </Expression>
+      	  <File type="fileName" inputType="file">
+      	    <libhpc:documentation>
+      	      Provide a field file containing details of the initial condition for this variable.
+      	    </libhpc:documentation>
+      	  </File>
+        </Type>
+      </Variable>
     </InitialConditions>
     <Stimuli>
       <libhpc:documentation>

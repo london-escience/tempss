@@ -105,10 +105,9 @@
                       </xs:choice>
                     </xs:complexType>
                   </xs:element>
-                  <xs:element name="UserDefinedType">
+                  <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
                     <xs:simpleType>
                       <xs:restriction base="xs:string">
-                        <xs:enumeration value="NotProvided"/>
                         <xs:enumeration value="TimeDependent"/>
                       </xs:restriction>
                     </xs:simpleType>
