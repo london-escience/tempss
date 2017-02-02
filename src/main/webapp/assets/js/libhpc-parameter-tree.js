@@ -109,7 +109,10 @@
                             // Node is valid if there are no ul children of it's li which
                             // are not marked as valid or are not marked as chosen.
                             // (.each loop will not run in that case).
-                            $owningUL.children('li').children('ul:not([class="valid"], [chosen="false"])').each(function(i, childUL) {
+                        	// Feb 17: This selector fails if a child UL is valid
+                        	// but has multiple classes on it. Fixed to resolve this.
+                            //$owningUL.children('li').children('ul:not([class="valid"], [chosen="false"])').each(function(i, childUL) {
+                        	$owningUL.children('li').children('ul').not('.valid, [chosen="false"]').each(function(i, childUL) {
                                 // If any remaining ul's are not disabled then is not valid.
                                 // TODO: Convert this into check on class="disabled" for performance?
                                 if ($(childUL).data('disabled') !== true) {
@@ -633,22 +636,77 @@ function isInteger(valueToCheck) {
      */
     var repeatBranch = function(elementUL) {
         // Get the name of the item we're repeating
-    	var ul = $(elementUL);
-    	var choice_path = ul.find('select.choice').attr('choice-path');
+    	var $ul = $(elementUL);
+    	var choice_path = $ul.find('select.choice').attr('choice-path');
     	
-    	var newElement = $(elementUL).clone(true);
+    	var $newElement = $ul.clone(true);
     	// Add an additional parameter to this node so we know which number
         // of a repeated element it is.
-        var numElements = $(elementUL).parent().find('select[choice-path="' + choice_path + '"]').length;
-        newElement.attr('data-repeat', numElements+1);
+        var numElements = $ul.parent().find('select[choice-path="' + choice_path + '"]').length;
+        $newElement.attr('data-repeat', numElements+1);
     	
+        // Update Feb 17: when cloning a repeatable element, we clone the 
+        // element and its descendants in their current state. This causes an
+        // issue when loading a profile that has multiple instances of a 
+        // repeatable element since we get stray elements left behind and 
+        // unexpected results with multiple unwanted elements displaying. We 
+        // now revert a cloned branch back to its original clean state before 
+        // adding it into the tree.
+        // First get the name of the element we're repeating
+        var name = $newElement.children('li.parent_li').data('fqname');
+        // Find any repeatable elements and ensure we have only 1 of each
+        var addButtonItems = $newElement.find('span.repeat_button_add').parent(
+        		'[data-fqname != ' + name + ']').toArray();
+        while(addButtonItems.length > 0) {
+        	var $item = $(addButtonItems.pop());
+        	var $parentUL = $item.closest('ul');
+        	var $repeatedElements = $parentUL.siblings('ul[data-repeat]').children('li.parent_li[data-fqname="' + $item.data('fqname') + '"]');
+        	if($repeatedElements.length > 0) {
+        		var $parentElements = $repeatedElements.parent();
+            	$parentElements.remove();
+            	// Now rebuild the addButtonItems list to take into account the
+            	// removed items.
+            	addButtonItems = $newElement.find('span.repeat_button_add').parent(
+                		'[data-fqname != ' + name + ']').toArray();
+        	}
+        }
+        
+        /*
+        $addButtonItems.each(function() {
+        	// Ignore the top level add button for the element we're cloning
+        	var currentName = $(this).parent().data('fqname');
+        	if(currentName == name) return;
+        	
+        	// For the element with currentName, get the main ul and look for
+        	// siblings of the same name which we can then remove.
+        	var $parentUL = $(this).closest('ul');
+        	var $repeatedElements = $parentUL.siblings('ul[data-repeat]').children('li.parent_li[data-fqname="' + currentName + '"]');
+        	var $parentElements = $repeatedElements.parent();
+        	$parentElements.remove();
+        });
+        */
+        
+        // Now clear any previously populated fields in newElement
+    	// Now reset the fields in the repeated block
+    	var $inputItems = $newElement.find('input[type="text"]');
+    	$inputItems.each(function() { $(this).val(""); });
+    	var $selectItems = $newElement.find('select option');
+    	$selectItems.each(function() { $(this).prop('selected', false); });
+    	var $validEl = $newElement.find('.valid');
+    	$validEl.each(function() {
+    		$(this).removeClass('valid');
+    	});
+
+        
     	// Copy this UL and insert into the tree directly after.
-        if ($(elementUL).children('li.parent_li').children('span.repeat_button_remove').length == 0) {
-        	newElement.insertAfter($(elementUL)).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
+        if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
+        	$newElement.insertAfter($ul).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
         }
         else {
-        	newElement.insertAfter($(elementUL));
+        	$newElement.insertAfter($ul);
         }
+        
+        $newElement.trigger('change');
     };
 
     /**
