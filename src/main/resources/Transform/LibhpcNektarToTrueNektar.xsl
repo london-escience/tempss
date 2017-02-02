@@ -349,23 +349,46 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   
   <xsl:template match="ProblemSpecification" mode ="CardiacFunctions">
     <FUNCTION NAME="InitialConditions">
-      <E VAR="u" >
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="InitialConditions/Constant">
+      <xsl:choose>
+        <xsl:when test="InitialConditions/Constant">
+          <E VAR="u" >
+            <xsl:attribute name="VALUE">
               <xsl:value-of select="InitialConditions/Constant"/>
-            </xsl:when>
-            <xsl:when test="InitialConditions/Function">
+            </xsl:attribute>
+          </E>
+        </xsl:when>
+        <xsl:when test="InitialConditions/Function">
+          <E VAR="u" >
+            <xsl:attribute name="VALUE">
               <xsl:value-of select="InitialConditions/Function"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:message terminate="yes">
-                Transform error: only constant initial conditions supported at present.
-              </xsl:message>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-      </E>
+            </xsl:attribute>
+          </E>
+        </xsl:when>
+        <xsl:when test="InitialConditions/Variable">
+          <xsl:for-each select="InitialConditions/Variable">
+            <E>
+              <xsl:attribute name="VAR">
+                <xsl:value-of select="VariableName"/>
+              </xsl:attribute>
+              <xsl:attribute name="VALUE">
+                <xsl:choose>
+                  <xsl:when test="Type/Expression">
+                    <xsl:value-of select="Type/Expression"/>
+                  </xsl:when>
+                  <xsl:when test="Type/File">
+                    <xsl:value-of select="Type/File"/>
+                  </xsl:when>
+                </xsl:choose>
+              </xsl:attribute>
+            </E>
+          </xsl:for-each>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:message terminate="yes">
+            Transform error: only constant initial conditions supported at present.
+          </xsl:message>
+        </xsl:otherwise>
+      </xsl:choose>
     </FUNCTION>
   </xsl:template>
 
