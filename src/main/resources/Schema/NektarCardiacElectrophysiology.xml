@@ -406,8 +406,6 @@
               
           Choices supported by libhpc/nekkloud:
           
-            "ForwardEuler"          Forward-Euler scheme
-            "BackwardEuler"         Backward Euler scheme
             "IMEXOrder1"            IMEX 1st order scheme using Euler Backwards 
                                     Euler Forwards
             "IMEXOrder2"            IMEX 2nd order scheme using Backward 
@@ -415,6 +413,8 @@
             "IMEXOrder3"            IMEX 3rd order scheme using Backward 
                                     Different Formula and Extrapolation
             "DIRKOrder1"            Diagonally Implicit Runge-Kutta scheme of order 1
+            "ForwardEuler"          Forward-Euler scheme
+            "BackwardEuler"         Backward Euler scheme
             "ClassicalRungeKutta4"  4th order Runge Kutta scheme
         </libhpc:documentation>
         <tempss:item>IMEXOrder1</tempss:item>

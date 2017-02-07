@@ -27,6 +27,12 @@
       <xs:minInclusive value="0"/>
     </xs:restriction>
   </xs:simpleType>
+  
+  <xs:simpleType name="gtOneDouble">
+    <xs:restriction base="xs:double">
+      <xs:minExclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="NotProvided"/>
 
