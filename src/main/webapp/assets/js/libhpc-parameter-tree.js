@@ -564,12 +564,23 @@ function isInteger(valueToCheck) {
             var siblings = $element.siblings('ul');
             var children = siblings.children('li');
         	//var children = $(element).siblings('ul').children('li');
+            // Just calling hide or show on the set of elements seems to be 
+            // failing for some reason - the function is only applied to the 
+            // first element where there are repeated elements...
             if (children.is(':visible')) {
-                children.hide('fast');
-                // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+            	for(var i = 0; i < children.length; i++) {
+            		$(children[i]).hide('fast');
+            		//$(children[i]).hide();
+            	}
+            	// children.hide('fast');
+                // // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
             } else {
-                children.show('fast');
-                //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+            	for(var i = 0; i < children.length; i++) {
+            		$(children[i]).show('fast');
+            		//$(children[i]).show();
+            	}
+            	//children.show('fast');
+                // //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
             }
         }
         event.stopPropagation();
@@ -607,6 +618,7 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', false).trigger('change');
                 // Expand branch
                 $(elementLI).children('ul').children('li').show('fast');
+                //$(elementLI).children('ul').children('li').show();
             });
         } else {
             // Disable branch
@@ -627,6 +639,7 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', true);
                 // Hide branch
                 $(elementLI).children('ul').children('li').hide('fast');
+                //$(elementLI).children('ul').children('li').hide();
             });
         }
     };
@@ -637,6 +650,8 @@ function isInteger(valueToCheck) {
     var repeatBranch = function(elementUL) {
         // Get the name of the item we're repeating
     	var $ul = $(elementUL);
+    	// FIXME: Don't think this is a correct way of counting the number
+    	// of elements! There may be no select element in a node being repeated!
     	var choice_path = $ul.find('select.choice').attr('choice-path');
     	
     	var $newElement = $ul.clone(true);
@@ -686,8 +701,8 @@ function isInteger(valueToCheck) {
         });
         */
         
-        // Now clear any previously populated fields in newElement
-    	// Now reset the fields in the repeated block
+        // Now clear any previously populated fields in newElement and
+    	// reset the fields in the repeated block.
     	var $inputItems = $newElement.find('input[type="text"]');
     	$inputItems.each(function() { $(this).val(""); });
     	var $selectItems = $newElement.find('select option');
@@ -696,7 +711,20 @@ function isInteger(valueToCheck) {
     	$validEl.each(function() {
     		$(this).removeClass('valid');
     	});
+    	// We also need to disable any optional fields that are set to enabled.
+    	// - find toggle buttons, find closest UL and see if its disabled, if 
+    	//   not, click the toggle to disable the field.
+    	$newElement.children('li.parent_li').find('ul i.disable_button').each(function() {
+    		var $parentUL = $(this).closest('ul');
+    		if(!$parentUL.hasClass("disabled")) {
+    			// Disable the node
+    			toggleBranch($parentUL);
+    		}
+    	});
 
+    	$ul.find('*').filter(function() {
+    		console.log("checking element <" + $(this).prop('tagName') + "> - display <" + $(this).css('display') + ">");
+    	})
         
     	// Copy this UL and insert into the tree directly after.
         if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
@@ -765,7 +793,8 @@ function isInteger(valueToCheck) {
                     // There is still a major issues with additional repeatable elements
                     // not expanding when clicked if they have a select box.
                     // Fix is applied below after the select.change()
-                    $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
+                    //$(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
+                    $(owningUL).find('li').attr('style', 'display: none;');
                     console.log('New UL: ', owningUL);
                 }
             }
