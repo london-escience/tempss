@@ -147,6 +147,8 @@ function displayTemplate(templateID, templateText) {
             $templateContainer.LibhpcParameterTree();
 
             treeRoot = $('#template-container ul[role="tree"]');
+            var $templateNameNode = treeRoot.find("> li.parent_li > span[data-fqname]");
+            var templateName = $templateNameNode.text();
             
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
@@ -156,6 +158,17 @@ function displayTemplate(templateID, templateText) {
             else {
             	disableProfileButtons(true);
             }
+            
+            // If this template has constraints, add a constraint icon to the
+            // root node with a click button to get constraint details
+            if(data.constraints) {
+            	var $constraintHtml = $('<div class="constraint-header">' + 
+            		'<i class="glyphicon glyphicon-link"></i> This template ' +
+            		'has constraints set. Click <a href="#" ' + 
+            		'class="constraint-info-link">here</a> for details.</div>');
+            	$constraintHtml.insertAfter($templateNameNode);
+            }
+            
             hideTreeExpandCollapseButtons(false);
             // Add click/change handlers
             attachChangeHandlers();
@@ -914,6 +927,16 @@ function updateBoundaryRegions(event, valid) {
 		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + BCNameList + "}');");
 		$select.trigger('change');
 	});
+}
+
+function showConstraintInfo(e) {
+	var $target = $(e.currentTarget);
+	templateName = $target.parent().parent().children('span[data-fqname]').data('fqname');
+	log("Constraint info requested for solver template <" + templateName + ">...");
+	e.preventDefault();
+
+	// Get the constraint info and display in a BootstrapDialog
+	$.get('')
 }
 
 // Utility function for displaying log messages

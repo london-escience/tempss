@@ -511,6 +511,10 @@
         	$('#profile-err-modal-text').html("");
         });
         
+        // Handle click of constraint info link
+        $('body').on('click', '.constraint-info-link', function(e) {
+        	showConstraintInfo(e);
+        });
 	});
 </script>
 {% endblock script %}

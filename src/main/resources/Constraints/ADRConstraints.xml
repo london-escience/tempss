@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<PrismConstraints 
+    xmlns="http://libhpc.doc.ic.ac.uk/prism/constraints"  
+    xmlns:prism="http://libhpc.doc.ic.ac.uk/prism/constraints"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://libhpc.doc.ic.ac.uk/prism/constraints PRISMConstraints.xsd">
+    
+    <description>Constraints for the Nektar++ ADR solver</description>
+    
+    <!-- This should be the solver name exactly as it appears in the root node
+         of the tree that these constraints relate to. 
+    -->
+    <solver>AdvectionDiffusionReaction</solver>
+    
+    <variables>
+      <variable path="ProblemSpecification.EquationType" name="EquationType">
+        <domain>
+          <value>Laplace</value>
+          <value>Poisson</value>
+          <value>Helmholtz</value>
+	      <value>SteadyAdvectionDiffusion</value>
+	      <value>SteadyDiffusionReaction</value>
+	      <value>SteadyAdvectionDiffusionReaction</value>
+	      <value>UnsteadyAdvection</value>
+	      <value>UnsteadyDiffusion</value>
+	      <value>UnsteadyAdvectionDiffusion</value>
+          <value>UnsteadyInviscidBurger</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.TimeIntegration.TimeIntegrationMethod" 
+                name="TimeIntegrationMethod">
+        <domain>
+          <value>Off</value>
+          <value>IMEXOrder1</value>
+          <value>IMEXOrder2</value>
+          <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
+          <value>BackwardEuler</value>
+          <value>ClassicalRungeKutta4</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.TimeIntegration.DiffusionAdvancement" 
+                name="DiffusionAdvancement">
+        <domain>
+          <value>Off</value>
+          <value>Implicit</value>
+          <value>Explicit</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.Projection" name="Projection">
+        <domain>
+          <value>ContinuousGalerkin</value>
+          <value>DiscontinuousGalerkin</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.AdvectionType" name="AdvectionType">
+        <domain>
+          <value>Off</value>
+          <value>NonConservative</value>
+          <value>WeakDG</value>
+          <value>FRDG</value>
+          <value>FRHU</value>
+          <value>FRSD</value>
+          <value>FRcmin</value>
+          <value>FRcinf</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.UpwindType" name="UpwindType">
+        <domain>
+          <value>Off</value>
+          <value>Upwind</value>
+        </domain>
+      </variable>
+      
+      <variable path="NumericalAlgorithm.GlobalSysSolution" name="GlobalSysSolution">
+        <domain>
+          <value>Off</value>
+          <value>On</value>
+        </domain>
+      </variable>
+      
+    </variables>
+    
+    <constraints>
+      <!-- Constraint mappings for Equation Type -> AdvectionType -->
+      <!-- 
+           If an EquationType that has no advection term is selected 
+           (i.e. Laplace, Poisson, Helmholtz, SteadyDiffusionReaction, 
+           UnsteadyDiffusion or UnsteadyInviscidBurger), it is not valid to 
+           select an entry from NumericalAlgorithm -> AdvectionType and this 
+           must be switched off. 
+      -->
+
+      <mapping variable="EquationType" varvalue="Laplace" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Poisson" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Helmholtz" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyDiffusionReaction" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyDiffusion" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyInviscidBurger" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+      </mapping>
+	  <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusion" targetVariable="AdvectionType">
+        <targetValue>NonConservative</targetValue>
+        <targetValue>WeakDG</targetValue>
+        <targetValue>FRDG</targetValue>
+        <targetValue>FRHU</targetValue>
+        <targetValue>FRSD</targetValue>
+        <targetValue>FRcmin</targetValue>
+        <targetValue>FRcinf</targetValue>
+      </mapping>
+	  <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusionReaction" targetVariable="AdvectionType">
+        <targetValue>NonConservative</targetValue>
+        <targetValue>WeakDG</targetValue>
+        <targetValue>FRDG</targetValue>
+        <targetValue>FRHU</targetValue>
+        <targetValue>FRSD</targetValue>
+        <targetValue>FRcmin</targetValue>
+        <targetValue>FRcinf</targetValue>
+      </mapping>
+	  <mapping variable="EquationType" varvalue="UnsteadyAdvection" targetVariable="AdvectionType">
+        <targetValue>NonConservative</targetValue>
+        <targetValue>WeakDG</targetValue>
+        <targetValue>FRDG</targetValue>
+        <targetValue>FRHU</targetValue>
+        <targetValue>FRSD</targetValue>
+        <targetValue>FRcmin</targetValue>
+        <targetValue>FRcinf</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyAdvectionDiffusion" targetVariable="AdvectionType">
+        <targetValue>NonConservative</targetValue>
+        <targetValue>WeakDG</targetValue>
+        <targetValue>FRDG</targetValue>
+        <targetValue>FRHU</targetValue>
+        <targetValue>FRSD</targetValue>
+        <targetValue>FRcmin</targetValue>
+        <targetValue>FRcinf</targetValue>
+      </mapping>
+
+      <!-- Constraint mappings for Projection -> AdvectionType -->
+      <!-- 
+           If ContinuousGalerkin is selected for NumericalAlgorithm -> 
+           Projection, NonConservative must be selected for NumericalAlgorithm 
+           -> AdvectionType or AdvectionType must be switched off. If 
+           DiscontinuousGalerkin is selected for Projection, then any 
+           AdvectionType value other than NonConservative can be chosen or 
+           AdvectionType must be switched off (if an EquationType with no 
+           Advection term is selected). 
+      -->
+
+      <mapping variable="Projection" varvalue="ContinuousGalerkin" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+        <targetValue>NonConservative</targetValue>
+      </mapping>
+      <mapping variable="Projection" varvalue="DiscontinuousGalerkin" targetVariable="AdvectionType">
+        <targetValue>Off</targetValue>
+        <targetValue>WeakDG</targetValue>
+        <targetValue>FRDG</targetValue>
+        <targetValue>FRHU</targetValue>
+        <targetValue>FRSD</targetValue>
+        <targetValue>FRcmin</targetValue>
+        <targetValue>FRcinf</targetValue>
+      </mapping>
+
+      <!-- 
+          EquationType -> DiffusionAdvancement
+      
+          For the equation types without a diffusion term (UnsteadyAdvection 
+          and UnsteadInviscidBurger) a DiffusionAdvancement (should this be 
+          changed to DiffusionType?) option (under NumericalAlgorithm -> 
+          TimeIntegration) is not relevant so this option should be set to 
+          NotProvided or made optional so that it can be switched off. It is 
+          still possible to select continuous or discontinuous Galerkin 
+          projection types for the two equation types affected by this 
+          constraint.
+      -->
+      <mapping variable="EquationType" varvalue="Laplace" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Poisson" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Helmholtz" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusion" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyDiffusionReaction" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusionReaction" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyDiffusion" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Explicit</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyAdvection" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyAdvectionDiffusion" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Explicit</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyInviscidBurger" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+      </mapping>
+      <!-- Constraint between EquationType and TimeIntegrationMethod -->
+      <mapping variable="EquationType" varvalue="Laplace" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Poisson" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="Helmholtz" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusion" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyDiffusionReaction" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="SteadyAdvectionDiffusionReaction" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyDiffusion" targetVariable="TimeIntegrationMethod">
+        <targetValue>DIRKOrder1</targetValue>
+        <targetValue>BackwardEuler</targetValue>
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyAdvection" targetVariable="TimeIntegrationMethod">
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyAdvectionDiffusion" targetVariable="TimeIntegrationMethod">
+        <targetValue>IMEXOrder1</targetValue>
+        <targetValue>IMEXOrder2</targetValue>
+        <targetValue>IMEXOrder3</targetValue>
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
+      </mapping>
+      <mapping variable="EquationType" varvalue="UnsteadyInviscidBurger" targetVariable="TimeIntegrationMethod">
+        <targetValue>IMEXOrder1</targetValue>
+        <targetValue>IMEXOrder2</targetValue>
+        <targetValue>IMEXOrder3</targetValue>
+      </mapping>
+      
+      <!-- TimeIntegrationMethod -> DiffusionAdvancement -->
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder1" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder2" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder3" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="DIRKOrder1" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="BackwardEuler" targetVariable="DiffusionAdvancement">
+        <targetValue>Implicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="ForwardEuler" targetVariable="DiffusionAdvancement">
+        <targetValue>Explicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="ClassicalRungeKutta4" targetVariable="DiffusionAdvancement">
+        <targetValue>Explicit</targetValue>
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="Off" targetVariable="DiffusionAdvancement">
+        <targetValue>Off</targetValue>
+      </mapping>
+      
+      <!-- Project -> UpwindType constraints -->
+      <mapping variable="Projection" varvalue="ContinuousGalerkin" targetVariable="UpwindType">
+        <targetValue>Off</targetValue>
+      </mapping>
+      <mapping variable="Projection" varvalue="DiscontinuousGalerkin" targetVariable="UpwindType">
+        <targetValue>Upwind</targetValue>
+      </mapping>
+
+      <!-- GlobalSysSolution -> TimeIntegrationType constraints -->
+      <mapping variable="GlobalSysSolution" varvalue="Off" targetVariable="TimeIntegrationMethod">
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
+      </mapping>
+      <mapping variable="GlobalSysSolution" varvalue="On" targetVariable="TimeIntegrationMethod">
+        <targetValue>Off</targetValue>
+        <targetValue>IMEXOrder1</targetValue>
+        <targetValue>IMEXOrder2</targetValue>
+        <targetValue>IMEXOrder3</targetValue>
+        <targetValue>DIRKOrder1</targetValue>
+        <targetValue>BackwardEuler</targetValue>
+      </mapping>
+    </constraints>              
+                  
+</PrismConstraints>

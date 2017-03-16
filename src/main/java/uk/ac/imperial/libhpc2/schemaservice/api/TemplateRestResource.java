@@ -208,11 +208,12 @@ public class TemplateRestResource {
     @GET
     @Produces("text/html")
     @Path("id/{templateId}")
-    @SuppressWarnings("unchecked")
     public Response getTemplatesHtmlTree(@PathParam("templateId") String templateId) {
     	String templateHtml = "";
     	try {
-    		templateHtml = _getTemplateHtml(templateId);
+    		// Get the template information from the metadata map
+    		TempssObject metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
+    		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
     		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
     	} catch(TemplateProcessorException e) {
@@ -225,11 +226,13 @@ public class TemplateRestResource {
     @GET
     @Produces("application/json")
     @Path("id/{templateId}")
-    @SuppressWarnings("unchecked")
     public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId) {
     	String templateHtml = "";
+    	TempssObject metadata = null;
     	try {
-    		templateHtml = _getTemplateHtml(templateId);
+    		// Get the template information from the metadata map
+    		metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
+    		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
     		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
     	} catch(TemplateProcessorException e) {
@@ -242,6 +245,13 @@ public class TemplateRestResource {
             templateObj.put("ComponentName", templateId);
             templateObj.put("TreeHtml", templateHtml);
             templateObj.put("authenticated", !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken));
+            
+            boolean constraints = false;
+            // Additional keys for constraint data
+            if(metadata.getConstraints() != null) {
+            	constraints = true;
+            }
+            templateObj.put("constraints", constraints);
         } catch (JSONException e) {
             sLog.error("Unable to add template HTML for template <" 
             		+ templateId + "> to JSON object: " + e.getMessage());
@@ -253,22 +263,11 @@ public class TemplateRestResource {
     	return Response.ok(templateObj.toString(), MediaType.APPLICATION_JSON).build();
     }
     
-    private String _getTemplateHtml(String templateId) 
+    private String _getTemplateHtml(String templateId, TempssObject metadata) 
     		throws UnknownTemplateException, TemplateProcessorException {
-        // Get the component metadata from the servletcontext and check the name is valid
-        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
-
-        // If we don't have a template of this name then throw an error
-        if(!components.containsKey(templateId)) {
-        	throw new UnknownTemplateException("Template with ID <" + templateId + "> does not exist.");
-        }
-
-        // Get the template information from the metadata map
-        // and make a call to the schema processor to transform
-        // the template schema to an HTML tree for display in
-        // a web page
+        // Make a call to the schema processor to transform the template 
+        // schema to an HTML tree for display in a web page
         SchemaProcessor proc = new SchemaProcessor(_context);
-        TempssObject metadata = components.get(templateId);
         String htmlTree = "";
         try {
             htmlTree = proc.processComponentSelector(metadata);
@@ -287,5 +286,5 @@ public class TemplateRestResource {
         }
 
         return htmlTree;
-    }
+    }   
 }

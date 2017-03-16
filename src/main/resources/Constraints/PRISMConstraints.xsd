@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="http://libhpc.doc.ic.ac.uk/prism/constraints" 
+        xmlns:prism="http://libhpc.doc.ic.ac.uk/prism/constraints" 
+        elementFormDefault="qualified">
+
+  <complexType name="variable">
+    <sequence>
+      <element name="domain">
+        <complexType>
+          <sequence>
+            <element name="value" type="string" minOccurs="1" maxOccurs="unbounded"/>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+    <!-- A unique identifier for the variable. This is used in mapping elements -->
+    <attribute name="name" type="string" />
+    <!-- The full path to the template node that this variable relates to.  
+         This path can exclude the solver name which will be automatically added.  
+         Path elements should be dot-separated. -->
+    <attribute name="path" type="string" />
+  </complexType>
+
+  <complexType name="variables">
+    <sequence>
+      <element name="variable" type="prism:variable" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="pair">
+    <sequence>
+      <element name="varvalue" minOccurs="2" maxOccurs="2">
+        <complexType>
+          <simpleContent>
+            <extension base="string">
+              <attribute name="var" type="string" />
+            </extension>
+          </simpleContent>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="mapping">
+    <sequence>
+      <element name="targetValue" type="string" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="variable" type="string"/>
+    <attribute name="varvalue" type="string"/>
+    <attribute name="targetVariable" type="string"/>
+  </complexType>
+  
+  <complexType name="constraints">
+    <choice>
+      <element name="pair" type="prism:pair" minOccurs="1" maxOccurs="unbounded"/>
+      <element name="mapping" type="prism:mapping" minOccurs="1" maxOccurs="unbounded"/>
+    </choice>
+  </complexType>
+
+  <element name="PrismConstraints">
+    <complexType>
+      <sequence>
+        <!-- A simple description of the problem represented by this constraint
+             set -->
+        <element name="description" type="string" minOccurs="1" maxOccurs="1"/>
+        <!-- This should be the solver name exactly as it appears in the root
+             node of the tempss template tree -->
+        <element name="solver" type="string" minOccurs="1" maxOccurs="1"/>
+        <element name="variables" type="prism:variables"/>
+        <element name="constraints" type="prism:constraints"/>
+      </sequence>
+    </complexType>
+  </element>
+
+</schema>
