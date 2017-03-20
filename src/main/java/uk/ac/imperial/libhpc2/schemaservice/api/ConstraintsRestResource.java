@@ -47,6 +47,7 @@ package uk.ac.imperial.libhpc2.schemaservice.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,13 +110,17 @@ public class ConstraintsRestResource {
 
     // Use the pebble engine to render the HTML constraint info
 	@Autowired
-	private PebbleEngine _pebbleEngine;
-    
-	/*
-	public void setPebbleEngine(PebbleEngine pEngine) {
-		this._pebbleEngine = pEngine;
-	}
-	*/
+    private PebbleEngine _pebbleEngine;
+	
+	/**
+	 * Renders some information about the specified templateId detailing the 
+	 * variables and their domains, and describing the set of constraints 
+	 * defined for this template. This information is returned as a JSON response
+	 * with any HTML content provided under the HTML key of the JSON. 
+	 *  
+	 * @param templateId the ID of the template to get constraint information for.
+	 * @return a JSON response containing details of variables and constraints. 
+	 */
     @GET
     @Produces("application/json")
     @Path("{templateId}")
@@ -192,6 +197,14 @@ public class ConstraintsRestResource {
     	return Response.ok(responseJson.toString(), MediaType.APPLICATION_JSON).build();
     }
     
+	/**
+	 * Renders some information about the specified templateId detailing the 
+	 * variables and their domains, and describing the set of constraints 
+	 * defined for this template. This is rendered as plain HTML.
+	 *  
+	 * @param templateId the ID of the template to get constraint information for.
+	 * @return a JSON response containing details of variables and constraints. 
+	 */
     @GET
     @Produces("text/html")
     @Path("{templateId}")
@@ -208,14 +221,90 @@ public class ConstraintsRestResource {
     		return Response.status(Response.Status.NOT_FOUND).build();
     	}
     	
+    	String templateName = problem.getSolverName();
+  
+      	// Process the constraint satisfaction problem data to be returned to the caller as HTML.
     	List<Variable> vars = problem.getVariables();
     	List<Constraint> constraints = problem.getConstraints();
-
-    	// Process the constraint satisfaction problem data to be returned to the caller as HTML.
+    	
+    	// Define a map that we'll populate when iterating through vars for use when 
+    	// preparing constraint data
+    	Map<String, Variable> varMap = new HashMap<String, Variable>(vars.size());
+    	List<String> varNames = new ArrayList<String>(vars.size());
+    	Map<String,List<String>> varDomains = new HashMap<String, List<String>>(vars.size());
+    	
+    	// FIXME: StringBuffer in which the HTML content will be built
+    	// Rather than building a StringBuffer here, we need instead to built a context dict
+    	// that is then passed to the template in order to carry out the proper rendering process.
+    	
+    	
+    	StringBuffer htmlBuffer = new StringBuffer("<h3>Variables</h3>\n");
+    	
+    	for(Variable v : vars) {
+    		varMap.put(v.getName(), v);
+    		varNames.add(v.getName());
+    		varDomains.put(v.getName(), v.getValues());
+    		JSONArray valArray = new JSONArray(v.getValues());
+    		htmlBuffer.append("<div>Variable: <b>" + v.getName() + "</b>\n<div>");
+    		for(String val : v.getValues()) {
+    			htmlBuffer.append("<span>" + val + "</span><br/>");
+    		}
+    	}
+    	
+    	Map<String,String[]> constraintData = new HashMap<String, String[]>(constraints.size());
+    	Map<String, Map<String, List<String>>> constraintMappings = new HashMap<String, Map<String, List<String>>>(constraints.size());
+    	for(Constraint c : constraints) {
+    		String var1 = c.getVariable1Name();
+    		String var2 = c.getVariable2Name();
+    		constraintData.put(var1 + "<->" + var2, new String[] {var1, var2});
+    		List<String> varValues = varMap.get(var1).getValues();
+    		Map<String, List<String>> valueMap = new HashMap<String, List<String>>(varValues.size());
+    		for(String varValue : varValues) {
+    			valueMap.put(varValue, new ArrayList<String>(c.getValidValues(var1, varValue)));
+    		}
+    		constraintMappings.put(var1 + "<->" + var2, valueMap);
+    	}
+    	
+    	
+    	
+    	
+    	/*
+    	JSONArray constraintArray = new JSONArray();
+    	for(Constraint c : constraints) {
+    		try {
+    			JSONObject constraintObject = new JSONObject();
+	    		constraintObject.put("variable1", c.getVariable1Name());
+	    		constraintObject.put("variable2", c.getVariable2Name());
+	    		
+	    		Variable v1 = varMap.get(c.getVariable1Name());
+	    		JSONArray mappingArray = new JSONArray();
+				// For each value in v1, get all the valid mappings
+	    		for(String value : v1.getValues()) {
+	    			JSONObject mappingItem = new JSONObject();
+	    			mappingItem.put("sourceVar", v1.getName());
+	    			mappingItem.put("sourceValue", value);
+	    			List<String> targetVals = c.getValidValues(v1.getName(), value);
+	    			mappingItem.put("targetValues", new JSONArray(targetVals));
+	    			mappingArray.put(mappingItem);
+	    		}
+	    		
+	    		constraintObject.put("mappings", mappingArray);
+	    		constraintArray.put(constraintObject);
+    		} catch (JSONException e) {
+				LOG.error("ERROR converting constraint <{}> JSON object: {}",
+						 c.getName(), e.getMessage());
+			}
+    	}
+    	*/
     	
     	// Render the template
     	Map<String, Object> templateContext = new HashMap<String, Object>();
-    	templateContext.put("templateName", templateId);
+    	templateContext.put("templateId", templateId);
+    	templateContext.put("templateName", templateName);
+    	templateContext.put("variables", varNames);
+    	templateContext.put("variableDomains", varDomains);
+    	templateContext.put("constraints", constraintData);
+    	templateContext.put("constraintMappings", constraintMappings);
     	
     	StringWriter sw = new StringWriter();
     	try {
@@ -228,6 +317,7 @@ public class ConstraintsRestResource {
 			LOG.error("IO error during template rendering: " + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
+		
     	String responseStr = sw.toString();
     	
     	return Response.ok(responseStr, MediaType.TEXT_HTML).build();

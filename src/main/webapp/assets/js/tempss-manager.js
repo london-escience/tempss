@@ -931,12 +931,27 @@ function updateBoundaryRegions(event, valid) {
 
 function showConstraintInfo(e) {
 	var $target = $(e.currentTarget);
-	templateName = $target.parent().parent().children('span[data-fqname]').data('fqname');
-	log("Constraint info requested for solver template <" + templateName + ">...");
+	var templateName = $target.parent().parent().children('span[data-fqname]').data('fqname');
+	var templateId = $('input[name="componentname"]').val();
+	log("Constraint info requested for solver template <" + templateName + "> with ID <" + templateId + ">...");
 	e.preventDefault();
 
 	// Get the constraint info and display in a BootstrapDialog
-	$.get('')
+	BootstrapDialog.show({
+		title: "Constraint information",
+        message: function(dialog) { 
+        	var $message = $('<div></div>');
+        	
+        	// Try to load the constraint data and show an error if loading fails
+        	$message.load('/tempss/api/constraints/' + templateId, 
+        			function( response, status, xhr ) {
+        				if (status=="error") {
+        					$message.html('<div class="alert alert-danger"><b>Unable to access constraint information.</b> An error has occurred accessing the constraint data from TemPSS for this template.</div>');
+        				}
+      		});
+        	return $message
+        }
+    });
 }
 
 // Utility function for displaying log messages

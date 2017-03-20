@@ -361,8 +361,7 @@ public class ProfileRestResource {
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
-        @Context HttpServletRequest pRequest,
-        TempssUser pUser) {
+        @Context HttpServletRequest pRequest) {
     
     	TempssUser user = getAuthenticatedUser();
     	

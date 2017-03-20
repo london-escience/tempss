@@ -134,3 +134,12 @@ div.constraint-header i {
 div.constraint-header a {
 	font-weight: bold;
 }
+
+.constraint-table tbody tr td {
+	font-size: 10px;
+}
+
+.constraint-table .mapping-key {
+	font-weight: bold;
+	color: #777;
+}
