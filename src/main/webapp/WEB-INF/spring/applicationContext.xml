@@ -54,10 +54,23 @@
     </bean>
  	-->
  	
- 	<bean id="pebbleEngine" class="com.mitchellbosecke.pebble.PebbleEngine">
-		<property name="loader">
-			<bean class="com.mitchellbosecke.pebble.spring.PebbleTemplateLoader" />
-		</property>
+ 	<!-- 
+ 	      Configuration of the pebbleengine bean has been moved here from the 
+ 	      web application context so that we can pass it to the rest resource
+ 	      Component classes.
+ 	 -->
+ 	<!-- Updated pebble engine configuration for pebble v2.3 -->
+    <!-- <bean id="servletContext" class="uk.ac.imperial.libhpc2.schemaservice.web.ServletContextFactory">  -->
+    <bean id="templateLoader" class="com.mitchellbosecke.pebble.loader.ServletLoader">
+        <constructor-arg ref="servletContext" />
+    </bean>
+    	
+	<bean id="springExtension" class="com.mitchellbosecke.pebble.spring4.extension.SpringExtension" />
+	
+	<bean id="pebbleEngine" class="uk.ac.imperial.libhpc2.schemaservice.web.PebbleEngineFactory" factory-method="getEngine">
+		<constructor-arg ref="templateLoader" />
+		<constructor-arg ref="springExtension" />
 	</bean>
+ 	 
  	
 </beans>
