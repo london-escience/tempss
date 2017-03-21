@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Job Configuration</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link href="./assets/css/style.css" rel="stylesheet" media="all" />
   </head>
   <body>
@@ -37,7 +37,7 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script>window.jQuery || document.write('<script src="./assets/js/jquery-1.11.1.min.js"><\/script>')</script>
     <!-- Bootstrap JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="./assets/js/bootstrap-fileinput.js"></script>
   </body>
 </html>
