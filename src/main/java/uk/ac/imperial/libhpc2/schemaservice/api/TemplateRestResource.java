@@ -49,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -260,8 +261,20 @@ public class TemplateRestResource {
             	try {
 					 problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
 					 List<Constraint> constraintList = problem.getConstraints();
+					 // Constraint map will be used to build a two way mapping between constraint variable relationships
 					 Map<String, Set<String>> constraintMap = new HashMap<String, Set<String>>();
-					 
+					 for(Constraint c : problem.getConstraints()) {
+						 String varName = c.getVariable1FQName();
+						 String var2Name = c.getVariable2FQName();
+						 if(!constraintMap.containsKey(varName)) {
+							 constraintMap.put(varName, new HashSet<String>());
+						 }
+						 constraintMap.get(varName).add(var2Name);
+						 if(!constraintMap.containsKey(var2Name)) {
+							 constraintMap.put(var2Name, new HashSet<String>());
+						 }
+						 constraintMap.get(var2Name).add(varName);
+					 }
 		            templateObj.put("constraintInfo", constraintMap);
 				} catch (UnknownTemplateException | ConstraintsException e) {
 					sLog.error("Error accessing constraint information for template <{}>", templateId);

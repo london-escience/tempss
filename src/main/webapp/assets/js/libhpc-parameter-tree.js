@@ -642,6 +642,13 @@ function isInteger(valueToCheck) {
                 //$(elementLI).children('ul').children('li').hide();
             });
         }
+        // Check if this optional element has a constraint class in which case
+        // it is part of a constraint relationship and we trigger the CS solver.
+        if($(elementUL).children('li.parent_li').hasClass("constraint")) {
+        	log("A constraint element (optional element) has been modified - triggering solver...");
+        	var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
+        	constraints.updateConstraints(templateName, $(elementUL).children('li.parent_li'));
+        }
     };
 
     /**
@@ -1526,7 +1533,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             }
                             if (!(isStringEnumerationFound)) {
                                 $caller.markValidity("invalid",
-                                        {message: 'This property must have a value from the list: ' + value.toString()});
+                                        {message: 'This property must have a value from the list: ' + value.join(", ")});
                             }
                             break;
                         case "xs:filetype":
@@ -1542,7 +1549,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             if (!(extensionFound)) {
                                 // File is not valid after all
                                 $caller.markValidity("invalid",
-                                        {message: 'The filename must have an extension from the list: ' + value.toString()});
+                                        {message: 'The filename must have an extension from the list: ' + value.join(", ")});
                             }
                             break;
                     }
@@ -1566,6 +1573,7 @@ function selectChoiceItem(event) {
     // Without this, if the branch is repeated, making a selection results in 
     // all copies of the branch being expanded.
     var $parentUL = $selectElement.parent().parent();
+    var $parentLI = $selectElement.parent();
     
     // This relies on the option value being the same as the
     // text displayed <option value="text">text</option>

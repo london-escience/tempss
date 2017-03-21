@@ -54,11 +54,13 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
@@ -322,4 +324,22 @@ public class ConstraintsRestResource {
     	
     	return Response.ok(responseStr, MediaType.TEXT_HTML).build();
     }
+    
+    @POST
+    @Produces("application/json")
+    @Path("{templateId}/solver")
+    public Response solveConstraintValues(@PathParam("templateId") String templateId,
+    		MultivaluedMap<String, String> dataParams) {
+    	StringBuffer sb = new StringBuffer();
+    	for(String key : dataParams.keySet()) {
+    		sb.append("Key: " + key + "    Value: " + dataParams.getFirst(key) + "\n");
+    	}
+    	LOG.debug("Request to solve constraint values for template <{}>\n{}", templateId, sb.toString());
+    	
+    	
+    	
+    	JSONObject responseJson = new JSONObject();
+    	return Response.ok(responseJson.toString(), MediaType.APPLICATION_JSON).build();
+    }
+
 }

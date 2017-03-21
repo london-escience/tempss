@@ -659,6 +659,16 @@ function attachChangeHandlers() {
     treeRoot.on('nodeInvalid', function() {
         disableGenerateInputButton(true);
     });
+    
+    // Add change handlers to check for changes on select values with constraints
+    treeRoot.on('change', 'select.choice', function(e) {
+    	var $parentLI = $(e.currentTarget).parent();
+    	if($parentLI.hasClass("constraint")) {
+    		log("select node with constraints changed - triggering constraint solver...");
+    		var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
+        	constraints.updateConstraints(templateName, $(e.currentTarget).parent());
+    	}
+    });
 }
 
 function removeChangeHandlers() {

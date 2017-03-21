@@ -38,6 +38,12 @@ public class TemplateResourceUtils {
 
 	public static CSProblemDefinition getConstraintData(String templateId, ServletContext pContext) 
     		throws UnknownTemplateException, ConstraintsException {
+		CSProblemDefinition definition = null;
+		definition = (CSProblemDefinition)pContext.getAttribute("csproblem-" + templateId);
+		if(definition != null) {
+			return definition;
+		}
+		
 		TempssObject metadata = getTemplateMetadata(templateId, pContext);
 		String constraintFile = metadata.getConstraints();
 		if(constraintFile == null) throw new ConstraintsException("There is no constraint file " +
@@ -46,7 +52,6 @@ public class TemplateResourceUtils {
 		// Now that we have the name of the constraint file we can create an 
 		// instance of a constraint satisfaction problem definition based on this file.
 		// The file is loaded as a resource from the jar file.
-		CSProblemDefinition definition = null;
 		InputStream xmlResource = TemplateResourceUtils.class.getClassLoader().getResourceAsStream("META-INF/Constraints/" + constraintFile);
 		if(xmlResource == null) {
 			LOG.error("Unable to access constraint file <" + constraintFile + "> as resource.");
@@ -54,6 +59,7 @@ public class TemplateResourceUtils {
 		}
 		try {
 			definition = CSProblemDefinition.fromXML(xmlResource);
+			pContext.setAttribute("csproblem-" + templateId, definition);
 		} catch (CSPInitException e) {
 			LOG.error("Error setting up constraint definition object: " + e.getMessage());
 			throw new ConstraintsException("Error setting up constraint definition object: " + e.getMessage(), e);

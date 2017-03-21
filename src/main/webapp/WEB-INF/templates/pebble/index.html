@@ -515,6 +515,9 @@
         $('body').on('click', '.constraint-info-link', function(e) {
         	constraints.showConstraintInfo(e);
         });
+        
+        // Enable tooltips for dynamically added constraint link icons
+        $('#template-container').tooltip({ selector: 'i.link-icon'});
 	});
 </script>
 {% endblock script %}
