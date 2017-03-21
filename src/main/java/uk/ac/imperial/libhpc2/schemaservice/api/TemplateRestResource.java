@@ -48,7 +48,10 @@ package uk.ac.imperial.libhpc2.schemaservice.api;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -70,6 +73,9 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import uk.ac.ic.prism.jhc02.csp.CSProblemDefinition;
+import uk.ac.ic.prism.jhc02.csp.Constraint;
+import uk.ac.imperial.libhpc2.schemaservice.ConstraintsException;
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
 import uk.ac.imperial.libhpc2.schemaservice.TemplateProcessorException;
 import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
@@ -250,6 +256,19 @@ public class TemplateRestResource {
             // Additional keys for constraint data
             if(metadata.getConstraints() != null) {
             	constraints = true;
+            	CSProblemDefinition problem = null;
+            	try {
+					 problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
+					 List<Constraint> constraintList = problem.getConstraints();
+					 Map<String, Set<String>> constraintMap = new HashMap<String, Set<String>>();
+					 
+		            templateObj.put("constraintInfo", constraintMap);
+				} catch (UnknownTemplateException | ConstraintsException e) {
+					sLog.error("Error accessing constraint information for template <{}>", templateId);
+					constraints = false;
+				}
+            	
+            	
             }
             templateObj.put("constraints", constraints);
         } catch (JSONException e) {

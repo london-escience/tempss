@@ -127,7 +127,7 @@ public class ConstraintsRestResource {
     public Response getConstraintInfoJSON(@PathParam("templateId")  String templateId) {
     	CSProblemDefinition problem = null;
     	try {
-    		problem = getConstraintData(templateId);
+    		problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
     	} catch (UnknownTemplateException e) {
     		LOG.error("Specified template ID <" + templateId + "> doesn't exist: " + e.getMessage());
     		return Response.status(Response.Status.NOT_FOUND).build();
@@ -211,7 +211,7 @@ public class ConstraintsRestResource {
     public Response getConstraintInfoHTML(@PathParam("templateId")  String templateId) {
     	CSProblemDefinition problem = null;
     	try {
-    		problem = getConstraintData(templateId);
+    		problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
     	} catch (UnknownTemplateException e) {
     		LOG.error("Specified template ID <" + templateId + "> doesn't exist: " + e.getMessage());
     		return Response.status(Response.Status.NOT_FOUND).build();
@@ -321,34 +321,5 @@ public class ConstraintsRestResource {
     	String responseStr = sw.toString();
     	
     	return Response.ok(responseStr, MediaType.TEXT_HTML).build();
-    }
-    
-    private CSProblemDefinition getConstraintData(String templateId) 
-    		throws UnknownTemplateException, ConstraintsException {
-		TempssObject metadata = TemplateResourceUtils.getTemplateMetadata(templateId, this._context);
-		String constraintFile = metadata.getConstraints();
-		if(constraintFile == null) throw new ConstraintsException("There is no constraint file " +
-				"configured for this template <" + templateId + ">.");
-		
-		// Now that we have the name of the constraint file we can create an 
-		// instance of a constraint satisfaction problem definition based on this file.
-		// The file is loaded as a resource from the jar file.
-		CSProblemDefinition definition = null;
-		InputStream xmlResource = getClass().getClassLoader().getResourceAsStream("META-INF/Constraints/" + constraintFile);
-		if(xmlResource == null) {
-			LOG.error("Unable to access constraint file <" + constraintFile + "> as resource.");
-			throw new ConstraintsException("The constraint XML file could not be accessed.");
-		}
-		try {
-			definition = CSProblemDefinition.fromXML(xmlResource);
-		} catch (CSPInitException e) {
-			LOG.error("Error setting up constraint definition object: " + e.getMessage());
-			throw new ConstraintsException("Error setting up constraint definition object: " + e.getMessage(), e);
-		} catch (CSPParseException e) {
-			LOG.error("Error parsing constraints XML data: " + e.getMessage());
-			throw new ConstraintsException("Error parsing constraints XML data.", e);
-		}
-
-		return definition;
     }
 }

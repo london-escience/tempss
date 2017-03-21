@@ -159,14 +159,14 @@ function displayTemplate(templateID, templateText) {
             	disableProfileButtons(true);
             }
             
-            // If this template has constraints, add a constraint icon to the
-            // root node with a click button to get constraint details
-            if(data.constraints) {
-            	var $constraintHtml = $('<div class="constraint-header">' + 
-            		'<i class="glyphicon glyphicon-link"></i> This template ' +
-            		'has constraints set. Click <a href="#" ' + 
-            		'class="constraint-info-link">here</a> for details.</div>');
-            	$constraintHtml.insertAfter($templateNameNode);
+            // If this template has constraints, and the constraint functions
+            // are available, add a constraint icon to the root node with a 
+            // click button to get constraint details
+            if(window.hasOwnProperty("constraints")) {
+            	constraints.setup(data, $templateNameNode, treeRoot);
+            }
+            else {
+            	log('No constraint library configured, ignoring constraints.');
             }
             
             hideTreeExpandCollapseButtons(false);
@@ -927,31 +927,6 @@ function updateBoundaryRegions(event, valid) {
 		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + BCNameList + "}');");
 		$select.trigger('change');
 	});
-}
-
-function showConstraintInfo(e) {
-	var $target = $(e.currentTarget);
-	var templateName = $target.parent().parent().children('span[data-fqname]').data('fqname');
-	var templateId = $('input[name="componentname"]').val();
-	log("Constraint info requested for solver template <" + templateName + "> with ID <" + templateId + ">...");
-	e.preventDefault();
-
-	// Get the constraint info and display in a BootstrapDialog
-	BootstrapDialog.show({
-		title: "Constraint information",
-        message: function(dialog) { 
-        	var $message = $('<div></div>');
-        	
-        	// Try to load the constraint data and show an error if loading fails
-        	$message.load('/tempss/api/constraints/' + templateId, 
-        			function( response, status, xhr ) {
-        				if (status=="error") {
-        					$message.html('<div class="alert alert-danger"><b>Unable to access constraint information.</b> An error has occurred accessing the constraint data from TemPSS for this template.</div>');
-        				}
-      		});
-        	return $message
-        }
-    });
 }
 
 // Utility function for displaying log messages
