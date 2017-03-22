@@ -24,7 +24,7 @@
         <tbody>
           {% for item in variableDomains %}
           <tr>
-            <td><b>{{ item.key }}</b></td>
+            <td><b title="{{ item.key }}">{{ variableNameMap[item.key] }}</b></td>
             <td>
               {% for val in item.value %}
                 {{ val }}{% if not loop.last %}, {% endif %}
@@ -46,8 +46,8 @@
         <tbody>
           {% for item in constraints %}
           <tr>
-            <td><b>{{ item.value[0] }}</b></td>
-            <td><b>{{ item.value[1] }}</b></td>
+            <td><b title="{{ item.value[0] }}">{{ variableNameMap[item.value[0]] }}</b></td>
+            <td><b title="{{ item.value[1] }}">{{ variableNameMap[item.value[1]] }}</b></td>
             <td>
               {% for mapping in constraintMappings[item.key] %}
                 <span class="mapping-key">{{ mapping.key }}</span> -> {{ mapping.value }}

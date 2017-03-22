@@ -45,14 +45,16 @@
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -62,6 +64,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,13 +78,15 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
-import uk.ac.ic.prism.jhc02.csp.CSPInitException;
-import uk.ac.ic.prism.jhc02.csp.CSPParseException;
+import uk.ac.ic.prism.jhc02.csp.AssignedVariable;
+import uk.ac.ic.prism.jhc02.csp.BacktrackingSolver;
+import uk.ac.ic.prism.jhc02.csp.CSPSolver;
+import uk.ac.ic.prism.jhc02.csp.CSProblem;
 import uk.ac.ic.prism.jhc02.csp.CSProblemDefinition;
 import uk.ac.ic.prism.jhc02.csp.Constraint;
+import uk.ac.ic.prism.jhc02.csp.Solution;
 import uk.ac.ic.prism.jhc02.csp.Variable;
 import uk.ac.imperial.libhpc2.schemaservice.ConstraintsException;
-import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 
 /**
@@ -166,10 +171,10 @@ public class ConstraintsRestResource {
     	for(Constraint c : constraints) {
     		try {
     			JSONObject constraintObject = new JSONObject();
-	    		constraintObject.put("variable1", c.getVariable1Name());
-	    		constraintObject.put("variable2", c.getVariable2Name());
+	    		constraintObject.put("variable1", c.getVariable1FQName());
+	    		constraintObject.put("variable2", c.getVariable2FQName());
 	    		
-	    		Variable v1 = varMap.get(c.getVariable1Name());
+	    		Variable v1 = varMap.get(c.getVariable1FQName());
 	    		JSONArray mappingArray = new JSONArray();
 				// For each value in v1, get all the valid mappings
 	    		for(String value : v1.getValues()) {
@@ -233,6 +238,7 @@ public class ConstraintsRestResource {
     	// preparing constraint data
     	Map<String, Variable> varMap = new HashMap<String, Variable>(vars.size());
     	List<String> varNames = new ArrayList<String>(vars.size());
+    	Map<String,String> varFQNameLocalNameMap = new HashMap<String,String>(vars.size());
     	Map<String,List<String>> varDomains = new HashMap<String, List<String>>(vars.size());
     	
     	// FIXME: StringBuffer in which the HTML content will be built
@@ -245,8 +251,8 @@ public class ConstraintsRestResource {
     	for(Variable v : vars) {
     		varMap.put(v.getName(), v);
     		varNames.add(v.getName());
+    		varFQNameLocalNameMap.put(v.getName(), v.getLocalName());
     		varDomains.put(v.getName(), v.getValues());
-    		JSONArray valArray = new JSONArray(v.getValues());
     		htmlBuffer.append("<div>Variable: <b>" + v.getName() + "</b>\n<div>");
     		for(String val : v.getValues()) {
     			htmlBuffer.append("<span>" + val + "</span><br/>");
@@ -256,8 +262,8 @@ public class ConstraintsRestResource {
     	Map<String,String[]> constraintData = new HashMap<String, String[]>(constraints.size());
     	Map<String, Map<String, List<String>>> constraintMappings = new HashMap<String, Map<String, List<String>>>(constraints.size());
     	for(Constraint c : constraints) {
-    		String var1 = c.getVariable1Name();
-    		String var2 = c.getVariable2Name();
+    		String var1 = c.getVariable1FQName();
+    		String var2 = c.getVariable2FQName();
     		constraintData.put(var1 + "<->" + var2, new String[] {var1, var2});
     		List<String> varValues = varMap.get(var1).getValues();
     		Map<String, List<String>> valueMap = new HashMap<String, List<String>>(varValues.size());
@@ -267,43 +273,12 @@ public class ConstraintsRestResource {
     		constraintMappings.put(var1 + "<->" + var2, valueMap);
     	}
     	
-    	
-    	
-    	
-    	/*
-    	JSONArray constraintArray = new JSONArray();
-    	for(Constraint c : constraints) {
-    		try {
-    			JSONObject constraintObject = new JSONObject();
-	    		constraintObject.put("variable1", c.getVariable1Name());
-	    		constraintObject.put("variable2", c.getVariable2Name());
-	    		
-	    		Variable v1 = varMap.get(c.getVariable1Name());
-	    		JSONArray mappingArray = new JSONArray();
-				// For each value in v1, get all the valid mappings
-	    		for(String value : v1.getValues()) {
-	    			JSONObject mappingItem = new JSONObject();
-	    			mappingItem.put("sourceVar", v1.getName());
-	    			mappingItem.put("sourceValue", value);
-	    			List<String> targetVals = c.getValidValues(v1.getName(), value);
-	    			mappingItem.put("targetValues", new JSONArray(targetVals));
-	    			mappingArray.put(mappingItem);
-	    		}
-	    		
-	    		constraintObject.put("mappings", mappingArray);
-	    		constraintArray.put(constraintObject);
-    		} catch (JSONException e) {
-				LOG.error("ERROR converting constraint <{}> JSON object: {}",
-						 c.getName(), e.getMessage());
-			}
-    	}
-    	*/
-    	
     	// Render the template
     	Map<String, Object> templateContext = new HashMap<String, Object>();
     	templateContext.put("templateId", templateId);
     	templateContext.put("templateName", templateName);
     	templateContext.put("variables", varNames);
+    	templateContext.put("variableNameMap", varFQNameLocalNameMap);
     	templateContext.put("variableDomains", varDomains);
     	templateContext.put("constraints", constraintData);
     	templateContext.put("constraintMappings", constraintMappings);
@@ -328,6 +303,7 @@ public class ConstraintsRestResource {
     @POST
     @Produces("application/json")
     @Path("{templateId}/solver")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response solveConstraintValues(@PathParam("templateId") String templateId,
     		MultivaluedMap<String, String> dataParams) {
     	StringBuffer sb = new StringBuffer();
@@ -336,10 +312,65 @@ public class ConstraintsRestResource {
     	}
     	LOG.debug("Request to solve constraint values for template <{}>\n{}", templateId, sb.toString());
     	
+    	// Now process the retrieved data and call the solver
+    	CSProblemDefinition definition = null;
+    	try {
+    		definition = TemplateResourceUtils.getConstraintData(templateId, this._context);
+		} catch (UnknownTemplateException e) {
+			LOG.error("The template with ID <{}> could not be found: " + e.getMessage());
+			return Response.status(Status.NOT_FOUND).build();
+		} catch(ConstraintsException e) {
+			LOG.error("Error getting constraint problem definition: " + e.getMessage());
+			return Response.serverError().build();
+		}
     	
+    	List<AssignedVariable> avList = new ArrayList<AssignedVariable>();
+    	// Now go through the variables 
+    	for(String key : dataParams.keySet()) {
+    		if(!dataParams.getFirst(key).equals("NONE")) {
+    			LOG.debug("Handling initial value for variable <{}>", key);
+    			Variable v = definition.getVariable(key);
+    			avList.add(new AssignedVariable(v, dataParams.getFirst(key)));
+    		}
+    	}
+    	CSProblem problem = new CSProblem(definition, avList);
+    	CSPSolver solver = new BacktrackingSolver(problem);
+    	List<Solution> solutions = solver.solve();
     	
+    	// Process the list of solutions from the solver
+    	Map<String, Set<String>> results = processSolutions(solutions);
     	JSONObject responseJson = new JSONObject();
+    	try {
+    		JSONArray varItemArray = new JSONArray();
+	    	for(String varName : results.keySet()) {
+	    		JSONObject varItem = new JSONObject();
+	    		varItem.put("variable", varName);
+	    		JSONArray varValues = new JSONArray(results.get(varName));
+	    		varItem.put("values", varValues);
+	    		varItemArray.put(varItem);
+	    	}
+	    	responseJson.put("solutions", varItemArray);
+	    	responseJson.put("result", "OK");
+    	} catch(JSONException e) {
+    		LOG.error("Unable to create JSON object for variable results...");
+    		return Response.serverError().build();
+    	}
+
     	return Response.ok(responseJson.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    private Map<String, Set<String>> processSolutions(List<Solution> pSolutions) {
+    	Map<String, Set<String>> varMappings = new HashMap<String,Set<String>>();
+    	for(Solution s : pSolutions) {
+    		for(AssignedVariable av : s.getSolution()) {
+    			String avName = av.getName();
+    			if(!varMappings.containsKey(avName)) {
+    				varMappings.put(avName, new HashSet<String>());
+    			}
+    			varMappings.get(avName).add(av.getValue());
+    		}
+    	}
+    	return varMappings;
     }
 
 }

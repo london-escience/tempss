@@ -91,7 +91,7 @@ window.constraints = {
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
 		// Create form data object to post the params to the server
-	    var formData = new FormData();
+	    var formDict = {};
 		$('.constraint').each(function(index, el) {
 			// constraint elements are li.parent_li nodes
 			// data-fqname attribute only gives us the local name so we need
@@ -116,23 +116,65 @@ window.constraints = {
 			else if($(el).children('span.toggle_button').length > 0) {
 				log("Preparing constraints - we have an on/off node...");
 				var $iEl = $(el).find('> span.toggle_button > i.toggle_button');
-				if($iEl.hasClass("enable_button")) value = "Off";
+				// FIXME: For now, we only want to set the actual value of the
+				// on/off item when it has been set by a constraint result.
+				if(!$iEl.hasClass("set_by_constraint")) value = "NONE";
+				else if($iEl.hasClass("enable_button")) value = "Off";
 				else value = "On";
 			}
 			log("Name: " + name + "    Value: " + value);
-			formData.append(name, value);
+			formDict[name] = value;
 		});
 		
 		var csrfToken = $('input[name="_csrf"]').val();
 		
 		// Now we need to post the constraintParams to the server
-		$.ajax({
+		var solveRequest = $.ajax({
 			beforeSend: function(jqxhr, settings) {
 	        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
 	        },
 			method: 'POST',
 			url: '/tempss/api/constraints/' + templateId + '/solver',
-			data: formData
+			data: formDict
+		});
+		
+		solveRequest.done(function(data) {
+			if(data.hasOwnProperty("result") && 
+			   data.hasOwnProperty("solutions") && 
+			   data["result"] == "OK") {
+				
+				log("solve request completed successfully." + JSON.stringify(data));
+				// Iterate through solutions and update the values
+				for(var i = 0; i < data.solutions.length; i++) {
+					var solution = data.solutions[i];
+					log("Processing constraint variable: " + solution['variable']);
+					var name = solution['variable'];
+					var nameParts = name.split(".");
+					var $targetEl = window.treeRoot.find('li.parent_li[data-fqname="' + nameParts[0] + '"]');
+					for(var j = 1; j < nameParts.length; j++) {
+						$targetEl = $targetEl.find('li.parent_li[data-fqname="' + nameParts[j] + '"]')
+					}
+					if(!$targetEl.length) {
+						log("ERROR, couldn't find tree node for variable <" + name + ">");
+						continue;
+					}
+					// See if we have a select element or on/off
+					if($targetEl.children('select.choice').length) {
+						var $selectEl = $targetEl.children('select.choice');
+						var selectHTML = '<option value="Select from list">Select from list</option>';
+						for(var j = 0; j < solution['values'].length; j++) {
+							selectHTML += '<option value="' + solution['values'][j] + 
+							'">' + solution['values'][j] + '</option>';
+						}
+						$selectEl.html(selectHTML);
+					}
+				}
+			}
+			else {
+				log("solve request failed: " + JSON.stringify(data));
+			}
+		}).fail(function(data) {
+			log("solve request returned error: " + JSON.stringify(data));
 		});
 	}
 
