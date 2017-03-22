@@ -84,20 +84,21 @@ window.constraints = {
 	    });
 	},
 	
-	updateConstraints: function(templateId, $triggerElement) {
-		log("Constraints update triggered for template <" + templateId 
-				+ "> with trigger element <" + $triggerElement.data('fqname') 
-				+ ">");
+	updateConstraints: function(templateName, templateId, $triggerElement) {
+		log("Constraints update triggered for template <" + templateName 
+				+ "> with ID <" + templateId + "> and trigger element <" 
+				+ $triggerElement.data('fqname') + ">");
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
-		var constraintParams = {};
+		// Create form data object to post the params to the server
+	    var formData = new FormData();
 		$('.constraint').each(function(index, el) {
 			// constraint elements are li.parent_li nodes
 			// data-fqname attribute only gives us the local name so we need
 			// to search up the tree to build the correct fq name.
 			var name = "";
 			var $element = $(el);
-			while($element.attr("data-fqname") && $element.data('fqname') != templateId) {
+			while($element.attr("data-fqname") && $element.data('fqname') != templateName) {
 				log("Processing name: " + $element.data('fqname'));
 				if(name == "") name = $element.data('fqname'); 
 				else name = $element.data('fqname') + "." + name;
@@ -119,6 +120,19 @@ window.constraints = {
 				else value = "On";
 			}
 			log("Name: " + name + "    Value: " + value);
+			formData.append(name, value);
+		});
+		
+		var csrfToken = $('input[name="_csrf"]').val();
+		
+		// Now we need to post the constraintParams to the server
+		$.ajax({
+			beforeSend: function(jqxhr, settings) {
+	        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+	        },
+			method: 'POST',
+			url: '/tempss/api/constraints/' + templateId + '/solver',
+			data: formData
 		});
 	}
 

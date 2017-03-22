@@ -666,7 +666,8 @@ function attachChangeHandlers() {
     	if($parentLI.hasClass("constraint")) {
     		log("select node with constraints changed - triggering constraint solver...");
     		var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
-        	constraints.updateConstraints(templateName, $(e.currentTarget).parent());
+    		var templateId = $('#template-select option:selected').val();
+        	constraints.updateConstraints(templateName, templateId, $(e.currentTarget).parent());
     	}
     });
 }
