@@ -119,10 +119,15 @@ body {
 	cursor: pointer;
 }
 
-div.constraint-header {
+div.constraint-header, div.constraint-header button {
 	display: inline;
 	color: #777;
 	font-size: 10px;
+}
+
+div.constraint-header button {
+	margin-bottom: 3px;
+	font-size: 9px;
 }
 
 div.constraint-header i {

@@ -596,10 +596,32 @@ function isInteger(valueToCheck) {
     };
 
     /**
-     * Disable a branch.
+     * Enable / disable a branch with a toggle that can be turned on or off.
+     * 
+     * If constraints are in use and the branch has a set_by_constraint class
+     * then we display a message saying that the branch is restricted by a 
+     * constraint and cannot be changed 
      */
     var toggleBranch = function(elementUL) {
-        if ($(elementUL).data('disabled') === true) {
+    	if($(elementUL).children("li.parent_li.constraint").length > 0 &&
+    			$(elementUL).children("li.parent_li.constraint").hasClass("set_by_constraint")) {
+    		BootstrapDialog.show({
+    			title: "Value change disabled by constraints",
+    			type: BootstrapDialog.TYPE_WARNING,
+    			message: "This node is constrained by other values in the " +
+    			         "template and cannot be changed. Reset the constraints " +
+    			         "or use the undo option to unrestrict this value.",
+    			buttons: [{
+    				icon: 'glyphicon glyphicon-remove',
+    				label: 'Close',
+    				action: function(dialog) {
+    					dialog.close();
+    				}
+    			}]
+    		});
+    		return;
+    	}
+    	if ($(elementUL).data('disabled') === true) {
             // Enable branch
             $(elementUL).removeClass('disabled')
                         .data('disabled', false)
@@ -646,8 +668,9 @@ function isInteger(valueToCheck) {
         // it is part of a constraint relationship and we trigger the CS solver.
         if($(elementUL).children('li.parent_li').hasClass("constraint")) {
         	log("A constraint element (optional element) has been modified - triggering solver...");
-        	var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
-        	constraints.updateConstraints(templateName, $(elementUL).children('li.parent_li'));
+        	var templateName = treeRoot.find('> li.parent_li > span').data('fqname');
+        	var templateId = $('#template-select option:selected').val();
+        	constraints.updateConstraints(templateName, templateId, $(elementUL).children('li.parent_li'));
         }
     };
 

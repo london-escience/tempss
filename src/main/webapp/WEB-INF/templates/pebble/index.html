@@ -516,6 +516,11 @@
         	constraints.showConstraintInfo(e);
         });
         
+     	// Handle click of "Reset constraints" button
+        $('body').on('click', '.reset-constraints-btn', function(e) {
+        	constraints.resetConstraints(e);
+        });
+        
         // Enable tooltips for dynamically added constraint link icons
         $('#template-container').tooltip({ selector: 'i.link-icon'});
 	});

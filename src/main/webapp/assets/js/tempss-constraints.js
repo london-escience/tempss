@@ -6,12 +6,19 @@ window.constraints = {
 			log("There is no constraints information in the provided data object.");
 			return;
 		}
+		// Store the initial constraint state for this solver
+		if(!window.hasOwnProperty("constraints")) window.constraints = {};
+		var solverName = $nameNode.text();
+		window.constraints[solverName] = this.getInitialConstraintState(data, solverName, $treeRoot);
+		
 		// Add a comment to the root node with a link to display the constraint
 		// information
     	var $constraintHtml = $('<div class="constraint-header">' + 
     		'<i class="glyphicon glyphicon-link"></i> This template ' +
     		'has constraints set. Click <a href="#" ' + 
-    		'class="constraint-info-link">here</a> for details.</div>');
+    		'class="constraint-info-link">here</a> for details. &nbsp;&nbsp;' +
+    		'<button class="btn btn-xs btn-default reset-constraints-btn">'+
+    		'Reset constraints</button></div>');
     	$constraintHtml.insertAfter($nameNode);
     	
     	// Build a string for each element that has constraints listing the 
@@ -57,6 +64,33 @@ window.constraints = {
     		$li.addClass('constraint');
     	}
 	},
+	
+	// Get the initial constraint state as a dict of parameters an all their values
+	getInitialConstraintState: function(data, solverName, $treeRoot) {
+		var constraintData = {};
+		for(var prop in data.constraintInfo) {
+			if(data.constraintInfo.hasOwnProperty(prop)) {
+				// Find the element relating to property and if it is a select
+				// with a list of options, store the options.
+				var $element = $treeRoot.find('span[data-fqname="' + solverName + '"]').parent();
+				var propPath = prop.split(".");
+				var targetName = propPath[propPath.length-1];
+				for(var i = 0; i < propPath.length; i++) {
+					$element = $element.find('> ul > li.parent_li[data-fqname="' + propPath[i] + '"]');
+				}
+				if($element.length == 0) {
+					log("Error finding node <" + targetName + "> during setup of initial constraints.");
+					continue;
+				}
+				if($element.children('select').length > 0) {
+					var $select = $element.children('select');
+					var selectHTML = $select.html();
+					constraintData[prop] = selectHTML;
+				}
+			}
+		}
+		return constraintData;
+	},
 
 	// Display a modal showing constraint information for the current template.
 	showConstraintInfo: function(e) {
@@ -88,6 +122,12 @@ window.constraints = {
 		log("Constraints update triggered for template <" + templateName 
 				+ "> with ID <" + templateId + "> and trigger element <" 
 				+ $triggerElement.data('fqname') + ">");
+		if($triggerElement.data("runSolver") !== undefined && !$triggerElement.data("runSolver")) {
+			log("Data attribute directed solver not to run.");
+			$triggerElement.removeAttr("data-run-solver");
+			$triggerElement.removeData("runSolver");
+			return;
+		}
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
 		// Create form data object to post the params to the server
@@ -107,19 +147,35 @@ window.constraints = {
 				
 			}
 			var value = "";
-			if($(el).children('select.choice').length > 0) {
+			var $el = $(el);
+			if($el.children('select.choice').length > 0) {
 				log("Preparing constraints - we have a select node...");
-				var $option = $(el).children('select.choice').find('option:selected');
+				var $option = $el.children('select.choice').find('option:selected');
 				value = $option.val();
 				if(value == "Select from list") value = "NONE";
+				// Map NotProvided values back to off.
+				else if(value == "NotProvided") value = "Off";
 			}
-			else if($(el).children('span.toggle_button').length > 0) {
+			else if($el.children('span.toggle_button').length > 0) {
 				log("Preparing constraints - we have an on/off node...");
-				var $iEl = $(el).find('> span.toggle_button > i.toggle_button');
+				var $iEl = $el.find('> span.toggle_button > i.toggle_button');
 				// FIXME: For now, we only want to set the actual value of the
-				// on/off item when it has been set by a constraint result.
-				if(!$iEl.hasClass("set_by_constraint")) value = "NONE";
-				else if($iEl.hasClass("enable_button")) value = "Off";
+				// on/off item when it has been set by a constraint result or
+				// when it is the element that triggered the update
+				// FIXME: For now, we only want to set the actual value of the
+				// on/off item when it has been set by a constraint result or
+				// when it is the element that triggered the update
+				if($el.is($triggerElement)) {
+					log("This is on/off node is the trigger element...");
+					value = ($iEl.hasClass("enable_button")) ? "Off" : "On";
+					$el.addClass("set_by_constraint");
+				}
+				else if(!$iEl.hasClass("set_by_constraint")) {
+					value = "NONE";
+				}
+				else if($iEl.hasClass("enable_button")) {
+					value = "Off";
+				}
 				else value = "On";
 			}
 			log("Name: " + name + "    Value: " + value);
@@ -166,7 +222,7 @@ window.constraints = {
 							selectHTML = '<option value="Select from list">Select from list</option>';
 						}
 						for(var j = 0; j < solution['values'].length; j++) {
-							// Remap "Off" values for select eleemnts to NotProvided
+							// Remap "Off" values for select elements to NotProvided
 							var solutionValue = (solution['values'][j] == "Off") ? "NotProvided" : solution['values'][j]; 
 							selectHTML += '<option value="' + solutionValue + 
 							'">' + solutionValue + '</option>';
@@ -201,6 +257,24 @@ window.constraints = {
 							selectChoiceItem(event);
 						}
 					}
+					// Else if we have an on/off node
+					else if($targetEl.children('span.toggle_button').length > 0) {
+						var $toggleSpan = $targetEl.children('span.toggle_button');
+						var solutionValue = "";
+						if(solution['values'].length == 1) {
+							solutionValue = solution['values'][0];
+							log("We have a fixed value for on/off node that needs to be set.");
+							if(solutionValue == "Off" && $toggleSpan.children('i').hasClass('disable_button')) {
+								$targetEl.data("run-solver", false);
+								$toggleSpan.trigger('click');
+							}
+							else if(solutionValue == "On" && $toggleSpan.children('i').hasClass('enable_button')) {
+								$targetEl.data("run-solver", false);
+								$toggleSpan.trigger('click');
+							}
+							$targetEl.addClass('set_by_constraint');
+						}						
+					}
 				}
 			}
 			else {
@@ -209,6 +283,50 @@ window.constraints = {
 		}).fail(function(data) {
 			log("solve request returned error: " + JSON.stringify(data));
 		});
-	}
+	},
 
+	resetConstraints: function(e) {
+		var $rootUl = $('#template-container ul[role="tree"]');
+		var $templateNameNode = $rootUl.find("> li.parent_li > span[data-fqname]");
+		var templateName = $templateNameNode.data('fqname');
+		if(!window.hasOwnProperty("constraints") && !window.constraints.hasOwnProperty(templateName)) {
+			log("ERROR: Cannot reset constraints - base constraint data for template <" + templateName + "> this doesn't exist");
+			return;
+		}
+		var constraintData = window.constraints[templateName];
+		for(var key in constraintData) {
+			var $element = $($templateNameNode.parent()[0]);
+			var keyElements = key.split('.');
+			for(var i = 0; i < keyElements.length; i++) {
+				$element = $element.find('> ul > li.parent_li[data-fqname="' + keyElements[i] + '"]');
+			}
+			if($element.children('select').length > 0) {
+				var $select = $element.children('select');
+				$select.html(constraintData[key]);
+				// Now re-initialise this select field
+				var changeStr = $select.attr("onchange");
+				if(changeStr.indexOf("validateEntries") == 0) {
+					// We have a select dropdown (text inputs also use
+					// this approach but we've already filtered for 
+					// select above).
+					// Restrictions JSON needs to be passed as a string
+					var restrictionsJSON = changeStr.substring(
+							changeStr.indexOf("\'\{")+1,
+							changeStr.lastIndexOf("\}\'")+1
+					);
+					// Run the validation
+					validateEntries($select, 'xs:string', restrictionsJSON);
+				}
+				else if(changeStr.indexOf("selectChoiceItem") == 0) {
+					// Can't trigger the change event on the choice 
+					// select directly but need to call selectChoiceItem
+					var event = {target: $select[0]};
+					selectChoiceItem(event);
+				}
+			}
+		}
+		// Remove the set_by_constraint from any toggle nodes...
+		$rootUl.find('li.parent_li.constraint').removeClass('set_by_constraint');
+	
+	}
 }
