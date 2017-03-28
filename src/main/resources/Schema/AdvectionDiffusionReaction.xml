@@ -193,6 +193,7 @@
         WeakDG: Select this with DiscontinuousGalerkin projection
         FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
       </libhpc:documentation>
+      <tempss:item>NotProvided</tempss:item>
       <tempss:item>NonConservative</tempss:item>
       <tempss:item>WeakDG</tempss:item>
       <tempss:item>FRDG</tempss:item>
@@ -246,6 +247,7 @@
             "BackwardEuler"         Backward Euler scheme
             "ClassicalRungeKutta4"  4th order Runge Kutta scheme
         </libhpc:documentation>
+        <tempss:item>NotProvided</tempss:item>
         <tempss:item>IMEXOrder1</tempss:item>
         <tempss:item>IMEXOrder2</tempss:item>
         <tempss:item>IMEXOrder3</tempss:item>

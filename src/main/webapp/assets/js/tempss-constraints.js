@@ -161,12 +161,45 @@ window.constraints = {
 					// See if we have a select element or on/off
 					if($targetEl.children('select.choice').length) {
 						var $selectEl = $targetEl.children('select.choice');
-						var selectHTML = '<option value="Select from list">Select from list</option>';
+						var selectHTML = '';
+						if(solution['values'].length > 1) {
+							selectHTML = '<option value="Select from list">Select from list</option>';
+						}
 						for(var j = 0; j < solution['values'].length; j++) {
-							selectHTML += '<option value="' + solution['values'][j] + 
-							'">' + solution['values'][j] + '</option>';
+							// Remap "Off" values for select eleemnts to NotProvided
+							var solutionValue = (solution['values'][j] == "Off") ? "NotProvided" : solution['values'][j]; 
+							selectHTML += '<option value="' + solutionValue + 
+							'">' + solutionValue + '</option>';
 						}
 						$selectEl.html(selectHTML);
+						// Can't trigger change here since this will put is in
+						// an infinite loop since triggering change calls the 
+						// solver and then that would trigger another change to
+						// re-validate. Instead, we call validate here manually.
+						// Depending on whether this is a choice option, an 
+						// enumeration select list or a text input, the 
+						// way that validation is called is slightly different.
+						var changeStr = $selectEl.attr("onchange");
+						if(changeStr.indexOf("validateEntries") == 0) {
+							// We have a select dropdown (text inputs also use
+							// this approach but we've already filtered for 
+							// select above).
+							// Restrictions JSON needs to be passed as a string
+							var restrictionsJSON = changeStr.substring(
+									changeStr.indexOf("\'\{")+1,
+									changeStr.lastIndexOf("\}\'")+1
+							);
+							// If the select is now set to a specific value,
+							// call the validation function
+							if($selectEl.find('option:selected').val() != "Select from list")
+								validateEntries($selectEl, 'xs:string', restrictionsJSON);
+						}
+						else if(changeStr.indexOf("selectChoiceItem") == 0) {
+							// Can't trigger the change event on the choice 
+							// select directly but need to call selectChoiceItem
+							var event = {target: $selectEl[0]};
+							selectChoiceItem(event);
+						}
 					}
 				}
 			}
