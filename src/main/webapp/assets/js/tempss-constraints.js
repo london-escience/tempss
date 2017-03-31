@@ -285,6 +285,27 @@ window.constraints = {
 		});
 	},
 
+	resetConstraintsConfirmation: function(e) {
+		BootstrapDialog.show({
+			title: "Reset constraints",
+			message: "<strong>Are you sure you want to reset constraints?</strong><br/><br/>This will reset all values that have constraints within this tempalte to their default values.",
+			type: BootstrapDialog.TYPE_WARNING,
+			buttons: [{
+                label: 'Close',
+                cssClass: 'btn-danger',
+                action: function(dialog) {
+                    dialog.close();
+                }
+            },{
+                label: 'Confirm',
+                action: (function(dialog) {
+                	this.resetConstraints(e);
+                	dialog.close();
+                }).bind(this)
+            }]
+		});
+	},
+	
 	resetConstraints: function(e) {
 		var $rootUl = $('#template-container ul[role="tree"]');
 		var $templateNameNode = $rootUl.find("> li.parent_li > span[data-fqname]");
