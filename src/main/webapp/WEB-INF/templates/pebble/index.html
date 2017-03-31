@@ -53,7 +53,20 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="well" style="padding-bottom: 50px;">
-						<div class="loading" id="template-tree-loading" style="display: none; float: right;">
+				    	<span id="tree-collapse" class="glyphicon glyphicon-minus-sign
+					              text-info tree-control-btn"
+					          data-toggle="tooltip" title="Collapse tree"></span>
+					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
+					              text-info tree-control-btn"
+					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
+					    <span id="constraint-redo" class="fa fa-repeat text-info tree-control-btn"
+					          style="margin-top: 1px; margin-right: 16px; display: none;" 
+					          data-toggle="tooltip" title="Redo constraint change"></span>
+					    <span id="constraint-icon-spacer" style="float: right; margin-top: -2px; margin-left: 6px; display: none;">|</span>
+					    <span id="constraint-undo" class="fa fa-undo text-info tree-control-btn"
+					          style="margin-top: 1px; display: none;" 
+					          data-toggle="tooltip" title="Undo constraint change"></span>
+					    <div class="loading" id="template-tree-loading" style="display: none; float: right;">
 				      	  <img src="../assets/img/loading.gif"/>
 				      	  <span>Loading template tree...</span>
 				    	</div>
@@ -61,12 +74,6 @@
 				      	  <img src="../assets/img/loading.gif"/>
 				      	  <span>Loading profile...</span>
 				    	</div>
-					    <span id="tree-collapse" class="glyphicon glyphicon-minus-sign
-					              text-info tree-control-btn"
-					          data-toggle="tooltip" title="Collapse tree"></span>
-					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
-					              text-info tree-control-btn"
-					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
 
 					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
 					    <div id="template-container">
@@ -472,17 +479,22 @@
 			tempssProcessProfile();
 		});
 
-		// Set up tooltips for validation help and tree expand/collapse buttons
-		//$('body').tooltip({
-		//    selector: ".val-help, .tree-control-btn"
-		//});
-
 		$('#tree-collapse').on('click', function() {
 			collapseTree();
 		});
 
 		$('#tree-expand').on('click', function() {
 			expandTree();
+		});
+		
+		$('#constraint-undo').on('click', function() {
+			if(window.hasOwnProperty('constraints'))
+				constraints.undoConstraintChange();
+		});
+
+		$('#constraint-redo').on('click', function() {
+			if(window.hasOwnProperty('constraints'))
+				constraints.redoConstraintChange();
 		});
 
 		// Set up tooltips for collapse/expand tree buttons

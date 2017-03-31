@@ -91,6 +91,11 @@ body {
 	cursor: hand; 
 }
 
+.tree-control-btn.disabled {
+	cursor: default;
+	color: #ddd;
+}
+
 .form-error {
 	padding-top: 8px;
 }

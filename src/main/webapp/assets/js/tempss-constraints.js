@@ -1,4 +1,6 @@
 window.constraints = {
+		
+	constraintStack: [],
 	
 	setup: function(data, $nameNode, $treeRoot) {
 		log("Request to setup constraints for template...");
@@ -349,5 +351,28 @@ window.constraints = {
 		// Remove the set_by_constraint from any toggle nodes...
 		$rootUl.find('li.parent_li.constraint').removeClass('set_by_constraint');
 	
+	},
+	
+	/**
+	 * Undo a constraint change. We maintain a stack of constraint changes and
+	 * this pops the stack and resets all constraint items to their previous
+	 * values. It is then necessary to trigger validation on these items. 
+	 */
+	undoConstraintChange: function(e) {
+		log("Undo constraint change requested.");
+		// Check the constraint stack has a size of >= 1 and if so, 
+		// pop the value and apply the data to the fields.
+		var size = this.constraintStack.length;
+		if(size < 1) {
+			log("The stack is empty, there's nothing to undo.");
+			return;
+		}
+		// Pop the value and handle the data
+		var value = this.constraintStack.pop();
+		
+	},
+	
+	redoConstraintChange: function(e) {
+		log("The redo constraint change feature is not yet implemented...");
 	}
 }

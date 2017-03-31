@@ -122,6 +122,7 @@ function displayTemplate(templateID, templateText) {
         disableProfileButtons(true);
         disableGenerateInputButton(true);
         hideTreeExpandCollapseButtons(true);
+        hideConstraintButtons(true);
         $templateContainer.html("<h6 class=\"infotext\">No template selected. Please select a template from the drop-down list above.</h6>");
         return;
     }
@@ -162,11 +163,14 @@ function displayTemplate(templateID, templateText) {
             // If this template has constraints, and the constraint functions
             // are available, add a constraint icon to the root node with a 
             // click button to get constraint details
-            if(window.hasOwnProperty("constraints")) {
+            if(data.hasOwnProperty('constraints') && data.constraints &&
+            		window.hasOwnProperty("constraints")) {
+            	hideConstraintButtons(false);
             	constraints.setup(data, $templateNameNode, treeRoot);
             }
             else {
             	log('No constraint library configured, ignoring constraints.');
+            	hideConstraintButtons(true);
             }
             
             hideTreeExpandCollapseButtons(false);
@@ -294,6 +298,19 @@ function hideTreeExpandCollapseButtons(hide) {
     } else {
         $('#tree-expand').show();
         $('#tree-collapse').show();
+    }
+}
+
+// Show/hide the constraint undo/redo buttons
+function hideConstraintButtons(hide) {
+    if (hide) {
+    	$('#constraint-undo').hide();
+    	$('#constraint-icon-spacer').hide();
+    	$('#constraint-redo').hide();
+    } else {
+    	$('#constraint-undo').show();
+    	$('#constraint-icon-spacer').show();
+    	$('#constraint-redo').show();
     }
 }
 
