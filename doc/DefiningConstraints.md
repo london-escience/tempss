@@ -40,21 +40,21 @@ At the root of a constraint definition document is the `<TempssConstraints>` ele
 </TempssConstraints>
 ```
 
-###Defining Variables
+### Defining Variables
 Within the `variables` block, each variable is defined using a `<variable>` element. This provides details of the variable and its domain of possible values. The variable element is defined as follows:
 
 __Element:__ `variable`<br/>
  
-######Attributes
+###### Attributes
  
  * ___path___: The dot-separated path of the target element within the TemPSS template tree, _excluding_ the root node. e.g. for an EquationType variable that appears under the ProblemSpecification branch of the Nektar++ AdvectionDiffusionReaction solver - ProblemSpecification.EquationType
  * ___name___: A name identifying the variable. This should be unique within this constraint document and will be used to identify variables within constraint mapping definitions.
 
-######Sub-elements
+###### Sub-elements
 
  * `domain`: A single domain element must be provided for each variable. The domain element contains zero or more `value` elements each defining a value that the variable can be assigned.
 
-######Example
+###### Example
 
 Consider the variable `DiffusionAdvancement` for the Nektar++ `AdvectionDiffusionReaction` solver. It is located under the `NumericalAlgorithm` -> `TimeIntegration` -> `DiffusionAdvancement` tree branch and has three possible values `NotProvided`, `Implicit` or `Explicit`. We have decided to use the identifier `DiffusionAdvancement` to identify the variable in constraint definitions. _Note that in some cases there may be variables in different tree branches that have the same name. The ability to define a variable identifier is useful to avoid name conflicts while being able to specify a short name as an identifier when referring to the variable to make mapping definitions less verbose._
 
@@ -73,7 +73,7 @@ This variable definition would be specified using the following XML:
 </variable>
 ```
 
-###Defining Constraints
+### Defining Constraints
 Within the `constraints` block, constraints are defined as a series of `<mapping>` elements. Each mapping element defines a constraint of the form:
 
 "When variable _X_ has value _a_, variable _Y_ (the target variable in the constraint relationship) must have a value that is one of _p_, _q_, _r_, ...". 
@@ -82,17 +82,17 @@ The structure of a mapping element is now described.
 
 __Element:__ `mapping`<br/>
  
-######Attributes
+###### Attributes
 
  * ___variable___: The first variable identifier (variable _X_ in the above mapping definition). This identifier must match the `name` attribute for one of variables defined in this constraint definition document.
  * ___varValue___: A value for the variable (value _a_ in the above mapping definition). This value must be present in the list of domain values for the variable in its definition in the `variables` section. 
  * ___targetVariable___: The second variable identifier (variable _Y_ in the above mapping defintiion). This identifier must match the `name` attribute for one of variables defined in this constraint definition document.
 
-######Sub-elements
+###### Sub-elements
 
  * `targetValue`: A targetValue element must be provided for each value that is compatible with the varValue value for the first variable.
 
-######Example
+###### Example
 
 This example demonstrates how to define constraint mappings for a constraint between two variables `NumericalAlgorithm` -> `Projection` and `NumericalAlgorithm` -> `UpwindType`. This is a simple constraint relationship, with each variable domain containing only two values, as such it provides an ideal relationship to illustrate the approach of defining mappings. Variables with larger value domains and more complex relationships may require a larger number of mapping elements to encapsulate the possible combinations between each of their values. 
 
