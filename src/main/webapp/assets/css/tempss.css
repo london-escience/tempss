@@ -86,7 +86,7 @@ body {
 
 .tree-control-btn {
 	float: right;
-	padding-left: 6px;
+	margin-left: 6px;
 	cursor: pointer;
 	cursor: hand; 
 }
@@ -157,14 +157,4 @@ div.constraint-header a {
 .link-icon {
 	margin-left: 10px;
 	cursor: pointer;
-}
-
-#constraint-undo.disabled {
-	cursor: default;
-	color: #ccc;
-}
-
-#constraint-redo.disabled {
-	cursor: default;
-	color: #ccc;
 }
