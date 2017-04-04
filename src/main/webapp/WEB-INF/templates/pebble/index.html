@@ -487,16 +487,6 @@
 			expandTree();
 		});
 		
-		$('#constraint-undo').on('click', function() {
-			if(window.hasOwnProperty('constraints'))
-				constraints.undoConstraintChange();
-		});
-
-		$('#constraint-redo').on('click', function() {
-			if(window.hasOwnProperty('constraints'))
-				constraints.redoConstraintChange();
-		});
-
 		// Set up tooltips for collapse/expand tree buttons
 		hideTreeExpandCollapseButtons(true);
 		
@@ -532,6 +522,16 @@
         $('body').on('click', '.reset-constraints-btn', function(e) {
         	constraints.resetConstraintsConfirmation(e);
         });
+     	
+		$('#constraint-undo').on('click', function() {
+			if(window.hasOwnProperty('constraints'))
+				constraints.undoConstraintChange();
+		});
+
+		$('#constraint-redo').on('click', function() {
+			if(window.hasOwnProperty('constraints'))
+				constraints.redoConstraintChange();
+		});
         
         // Enable tooltips for dynamically added constraint link icons
         $('#template-container').tooltip({ selector: 'i.link-icon'});

@@ -124,20 +124,30 @@ window.constraints = {
 		log("Constraints update triggered for template <" + templateName 
 				+ "> with ID <" + templateId + "> and trigger element <" 
 				+ $triggerElement.data('fqname') + ">");
+		
+		// Where we have an on/off switchable element, the easiest way to 
+		// switch it while maintaining all the associated behaviour is to 
+		// trigger a click on the element. However, when we do this, it 
+		// triggers a re-run of the solver putting is into an infinite loop. 
+		// To prevent this, when a switchable element needs to be changed as 
+		// a result of processing a constraint, we add a flag to it which is 
+		// picked up here and prevents the solver running again as a result of 
+		// the change to this element.
 		if($triggerElement.data("runSolver") !== undefined && !$triggerElement.data("runSolver")) {
 			log("Data attribute directed solver not to run.");
 			$triggerElement.removeAttr("data-run-solver");
 			$triggerElement.removeData("runSolver");
 			return;
 		}
-		// Find all the constraint items and prepare a form request to 
-		// submit them to the server.
-		// Create form data object to post the params to the server
-	    var formDict = {};
+		
+		// Both the storing of constraint undo data and the preparation of form 
+		// content to send to the solver need references to all the constraint 
+		// elements in the tree. We prepare a list of these elements here.
+		var constraintElements = [];
 		$('.constraint').each(function(index, el) {
 			// constraint elements are li.parent_li nodes
-			// data-fqname attribute only gives us the local name so we need
-			// to search up the tree to build the correct fq name.
+			// The data-fqname attribute only gives us the local name so we 
+			// need to search up the tree to build the correct fq name.
 			var name = "";
 			var $element = $(el);
 			while($element.attr("data-fqname") && $element.data('fqname') != templateName) {
@@ -145,11 +155,22 @@ window.constraints = {
 				if(name == "") name = $element.data('fqname'); 
 				else name = $element.data('fqname') + "." + name;
 				$element = $element.parent().closest('li.parent_li');
-				if($element.length == 0) break;
-				
+				if($element.length == 0) break;	
 			}
+			constraintElements.push({ name: name, element: $(el)});
+		});
+		
+		// The solver will be run so we store undo information
+		//this.storeConstraintUndoData(templateName, templateId);
+		
+		// Find all the constraint items and prepare a form request to 
+		// submit them to the server.
+		// Create form data object to post the params to the server
+	    var formDict = {};
+	    for(var i = 0; i < constraintElements.length; i++) {
+	    	var $el = constraintElements[i]['element'];
+	    	var name = constraintElements[i]['name'];
 			var value = "";
-			var $el = $(el);
 			if($el.children('select.choice').length > 0) {
 				log("Preparing constraints - we have a select node...");
 				var $option = $el.children('select.choice').find('option:selected');
@@ -182,7 +203,7 @@ window.constraints = {
 			}
 			log("Name: " + name + "    Value: " + value);
 			formDict[name] = value;
-		});
+		}
 		
 		var csrfToken = $('input[name="_csrf"]').val();
 		
@@ -374,5 +395,15 @@ window.constraints = {
 	
 	redoConstraintChange: function(e) {
 		log("The redo constraint change feature is not yet implemented...");
+	},
+	
+	/**
+	 * Store undo information into an object which is added to the constraint
+	 * stack.
+	 */
+	storeConstraintUndoData($constraintElements) {
+		// Get all the constraint items and, depending on their type, store 
+		// either the list of available values
+		
 	}
 }
