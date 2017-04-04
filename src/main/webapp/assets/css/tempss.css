@@ -158,3 +158,13 @@ div.constraint-header a {
 	margin-left: 10px;
 	cursor: pointer;
 }
+
+#constraint-undo.disabled {
+	cursor: default;
+	color: #ccc;
+}
+
+#constraint-redo.disabled {
+	cursor: default;
+	color: #ccc;
+}

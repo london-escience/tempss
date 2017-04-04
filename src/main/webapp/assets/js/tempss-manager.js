@@ -957,6 +957,26 @@ function updateBoundaryRegions(event, valid) {
 	});
 }
 
+/**
+ * Given a template root node and a fully qualified, dot-separated path name  
+ * to an element, this function will return the element at the specified path 
+ * as a jQuery object.
+ */
+function getNodeFromPath(path, $rootNode) {
+	if((path == "" ) || (typeof $rootNode === "undefined")) {
+		return null;
+	}
+	var pathSections = path.split(".");
+	var $targetEl = $rootNode.find('li.parent_li[data-fqname="' + pathSections[0] + '"]');
+	for(var i = 1; i < pathSections.length; i++) {
+		$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"]')
+	}
+	if(!$targetEl.length) {
+		return null;
+	}
+	return $targetEl;
+}
+
 // Utility function for displaying log messages
 function log(message) {
     if(console && console.log) {

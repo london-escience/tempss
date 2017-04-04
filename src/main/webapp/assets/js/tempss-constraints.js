@@ -161,7 +161,7 @@ window.constraints = {
 		});
 		
 		// The solver will be run so we store undo information
-		//this.storeConstraintUndoData(templateName, templateId);
+		this.storeConstraintUndoData(constraintElements);
 		
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
@@ -217,7 +217,7 @@ window.constraints = {
 			data: formDict
 		});
 		
-		solveRequest.done(function(data) {
+		solveRequest.done($.proxy(function(data) {
 			if(data.hasOwnProperty("result") && 
 			   data.hasOwnProperty("solutions") && 
 			   data["result"] == "OK") {
@@ -228,15 +228,21 @@ window.constraints = {
 					var solution = data.solutions[i];
 					log("Processing constraint variable: " + solution['variable']);
 					var name = solution['variable'];
-					var nameParts = name.split(".");
-					var $targetEl = window.treeRoot.find('li.parent_li[data-fqname="' + nameParts[0] + '"]');
-					for(var j = 1; j < nameParts.length; j++) {
-						$targetEl = $targetEl.find('li.parent_li[data-fqname="' + nameParts[j] + '"]')
-					}
+					//var nameParts = name.split(".");
+					//var $targetEl = window.treeRoot.find('li.parent_li[data-fqname="' + nameParts[0] + '"]');
+					//for(var j = 1; j < nameParts.length; j++) {
+					//	$targetEl = $targetEl.find('li.parent_li[data-fqname="' + nameParts[j] + '"]')
+					//}
+					//if(!$targetEl.length) {
+					//	log("ERROR, couldn't find tree node for variable <" + name + ">");
+					//	continue;
+					//}
+					var $targetEl = getNodeFromPath(name, window.treeRoot);
 					if(!$targetEl.length) {
 						log("ERROR, couldn't find tree node for variable <" + name + ">");
 						continue;
 					}
+					
 					// See if we have a select element or on/off
 					if($targetEl.children('select.choice').length) {
 						var $selectEl = $targetEl.children('select.choice');
@@ -251,34 +257,7 @@ window.constraints = {
 							'">' + solutionValue + '</option>';
 						}
 						$selectEl.html(selectHTML);
-						// Can't trigger change here since this will put is in
-						// an infinite loop since triggering change calls the 
-						// solver and then that would trigger another change to
-						// re-validate. Instead, we call validate here manually.
-						// Depending on whether this is a choice option, an 
-						// enumeration select list or a text input, the 
-						// way that validation is called is slightly different.
-						var changeStr = $selectEl.attr("onchange");
-						if(changeStr.indexOf("validateEntries") == 0) {
-							// We have a select dropdown (text inputs also use
-							// this approach but we've already filtered for 
-							// select above).
-							// Restrictions JSON needs to be passed as a string
-							var restrictionsJSON = changeStr.substring(
-									changeStr.indexOf("\'\{")+1,
-									changeStr.lastIndexOf("\}\'")+1
-							);
-							// If the select is now set to a specific value,
-							// call the validation function
-							if($selectEl.find('option:selected').val() != "Select from list")
-								validateEntries($selectEl, 'xs:string', restrictionsJSON);
-						}
-						else if(changeStr.indexOf("selectChoiceItem") == 0) {
-							// Can't trigger the change event on the choice 
-							// select directly but need to call selectChoiceItem
-							var event = {target: $selectEl[0]};
-							selectChoiceItem(event);
-						}
+						this.revalidateChoiceElement($selectEl);
 					}
 					// Else if we have an on/off node
 					else if($targetEl.children('span.toggle_button').length > 0) {
@@ -303,7 +282,7 @@ window.constraints = {
 			else {
 				log("solve request failed: " + JSON.stringify(data));
 			}
-		}).fail(function(data) {
+		}, this)).fail(function(data) {
 			log("solve request returned error: " + JSON.stringify(data));
 		});
 	},
@@ -389,8 +368,65 @@ window.constraints = {
 			return;
 		}
 		// Pop the value and handle the data
-		var value = this.constraintStack.pop();
-		
+		var constraintData = this.constraintStack.pop();
+		if(this.constraintStack.length == 0)
+			$('#constraint-undo').addClass('disabled');
+		for(var i = 0; i < constraintData.length; i++) {
+			var $targetEl = getNodeFromPath(
+					constraintData[i]['name'], window.treeRoot);
+			
+			if(!$targetEl) {
+				log("Couldn't find the target element for path <" 
+						+ constraintData[i]['name'] + ">");
+				continue;
+			}
+			
+			switch(constraintData[i]['type']) {
+			case "choice":
+				var valueList = constraintData[i]['value'];
+				var valueHtml = "";
+				for(var j = 0; j < valueList.length; j++) {
+					var value = valueList[j]['value'];
+					var text = valueList[j]['text'];
+					var title = "";
+					if(valueList[j].hasOwnProperty('title')) {
+						title = 'title="' + valueList[j]['title'] + '"';
+					}
+					valueHtml += '<option value="' + value + '" ' + title + '>' + text + '</option>\n';
+				}
+				$targetEl.children('select.choice').html(valueHtml);
+				this.revalidateChoiceElement($targetEl.children('select.choice'));
+				break;
+			case "toggle":
+				// Get the current value of the toggle - if its the same as 
+				// the stored value then we don't need to change anything, 
+				// otherwise we change it triggering a click and add the tag 
+				// to tell the constraint solver not to run again.
+				var $iEl = $targetEl.find('> span.toggle_button > i.toggle_button');
+				$targetEl.removeClass('set_by_constraint');
+				var $toggleSpan = $targetEl.children('span.toggle_button');
+				if($iEl.hasClass("enable_button") && constraintData[i]['value'] == "On") {
+					$targetEl.data("run-solver", false);
+					$toggleSpan.trigger('click');
+				}
+				else if($iEl.hasClass("disable_button") && constraintData[i]['value'] == "Off") {
+					$targetEl.data("run-solver", false);
+					$toggleSpan.trigger('click');
+				}
+				else {
+					log("The toggle value is already correct, no change required...");
+				}
+				if(constraintData[i]['sbc']) {
+					$targetEl.addClass('set_by_constraint');
+				}
+				break;
+			case "text":
+				$targetEl.val(constraintData[i]['value']);
+				break;
+			default:
+				log("Found an element that is not of a supported type.");
+			}
+		}
 	},
 	
 	redoConstraintChange: function(e) {
@@ -401,9 +437,117 @@ window.constraints = {
 	 * Store undo information into an object which is added to the constraint
 	 * stack.
 	 */
-	storeConstraintUndoData($constraintElements) {
-		// Get all the constraint items and, depending on their type, store 
-		// either the list of available values
-		
-	}
+	storeConstraintUndoData: function(constraintElements) {
+		// Go through the list of constraint items and, depending on their type, 
+		// store either the list of available values, the value entered (if its 
+		// a text node) or the 
+		var constraintData = [];
+		for(var i = 0; i < constraintElements.length; i++) {
+			var $element = constraintElements[i]['element']
+			var fqName = constraintElements[i]['name']
+			
+			var nodeType = "";
+			if($element.children('select.choice').length > 0) 
+				nodeType = "choice";
+			else if($element.children('span.toggle_button').length > 0)
+				nodeType = "toggle";
+			else if($element.children('input[type="text"]').length > 0)
+				nodeType = "text";
+			
+			var constraintItem = {};
+			constraintItem['name'] = fqName;
+			switch(nodeType) {
+			
+			case "choice":
+				constraintItem['type'] = "choice";
+				var optionValues = [];
+				$element.children('select.choice').find('option').each(
+					function(index, element) {
+						var $element = $(element);
+						var optionObj = { value: $element.val(), 
+								          text: $element.text() };
+						if($element.attr('title'))
+							optionObj['title'] = $element.attr('title');
+						optionValues.push(optionObj);
+					}
+				);
+				constraintItem['value'] = optionValues;
+				break;
+			
+			case "toggle":
+				constraintItem['type'] = "toggle";
+				if($element.hasClass('set_by_constraint')) {
+					constraintItem['sbc'] = true;	
+				}
+				else {
+					constraintItem['sbc'] = false;
+				}
+				var $iEl = $element.find('> span.toggle_button > i.toggle_button');
+				if($iEl.hasClass("enable_button")) {
+					constraintItem['value'] = "Off";
+				}
+				else {
+					constraintItem['value'] = "On";
+				}
+				break;
+			
+			case "text":
+				constraintItem['type'] = "text";
+				constraintItem['value'] = $element.children('input[type="text"]').val();
+				break;
+			
+			default:
+				log("An unknown element type has been found in the constraint element list");
+			}
+			if(constraintItem.hasOwnProperty("type"))
+				constraintData.push(constraintItem);
+		}
+		this.constraintStack.push(constraintData);
+		if($('#constraint-undo').hasClass('disabled')) 
+			$('#constraint-undo').removeClass('disabled'); 		
+	},
+	
+	/**
+	 * This function undertakes revalidation of a choice element after a 
+	 * constraint change. This shouldn't be used for standard validation when 
+	 * a value is selected/changed manually - this is already handled by 
+	 * existing events.
+	 * 
+	 * We can't simply trigger a change on the node since this, in-turn, 
+	 * triggers an update of constraints, calling the solver, which puts us
+	 * into a loop. See details below.
+	 */
+	revalidateChoiceElement: function($selectEl) {
+		// Can't trigger change here since this will put is in
+		// an infinite loop since triggering change calls the 
+		// solver and then that would trigger another change to
+		// re-validate. Instead, we call validate here manually.
+		// Depending on whether this is a choice option, an 
+		// enumeration select list or a text input, the 
+		// way that validation is called is slightly different.
+		var changeStr = $selectEl.attr("onchange");
+		if(changeStr.indexOf("validateEntries") == 0) {
+			// We have a select dropdown (text inputs also use
+			// this approach but we've already filtered for 
+			// select above).
+			// Restrictions JSON needs to be passed as a string
+			var restrictionsJSON = changeStr.substring(
+					changeStr.indexOf("\'\{")+1,
+					changeStr.lastIndexOf("\}\'")+1
+			);
+			// Revalidate the element - if its been set back to select from list
+			// then we remove the invalid/valid class
+			validateEntries($selectEl, 'xs:string', restrictionsJSON);
+			if($selectEl.find('option:selected').val() == "Select from list")
+				$selectEl.closest('ul').removeClass('valid invalid');
+				
+		}
+		else if(changeStr.indexOf("selectChoiceItem") == 0) {
+			// Can't trigger the change event on the choice 
+			// select directly but need to call selectChoiceItem
+			var event = {target: $selectEl[0]};
+			selectChoiceItem(event);
+		}
+
+	},
 }
