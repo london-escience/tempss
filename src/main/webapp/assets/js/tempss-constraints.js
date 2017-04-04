@@ -290,7 +290,7 @@ window.constraints = {
 	resetConstraintsConfirmation: function(e) {
 		BootstrapDialog.show({
 			title: "Reset constraints",
-			message: "<strong>Are you sure you want to reset constraints?</strong><br/><br/>This will reset all values that have constraints within this tempalte to their default values.",
+			message: "This will reset all values that have constraints within this template to their default values.<br/><br/>If you only want to undo your most recent change, use the undo button at the top right of the profile editor panel.<br/><br/><strong>Are you sure you want to reset all constraints to their original state?</strong><br/><br/>",
 			type: BootstrapDialog.TYPE_WARNING,
 			buttons: [{
                 label: 'Close',
