@@ -614,6 +614,20 @@ var constraints = {
 		}
 
 	},
+
+	/**
+	 * This function checks whether we need to invalidate redo data. It is 
+	 * triggered (at present within the TemPSS core library code) when a change 
+	 * is made to a constraint field.
+	 * 
+	 *  We only invalidate the data if we are currently in a position where 
+	 *  the redo stack is not empty - that tells us that we gone back through 
+	 *  the change history by previously selecting undo.
+	 */
+	checkInvalidateRedoData: function() {
+		if(this.constraintRedoStack.length > 0)
+			this.clearRedoData();
+	},
 	
 	clearRedoData: function() {
 		this.constraintRedoStack.length = 0;
