@@ -30,7 +30,7 @@ The root tag should be based on the solver name and will be rendered as the base
 
 `<CardiacElectrophysiology>`
 
-######Namespace
+###### Namespace
 
 You are recommended to set the detault namespace for your schema document to *http://www.libhpc.imperial.ac.uk* by adding the namespace attribute `xmlns="http://www.libhpc.imperial.ac.uk"` to your root node. As detailed later in this document, some additional TemPSS XML tags that may be of use to you come from the libhpc and tempss namespaces which can be imported using the following attributes respectively: 
 

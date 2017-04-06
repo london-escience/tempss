@@ -79,11 +79,11 @@ The configuration file currently supports only one section `[template-ignore]` w
 
 TemPSS now has support for user accounts. Registered users can save their profiles as private profiles that are only visible to them. They can also create new public profiles that are visible to all users. Unregistered users or users who are not logged in cannot save profiles but they are able to load existing public profiles and use/extend them. When an unregistered user completes a profile, they are able to convert this to an application input file which they can then download.
 
-######Standard Authentication
+###### Standard Authentication
 
 By default the user accounts implementation stores account informatino in the local database with secure password storage. Accounts that users create are local to the TemPSS system.
 
-######LDAP Authentication
+###### LDAP Authentication
 
 We also provide support for LDAP authentication. LDAP authentication can be configured by editing the [src/main/webapp/WEB-INF/spring/security.xml](../blob/master/src/main/webapp/WEB-INF/spring/security.xml) file.
 
