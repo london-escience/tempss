@@ -2,6 +2,8 @@ var constraints = {
 		
 	constraintUndoStack: [],
 	constraintRedoStack: [],
+	constraintChangeStack: [],
+	constraintChangeStackPointer: -1,
 	
 	/**
 	 * @memberof constraints
@@ -16,7 +18,7 @@ var constraints = {
 		if(!window.hasOwnProperty("constraints")) window.constraints = {};
 		var solverName = $nameNode.text();
 		window.constraints[solverName] = this.getInitialConstraintState(data, solverName, $treeRoot);
-		
+				
 		// Add a comment to the root node with a link to display the constraint
 		// information
     	var $constraintHtml = $('<div class="constraint-header">' + 
@@ -69,6 +71,12 @@ var constraints = {
     		}
     		$li.addClass('constraint');
     	}
+    	
+		// Store the base state in the undo/redo constraint stack
+		var constraintElements = this._getConstraintElements(solverName);
+		this.storeConstraintData(constraintElements, this.constraintChangeStack);
+		this.constraintChangeStackPointer = 0;
+
 	},
 	
 	// Get the initial constraint state as a dict of parameters an all their values
@@ -124,6 +132,10 @@ var constraints = {
 	    });
 	},
 	
+	/**
+	 * Called when an update to the constraints is triggered. This is called
+	 * when something is changed in the template tree.
+	 */
 	updateConstraints: function(templateName, templateId, $triggerElement) {
 		log("Constraints update triggered for template <" + templateName 
 				+ "> with ID <" + templateId + "> and trigger element <" 
@@ -267,6 +279,22 @@ var constraints = {
 						}						
 					}
 				}
+				
+				// After processing all the data, we now store the current
+				// state to the undo/redo stack and increment the stack pointer
+				// First check if there's any redo state to remove.
+				if(this.constraintChangeStack.length > this.constraintChangeStackPointer+1) {
+					// Delete the redo state and disable the redo icon
+					while(this.constraintChangeStack.length > this.constraintChangeStackPointer+1) {
+						this.constraintChangeStack.pop();
+					}
+					$('#constraint-redo').addClass('disabled');
+				}
+				// Now store the state and increment the stack pointer
+				this.storeConstraintData(constraintElements, this.constraintChangeStack);
+				this.constraintChangeStackPointer++;
+				// If the undo icon is currently disabled, we now enable it.
+				$('#constraint-undo').removeClass('disabled');
 			}
 			else {
 				log("solve request failed: " + JSON.stringify(data));
@@ -339,6 +367,17 @@ var constraints = {
 		}
 		// Remove the set_by_constraint from any toggle nodes...
 		$rootUl.find('li.parent_li.constraint').removeClass('set_by_constraint');
+		
+		// Disable both the undo and redo buttons and reset the constraint
+		// change stack
+		$('#constraint-undo').addClass('disabled');
+		$('#constraint-redo').addClass('disabled');
+		// Since the item at position 0 in constraint stack will be the base
+		// state, we don't recreate/store this, just pop everything off the 
+		// stack until we have a single item remaining.
+		while(this.constraintChangeStack.length > 1)
+			this.constraintChangeStack.pop();
+		this.constraintChangeStackPointer = 0;
 	
 	},
 	
@@ -401,6 +440,66 @@ var constraints = {
 			$('#constraint-redo').addClass('disabled');
 		
 		this._processConstraintData(constraintData);
+	},
+	
+	/**
+	 * New function to undo a constraint change. Uses the unified undo/redo 
+	 * stack. We maintain a stack of constraint changes and when an undo 
+	 * request is made, this decrements the stack pointer and gets the 
+	 * previous state to display on the screen.
+	 * It is then necessary to trigger re-validation on the constraint items. 
+	 */
+	undoConstraintChangeNew: function(e) {
+		log("NEW Undo constraint change requested.");
+		// Decrement the constraint stack pointer and get the data at that
+		// point in the stack. Apply this data into the tree.
+		if(this.constraintChangeStackPointer == 0) {
+			log("Undo request: We are already at the initial state. There is nothing to undo.");
+			return;
+		}
+		
+		this.constraintChangeStackPointer--;
+		var constraintData = this.constraintChangeStack[this.constraintChangeStackPointer];
+		
+		// Now apply the data
+		this._processConstraintData(constraintData);
+		
+		// Enable the redo button in case it isn't already available
+		$('#constraint-redo').removeClass('disabled');
+		// If we've moved back to the initial state then we disable the 
+		// undo button.
+		if(this.constraintChangeStackPointer == 0) {
+			$('#constraint-undo').addClass('disabled');
+		}
+	}, 
+
+	/**
+	 * New function to redo a constraint change. Uses the unified undo/redo 
+	 * stack. We maintain a stack of constraint changes and when a redo request  
+	 * is received, we increment the stack pointer and get the state at this  
+	 * location to display in the UI.
+	 */
+	redoConstraintChangeNew: function(e) {
+		log("NEW Redo constraint change requested.");
+		if(this.constraintChangeStackPointer == this.constraintChangeStack.length-1) {
+			log("Redo request: There is no future state. There is nothing to redo. ");
+			return;
+		}
+		
+		this.constraintChangeStackPointer++;
+		var constraintData = this.constraintChangeStack[this.constraintChangeStackPointer];
+		
+		// Now apply the data
+		this._processConstraintData(constraintData);
+
+		// Enable the undo button in case it isn't already available
+		// (e.g. if we've moved from the initial state to a future state)
+		$('#constraint-undo').removeClass('disabled');
+		// If we've moved to the last available redo state then we disable the 
+		// redo button.
+		if(this.constraintChangeStackPointer == this.constraintChangeStack.length-1) {
+			$('#constraint-redo').addClass('disabled');
+		}
 	},
 	
 	/**
@@ -501,7 +600,7 @@ var constraints = {
 	 * constraintElements is the list of constraint elements to store data from
 	 * stack is a reference to a stack on which to store the data.
 	 */
-	storeConstraintData: function(constraintElements, stack, action) {
+	storeConstraintData: function(constraintElements, stack) {
 		// Go through the list of constraint items and, depending on their type, 
 		// store either the list of available values, the value entered (if its 
 		// a text node) or the 
@@ -567,8 +666,10 @@ var constraints = {
 				constraintData.push(constraintItem);
 		}
 		stack.push(constraintData);
-		if($('#constraint-' + action).hasClass('disabled'))
-			$('#constraint-' + action).removeClass('disabled');		
+		//if(typeof action !== undefined) {
+		//	if($('#constraint-' + action).hasClass('disabled'))
+		//		$('#constraint-' + action).removeClass('disabled');
+		//}
 	},
 	
 	/**
