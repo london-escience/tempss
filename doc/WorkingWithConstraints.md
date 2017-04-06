@@ -23,11 +23,11 @@ You can identify variables in a TemPSS template tree that have constraints attac
 ![ADR solver EquationType parameter](img/ADRConstraintSymbolEqType.png)
 ![ADR solver constraint mappings](img/ADRConstraintSymbolAdvType.png)
 
-If you place the mouse pointer over the constraint symbol, an overlay will be displayed showing specifying the variables that the selected variable has constraint relationships with, e.g.:
+If you place the mouse pointer over the constraint symbol, an overlay will be displayed specifying other variables that the selected variable has constraint relationships with, e.g.:
 
 ![ADR solver constraint overlay example](img/ADRConstraintOverlay.png)
 
-When selection of a variable value is made from a list of possible choices, the constraint solver is called with the values of all currently set variables that have constraints. The solver identifies the possible values of all these variables given the selection that has been made and the state of all the variables is sent bacl to TemPSS interface.
+When selection of a variable value is made from a list of possible choices, the constraint solver is called with the values of all currently set variables that have constraints. The solver identifies the possible values of all these variables given the selection that has been made and the state of all the variables is sent back to the TemPSS user interface.
 
 Taking the AdvectionDiffusionReaction solver as an example, when the template is first opened, the EquationType variable has its full domain of values available as possible options:
 
@@ -43,4 +43,22 @@ Here we can see that all the `EquationType` options that had an advection term h
 
 ![ADR solver EquationType full domain](img/ConstraintsEqType3.png)
 
-At present it is not possible to revert a constrained selection due to the method of solver operation. However, the "Reset constraints" button shown alongside the root node for all templates with constraints will reset all values in a template that have constraints back to their default choices. This is will be resolved with the addition of an undo option in a subsequent version of the system.
+## Reverting and Resetting Constraint Changes
+
+#### Undo/Redo Functionality
+
+If you make a selection in the TemPSS tree for a value that has constraints, the tree is updated and some previously available options may disappear to reflect the restricted set of available choices given the change that you have made. 
+
+Sometimes you may want to return to a previous state in order to make an alternative selection. This is especially important when building a configuration and testing or investigating the effects of selecting certain parameters on your configuration.
+
+TemPSS provides undo and redo functionality via the buttons that appear in the profile editor's header bar:
+
+![Undo and redo icons](img/UndoRedoIcons.png)
+
+These icons are not shown for templates that do not have any constraints configured.
+
+You can undo changes right back to the initial state where all constrained variables are unselected. If you want to reapply one or more states that you have undone, you can use the redo functionality to acheive this. Note that the undo and redo icons will be disabled if it is not possible to undo or redo in the current state.
+
+#### Resetting constraint values
+
+As an alternative to undoing changes you can reset all values to their original state by clicking the _Reset constraints_ button. This will display a warning to confirm that you are happy to apply this change since resetting constraints will also remove all undo/redo state.
