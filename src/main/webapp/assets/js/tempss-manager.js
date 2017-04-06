@@ -122,6 +122,7 @@ function displayTemplate(templateID, templateText) {
         disableProfileButtons(true);
         disableGenerateInputButton(true);
         hideTreeExpandCollapseButtons(true);
+        hideConstraintButtons(true);
         $templateContainer.html("<h6 class=\"infotext\">No template selected. Please select a template from the drop-down list above.</h6>");
         return;
     }
@@ -147,7 +148,9 @@ function displayTemplate(templateID, templateText) {
             $templateContainer.LibhpcParameterTree();
 
             treeRoot = $('#template-container ul[role="tree"]');
-
+            var $templateNameNode = treeRoot.find("> li.parent_li > span[data-fqname]");
+            var templateName = $templateNameNode.text();
+            
             // Enable the profile buttons for saving/clearing template content
             // and show the expand/collapse buttons
             if(data.authenticated) {
@@ -156,10 +159,27 @@ function displayTemplate(templateID, templateText) {
             else {
             	disableProfileButtons(true);
             }
+            
+            // If this template has constraints, and the constraint functions
+            // are available, add a constraint icon to the root node with a 
+            // click button to get constraint details
+            if(data.hasOwnProperty('constraints') && data.constraints &&
+            		window.hasOwnProperty("constraints")) {
+            	hideConstraintButtons(false);
+            	constraints.setup(data, $templateNameNode, treeRoot);
+            }
+            else {
+            	log('No constraint library configured, ignoring constraints.');
+            	hideConstraintButtons(true);
+            }
+            
             hideTreeExpandCollapseButtons(false);
             // Add click/change handlers
             attachChangeHandlers();
             setEditingProfileName("");
+            
+            // Attach handlers for BoundaryCondition/BoundaryRegion processing
+            attachBoundaryConditionHandlers();
 
             $("#template-tree-loading").hide(0);
             dfd.resolve();
@@ -278,6 +298,19 @@ function hideTreeExpandCollapseButtons(hide) {
     } else {
         $('#tree-expand').show();
         $('#tree-collapse').show();
+    }
+}
+
+// Show/hide the constraint undo/redo buttons
+function hideConstraintButtons(hide) {
+    if (hide) {
+    	$('#constraint-undo').hide();
+    	$('#constraint-icon-spacer').hide();
+    	$('#constraint-redo').hide();
+    } else {
+    	$('#constraint-undo').show();
+    	$('#constraint-icon-spacer').show();
+    	$('#constraint-redo').show();
     }
 }
 
@@ -639,9 +672,21 @@ function attachChangeHandlers() {
     treeRoot.on('nodeValid', function() {
         disableGenerateInputButton(false);
     });
-
+    
     treeRoot.on('nodeInvalid', function() {
         disableGenerateInputButton(true);
+    });
+    
+    // Add change handlers to check for changes on select values with constraints
+    treeRoot.on('change', 'select.choice', function(e) {
+    	var $parentLI = $(e.currentTarget).parent();
+    	if($parentLI.hasClass("constraint")) {
+    		log("select node with constraints changed - triggering constraint solver...");
+    		var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
+    		var templateId = $('#template-select option:selected').val();
+
+    		constraints.updateConstraints(templateName, templateId, $(e.currentTarget).parent());
+    	}
     });
 }
 
@@ -649,6 +694,23 @@ function removeChangeHandlers() {
     treeRoot.off('click');
     treeRoot.off('nodeValid');
     treeRoot.off('nodeInvalid');
+}
+
+function attachBoundaryConditionHandlers() {
+    // Add an additional nodeValid/nodeInvalid handler to BoundaryCondition 
+    // nodes that triggers an update of the boundary region options when a 
+    // boundary condition becomes valid or invalid.
+    // Since we don't have a way of directly selecting BoundaryCondition ul 
+    // elements (we can only grab the li descendent of a BoundaryCondition
+    // element and there is no CSS parent selector), we add a class to identify 
+    // these nodes.
+    // TEST: Attaching handlers to input nodes instead of main bc node.
+    $('li.parent_li[data-fqname="BoundaryConditionName"]').parent(
+    	).addClass('boundary-condition').on('nodeValid', function(e) {
+    		updateBoundaryRegions(e, true);
+    	}).on('nodeInvalid', function(e) {
+    		updateBoundaryRegions(e, false);
+    	});
 }
 
 function setEditingProfileName(profileName) {
@@ -843,6 +905,77 @@ function displayLoginForm(modalSource) {
             }
         }]
     });
+}
+
+/**
+ * This function updates BoundaryRegion nodes by finding all the boundary 
+ * conditions that have a name set and then placing these names in the list of  
+ * available boundary conditions for each BoundaryRegion.
+ */
+function updateBoundaryRegions(event, valid) {
+	log("Update boundary regions - valid? " + valid);
+	// Iterate over all the BoundaryCondition elements and find those that have
+	// a name set. Compile a list of these names and then add them to each 
+	// BoundaryRegion/BoundaryCondition node.
+	var BCNames = [];
+	$('li.parent_li[data-fqname="BoundaryConditionName"] input').each(function() {
+		if(!$(this).parent().parent().parent().parent().hasClass('disabled')) {
+			var value = $(this).val();
+			if(value != null && value != "") {
+				BCNames.push(value);
+			}
+		}
+	});
+	
+	// Prepare a list of boundary condition names to place in the change handler
+	// and the list of option elements to add to each boundary region select.
+	log("BCNames: " + BCNames);
+	var BCNameList = "[";
+	var optionHtml = '<option value="Select from list">Select from list</option>';
+	for(var i = 0; i < BCNames.length; i++) {
+		optionHtml += '<option value="' + BCNames[i] + '">' + BCNames[i] + '</option>';
+		BCNameList += '"' + BCNames[i] + '"';
+		if(i < BCNames.length-1) {
+			BCNameList += ", ";
+		}
+	}
+	BCNameList += ']';
+
+	$('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
+		var $select = $(this).find('li.parent_li[data-fqname="BoundaryCondition"] select');
+		// Before removing options from the existing list, get the current value
+		// from the select. If this is present in the new array, then we 
+		// re-select it after updating the available options. An alternative 
+		// would be to only remove an option if it is not in the list.
+		var previousValue = $select.find(":selected").val();
+		$select.find('option').remove();
+		$select.append($(optionHtml));
+		if(BCNames.indexOf(previousValue) >= 0) {
+			$select.val(previousValue);
+		}
+		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + BCNameList + "}');");
+		$select.trigger('change');
+	});
+}
+
+/**
+ * Given a template root node and a fully qualified, dot-separated path name  
+ * to an element, this function will return the element at the specified path 
+ * as a jQuery object.
+ */
+function getNodeFromPath(path, $rootNode) {
+	if((path == "" ) || (typeof $rootNode === "undefined")) {
+		return null;
+	}
+	var pathSections = path.split(".");
+	var $targetEl = $rootNode.find('li.parent_li[data-fqname="' + pathSections[0] + '"]');
+	for(var i = 1; i < pathSections.length; i++) {
+		$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"]')
+	}
+	if(!$targetEl.length) {
+		return null;
+	}
+	return $targetEl;
 }
 
 // Utility function for displaying log messages

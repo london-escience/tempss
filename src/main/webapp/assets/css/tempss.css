@@ -86,9 +86,14 @@ body {
 
 .tree-control-btn {
 	float: right;
-	padding-left: 6px;
+	margin-left: 6px;
 	cursor: pointer;
 	cursor: hand; 
+}
+
+.tree-control-btn.disabled {
+	cursor: default;
+	color: #ddd;
 }
 
 .form-error {
@@ -116,5 +121,40 @@ body {
 
 /* Styling for dropdown list items in profile name list */
 .dropdown-link {
+	cursor: pointer;
+}
+
+div.constraint-header, div.constraint-header button {
+	display: inline;
+	color: #777;
+	font-size: 10px;
+}
+
+div.constraint-header button {
+	margin-bottom: 3px;
+	font-size: 9px;
+}
+
+div.constraint-header i {
+	font-size: 14px;
+	color: #444;
+	padding-right: 8px;
+}
+
+div.constraint-header a {
+	font-weight: bold;
+}
+
+.constraint-table tbody tr td {
+	font-size: 10px;
+}
+
+.constraint-table .mapping-key {
+	font-weight: bold;
+	color: #777;
+}
+
+.link-icon {
+	margin-left: 10px;
 	cursor: pointer;
 }

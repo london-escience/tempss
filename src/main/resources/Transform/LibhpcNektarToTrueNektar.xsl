@@ -113,7 +113,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="ProblemSpecification" mode ="CompositeCardiac">
     <!-- We assume the composites required for the expansion match the domain -->
+    <xsl:choose>
+      <xsl:when test="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN">
+        <xsl:attribute name="COMPOSITE"><xsl:value-of select="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN"/></xsl:attribute>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:attribute name="COMPOSITE">C[0]</xsl:attribute>
+      </xsl:otherwise>
+    </xsl:choose>
+    <!-- Replaced this with the above check....
     <xsl:attribute name="COMPOSITE"><xsl:value-of select="GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY/DOMAIN"/></xsl:attribute>
+     -->
   </xsl:template>
   
   <xsl:template match="ProblemSpecification" mode ="CompositeCompressible">
@@ -136,7 +146,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="NumericalAlgorithm" mode ="Parameters">
     <xsl:if test="TimeIntegration/DiffusionAdvancement!='Explicit'">
-      <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
+      <xsl:choose>
+        <xsl:when test="MatrixInversion/Iterative/IterativeSolverTolerance">
+          <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
+        </xsl:when>
+        <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance">
+          <P>IterativeSolverTolerance = <xsl:value-of select="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance"/></P>
+        </xsl:when>
+      </xsl:choose>
     </xsl:if>
   </xsl:template>
 
@@ -153,6 +170,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:if test="Model/Monodomain/IsotropicConductivity/Intensity">
         <P>d_min = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/d_min"/></P>
         <P>d_max = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/d_max"/></P>
+        <P>o_min = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/o_min"/></P>
+        <P>o_max = <xsl:value-of select="Model/Monodomain/IsotropicConductivity/Intensity/o_max"/></P>
       </xsl:if>
     </xsl:if>
     <xsl:if test="Model/Bidomain">
@@ -263,6 +282,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
           <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
           <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+          <!-- Options for revised GlobalSysSolution with separate InversionType block -->
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
+          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
           <xsl:otherwise>
             <xsl:message terminate="yes">
               Error: unhandled matrix inversion approach -> cannot set GlobalSysSoln
@@ -325,20 +349,46 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   
   <xsl:template match="ProblemSpecification" mode ="CardiacFunctions">
     <FUNCTION NAME="InitialConditions">
-      <E VAR="u" >
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="InitialConditions/Constant">
+      <xsl:choose>
+        <xsl:when test="InitialConditions/Constant">
+          <E VAR="u" >
+            <xsl:attribute name="VALUE">
               <xsl:value-of select="InitialConditions/Constant"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:message terminate="yes">
-                Transform error: only constant initial conditions supported at present.
-              </xsl:message>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-      </E>
+            </xsl:attribute>
+          </E>
+        </xsl:when>
+        <xsl:when test="InitialConditions/Function">
+          <E VAR="u" >
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="InitialConditions/Function"/>
+            </xsl:attribute>
+          </E>
+        </xsl:when>
+        <xsl:when test="InitialConditions/Variable">
+          <xsl:for-each select="InitialConditions/Variable">
+            <E>
+              <xsl:attribute name="VAR">
+                <xsl:value-of select="VariableName"/>
+              </xsl:attribute>
+              <xsl:attribute name="VALUE">
+                <xsl:choose>
+                  <xsl:when test="Type/Expression">
+                    <xsl:value-of select="Type/Expression"/>
+                  </xsl:when>
+                  <xsl:when test="Type/File">
+                    <xsl:value-of select="Type/File"/>
+                  </xsl:when>
+                </xsl:choose>
+              </xsl:attribute>
+            </E>
+          </xsl:for-each>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:message terminate="yes">
+            Transform error: only constant initial conditions supported at present.
+          </xsl:message>
+        </xsl:otherwise>
+      </xsl:choose>
     </FUNCTION>
   </xsl:template>
 
@@ -580,6 +630,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <BOUNDARYCONDITIONS>
               <xsl:apply-templates select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION" mode ="GetCardiacBoundaryConditions"/>
           </BOUNDARYCONDITIONS>
+          
+          <BOUNDARYREGIONS>
+            <!-- TODO: This may be blank for the cardiac solver - check details on this -->
+          </BOUNDARYREGIONS>
+          
           <xsl:apply-templates select="Physics" mode ="CardiacFunctions"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="CardiacFunctions"/>
       </CONDITIONS>        
@@ -587,8 +642,19 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <GLOBALOPTIMIZATIONPARAMETERS>
         <xsl:apply-templates select="NumericalAlgorithm/GlobalOptimizationParameters/*" mode ="GlobalMatrixOpt"/>
       </GLOBALOPTIMIZATIONPARAMETERS>
-      <!-- Copy in the geometry -->
-      <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY"/>
+      <!-- Copy in the geometry - Update: Jan17 - with the new geometry handling 
+           that allows the use of a standard Nektar++ geometry, there are two 
+           possible locations that the geometry may be found in order to preserve
+           compatibility with the original approach.
+      -->
+      <xsl:choose>
+        <xsl:when test="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY">
+          <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/GEOMETRY"/>
+        </xsl:when>
+        <xsl:when test="ProblemSpecification/Geometry/GEOMETRY">
+          <xsl:copy-of select="ProblemSpecification/Geometry/GEOMETRY"/>
+        </xsl:when>
+      </xsl:choose>
     </NEKTAR>
   </xsl:template>
 

@@ -9,7 +9,7 @@
 
 	<!-- Here we're in the root context so exclude controllers which are 
 	     scanned for in the web context. -->
-	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web">
+	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web, uk.ac.imperial.libhpc2.schemaservice.api">
     	<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 
@@ -29,7 +29,7 @@
 	    <!-- Use DB in a directory outside the main tomcat app tree when
 	         testing/debugging via Eclipse.
 	    <property name="url" value="jdbc:sqlite:/tmp/profiles.db" />
-            -->
+	     -->
 	    <property name="initialSize" value="1" />
 	    <!--  <property name="maxTotal" value="1" />  REQUIRED INSTEAD OF maxActive FOR DBCP2-->
 	    <property name="maxActive" value="1" /> 
@@ -53,5 +53,24 @@
         </property>
     </bean>
  	-->
+ 	
+ 	<!-- 
+ 	      Configuration of the pebbleengine bean has been moved here from the 
+ 	      web application context so that we can pass it to the rest resource
+ 	      Component classes.
+ 	 -->
+ 	<!-- Updated pebble engine configuration for pebble v2.3 -->
+    <!-- <bean id="servletContext" class="uk.ac.imperial.libhpc2.schemaservice.web.ServletContextFactory">  -->
+    <bean id="templateLoader" class="com.mitchellbosecke.pebble.loader.ServletLoader">
+        <constructor-arg ref="servletContext" />
+    </bean>
+    	
+	<bean id="springExtension" class="com.mitchellbosecke.pebble.spring4.extension.SpringExtension" />
+	
+	<bean id="pebbleEngine" class="uk.ac.imperial.libhpc2.schemaservice.web.PebbleEngineFactory" factory-method="getEngine">
+		<constructor-arg ref="templateLoader" />
+		<constructor-arg ref="springExtension" />
+	</bean>
+ 	 
  	
 </beans>

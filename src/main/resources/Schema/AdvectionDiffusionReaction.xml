@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<AdvectionDiffusionReaction xmlns="http://www.libhpc.imperial.ac.uk"
+                            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                            xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+
+  <libhpc:documentation>
+  	The Nektar++ advection diffusion solver models the transfer of physical 
+  	properties through some medium by advection and diffusion.
+  	Full details of the solver can be found in chapter 6 of the Nektar++ user 
+  	guide (http://doc.nektar.info/userguide/latest).
+  </libhpc:documentation>
+  <ProblemSpecification>
+    <libhpc:documentation>
+      Specification of the particular problem to solve, including geometry, 
+      initial conditions, boundary conditions, etc.
+    </libhpc:documentation>
+    <EquationType paramType="choice">
+    	<Laplace>
+    	<libhpc:documentation>Laplace equation. Applicable in all dimensions.</libhpc:documentation>
+    	</Laplace>
+    	<Poisson>
+    		<libhpc:documentation>Poisson equation. Applicable in all dimensions.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    	</Poisson>
+    	<Helmholtz>
+    		<libhpc:documentation>Helmholtz equation. Applicable in all dimensions.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    		<Lambda type="xs:string"/>
+    	</Helmholtz>
+    	<SteadyAdvectionDiffusion>
+    		<libhpc:documentation>Steady advection diffusion equation. 2D only.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    		<Epsilon type="xs:string"/>
+    		<Velocity>
+    			<VelocityX type="xs:string"/>
+    			<VelocityY type="xs:string"/>
+    			<VelocityZ type="xs:string"/>
+    		</Velocity>
+    	</SteadyAdvectionDiffusion>
+    	<SteadyDiffusionReaction>
+    		<libhpc:documentation>Steady diffusion reaction equation. 2D only.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    		<Epsilon type="xs:string"/>
+    		<Lambda type="xs:string"/>
+    	</SteadyDiffusionReaction>
+    	<SteadyAdvectionDiffusionReaction>
+    		<libhpc:documentation>Steady advection diffusion reaction equation. 2D only.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    		<Epsilon type="xs:string"/>
+    		<Velocity>
+    			<VelocityX type="xs:string"/>
+    			<VelocityY type="xs:string"/>
+    			<VelocityZ type="xs:string"/>
+    		</Velocity>
+    		<Lambda type="xs:string"/>
+    	</SteadyAdvectionDiffusionReaction>
+    	<UnsteadyAdvection>
+    		<libhpc:documentation>Unsteady advection equation. Applicable in all dimensions.</libhpc:documentation>
+    		<ForcingFunction type="xs:string"/>
+    		<InitialConditions type="xs:string"/>
+    		<Velocity>
+    			<VelocityX type="xs:string"/>
+    			<VelocityY type="xs:string"/>
+    			<VelocityZ type="xs:string"/>
+    		</Velocity>
+    		<SimulationTimeParams>
+    			<FinalTime type="xs:string"/>
+    			<TimeStep type="xs:string"/>
+    		</SimulationTimeParams>
+    		<Variables>
+    			<K name="k" type="xs:string"/>
+    		</Variables>
+    	</UnsteadyAdvection>
+    	<UnsteadyDiffusion>
+    		<libhpc:documentation>Unsteady diffusion equation. Applicable in all dimensions.</libhpc:documentation>
+    		<InitialConditions type="xs:string"/>
+    		<Epsilon type="xs:string"/>
+    		<SimulationTimeParams>
+    			<FinalTime type="xs:string"/>
+    			<TimeStep type="xs:string"/>
+    		</SimulationTimeParams>
+    	</UnsteadyDiffusion>
+    	<UnsteadyAdvectionDiffusion>
+    		<libhpc:documentation>Unsteady advection diffusion equation. Applicable in all dimensions.</libhpc:documentation>
+    		<InitialConditions type="xs:string"/>
+    		<Velocity>
+    			<VelocityX type="xs:string"/>
+    			<VelocityY type="xs:string"/>
+    			<VelocityZ type="xs:string"/>
+    		</Velocity>
+    		<Epsilon type="xs:string"/>
+    		<SimulationTimeParams>
+    			<FinalTime type="xs:string"/>
+    			<TimeStep type="xs:string"/>
+    		</SimulationTimeParams>
+    	</UnsteadyAdvectionDiffusion>
+    	<UnsteadyInviscidBurger>
+    		<libhpc:documentation>Unsteady Inviscid Burger equation. 1D only.</libhpc:documentation>
+    		<InitialConditions type="xs:string"/>
+    		<SimulationTimeParams>
+    			<FinalTime type="xs:string"/>
+    			<TimeStep type="xs:string"/>
+    		</SimulationTimeParams>
+    	</UnsteadyInviscidBurger>
+    </EquationType>
+    <Geometry type="geometryFileName" inputType="file">
+      <libhpc:documentation>
+        The geometry on which the problem is being solved . Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that will 
+        be parsed to identify boundary regions.
+      </libhpc:documentation>
+    </Geometry>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+    </BoundaryDetails>
+    <Expansion>
+      <libhpc:documentation>Specify details of how the solution function will 
+      be approximated.</libhpc:documentation>
+      <PolynomialOrder type="xs:positiveInteger">
+        <libhpc:documentation>
+          The order of polynomial expansion used on each element. Higher order 
+          gives better approximation to the true solution. The number of modes 
+          is equal to PolyNomialOrder + 1.
+        </libhpc:documentation>
+      </PolynomialOrder>
+      <BasisType type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal. 
+          Modal / hierarchical basis: don't need to redefine basis functions 
+          when increase the order (but have to be modified to get zero at 
+          boundary).
+          Nodal: have to be redefined when the polynomial order is increased, 
+          but are naturally zero at the boundaries.
+          
+          Available choices:
+            MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                      by two linear functions to make them zero at the boundaries.
+            GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+            GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                          Gauss-Lobatto-Legendre
+            GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+            CHEBYSHEV: another modal approach (similar to Fourier modes).
+        </libhpc:documentation>
+        <tempss:item>MODIFIED</tempss:item>
+        <tempss:item>GAUSS_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
+        <tempss:item>CHEBYSHEV</tempss:item>
+      </BasisType>
+    </Expansion>
+  </ProblemSpecification>
+  <NumericalAlgorithm>
+    <libhpc:documentation>
+      This section contains all the parameters that specify the numerical 
+      algorithm for solving the problem.
+    </libhpc:documentation>
+    <Projection paramType="choice">
+      <libhpc:documentation>
+        ContinuousGalerkin: enforces continuity of solution across element boundaries
+        DiscontinuousGalerkin: doesn't enforce continuity, but better at 
+                               capturing shocks in solution
+      </libhpc:documentation>
+      <ContinuousGalerkin></ContinuousGalerkin>
+      <DiscontinuousGalerkin>
+        <DiffusionType type="xs:string" inputType="choice">
+          <libhpc:documentation>
+            This specifies how to treat the diffusion term.
+          </libhpc:documentation>
+          <tempss:item>Not Provided</tempss:item>
+          <tempss:item>LDG</tempss:item>
+          <tempss:item>LFRDG</tempss:item>
+          <tempss:item>LFRHU</tempss:item>
+          <tempss:item>LFRSD</tempss:item>
+          <tempss:item>LFRcmin</tempss:item>
+          <tempss:item>LFRcinf</tempss:item>
+        </DiffusionType>
+      </DiscontinuousGalerkin>
+    </Projection>
+    <AdvectionType type="xs:string" inputType="choice">
+      <libhpc:documentation>
+        This specifies how to treat the advection term and is restricted based 
+        on the selected projection type.
+        
+        NonConservative: Select this with ContinuousGalerkin projection
+        WeakDG: Select this with DiscontinuousGalerkin projection
+        FR* options: Flux Reconstruction options - only for tensor product elements (Quads and Hexes)
+      </libhpc:documentation>
+      <tempss:item>NotProvided</tempss:item>
+      <tempss:item>NonConservative</tempss:item>
+      <tempss:item>WeakDG</tempss:item>
+      <tempss:item>FRDG</tempss:item>
+      <tempss:item>FRHU</tempss:item>
+      <tempss:item>FRSD</tempss:item>
+      <tempss:item>FRcmin</tempss:item>
+      <tempss:item>FRcinf</tempss:item>
+    </AdvectionType>
+    <UpwindType type="xs:string" inputType="choice">
+      <libhpc:documentation>
+        Upwind type specification. If this is not applicable for your problem, select Not Provided.
+      </libhpc:documentation>
+      <tempss:item>NotProvided</tempss:item>
+      <tempss:item>Upwind</tempss:item>
+    </UpwindType>
+    <TimeIntegration>
+      <libhpc:documentation>Parameters setting the method for time integration.</libhpc:documentation>
+      <TimeIntegrationMethod type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          Method of time stepping. See: http://www.nektar.info/wiki/3.2/Reference/TimeStepping
+          
+          - Formally Explicit Methods: These types of methods are considered 
+            explicit from an ODE point of view. They are characterised by a 
+            lower triangular coefficient matrix formula, i.e. formula for 
+            formula. To avoid confusion, we make a further distinction:
+          
+            - direct explicit method: Only forward operators are required.
+            - indirect explicit method: The inverse operator is required.
+            - Diagonally Implicit Methods': Compared to explicit methods, 
+              the coefficient matrix formula has now non-zero entries on the 
+              diagonal. This means that each stage value depend on the stage 
+              derivative at the same stage, requiring an implicit step. 
+              However, the calculation of the different stage values is still 
+              uncoupled. Best known are the DIRK schemes.
+            - IMEX schemes: These schemes support the concept of being able to 
+              split right hand forcing term into an explicit and implicit 
+              component. This is useful in advection diffusion type problems 
+              where the advection is handled explicity and the diffusion is 
+              handled implicit.
+              
+          Choices supported by libhpc/nekkloud:
+          
+            "IMEXOrder1"            IMEX 1st order scheme using Euler Backwards 
+                                    Euler Forwards
+            "IMEXOrder2"            IMEX 2nd order scheme using Backward 
+                                    Different Formula and Extrapolation
+            "IMEXOrder3"            IMEX 3rd order scheme using Backward 
+                                    Different Formula and Extrapolation
+            "DIRKOrder1"            Diagonally Implicit Runge-Kutta scheme of order 1
+            "ForwardEuler"          Forward-Euler scheme
+            "BackwardEuler"         Backward Euler scheme
+            "ClassicalRungeKutta4"  4th order Runge Kutta scheme
+        </libhpc:documentation>
+        <tempss:item>NotProvided</tempss:item>
+        <tempss:item>IMEXOrder1</tempss:item>
+        <tempss:item>IMEXOrder2</tempss:item>
+        <tempss:item>IMEXOrder3</tempss:item>
+        <tempss:item>DIRKOrder1</tempss:item>
+        <tempss:item>ForwardEuler</tempss:item>
+        <tempss:item>BackwardEuler</tempss:item>
+        <tempss:item>ClassicalRungeKutta4</tempss:item>
+      </TimeIntegrationMethod>
+      <DiffusionAdvancement type="xs:string"  inputType="choice">
+        <libhpc:documentation>
+          Specifies whether diffusion is handled implicitly or explicitly in 
+          the time integration scheme. 
+        </libhpc:documentation>
+        <tempss:item>NotProvided</tempss:item>
+        <tempss:item>Implicit</tempss:item>
+        <tempss:item>Explicit</tempss:item>
+      </DiffusionAdvancement>
+    </TimeIntegration>
+    <GlobalSysSolution optional="true">
+      <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+      <MatrixInversion repeatable="true">
+        <libhpc:documentation>Parameter controlling how matrix inversion is performed for a given field.</libhpc:documentation>
+        <Field type="xs:string">
+          <libhpc:documentation>The variable name for the field that this matrix inversion applies to.</libhpc:documentation>
+        </Field>
+        <InversionType paramType="choice">
+          <libhpc:documentation>The inversion type for this field.</libhpc:documentation>
+          <Direct>
+            <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <libhpc:documentation>
+              Invert the matrix iteratively using the conjugate gradient 
+              approach. Uses repeated matrix multiplication to converge to a 
+              solution to the matrix inverse problem rather than directly 
+              inverting the matrix.
+            </libhpc:documentation>
+            <SubStructuring type="xs:string" inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                The preconditioner uses linear algebra to bring the matrix 
+                into a form for which the conjugate gradient iterative 
+                algorithm converges faster. A perfect preconditioner would be 
+                the inverse of the matrix!
+                
+                LowEnergy: use for 3D elements with high polynomial order
+                BlockDiagonal: use for 2D elements with high polynomial order
+                Diagonal: use for anything else
+                LowEnergyWithLinearSpace: available for use on the pressure in 
+                                          3D flow simulation (rarely used)
+              </libhpc:documentation>
+              <tempss:item>LowEnergy</tempss:item>
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>BlockDiagonal</tempss:item>
+              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble">
+              <libhpc:documentation>
+                When SuccessiveRHS is set to true, a number of previous 
+                solutions to the linear solver are used to extrapolate an 
+                initial guess for the current solve.
+              </libhpc:documentation>
+            </SuccessiveRHS>
+            <IterativeSolverTolerance type="positiveDouble">
+              <libhpc:documentation>Required tolerance in solution when 
+              solving iteratively</libhpc:documentation>
+            </IterativeSolverTolerance>
+          </Iterative>
+          <Xxt>
+            <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+  </NumericalAlgorithm>
+  <Admin>
+    <libhpc:documentation>
+      This section contains parameters that specify administrative details.
+    </libhpc:documentation>
+    <IO_CheckSteps type="xs:positiveInteger">
+      <libhpc:documentation>
+        The solution can be dumped out at regular intervals. This parameter 
+        specifies the number of time steps for this interval.
+      </libhpc:documentation>
+    </IO_CheckSteps>
+    <IO_InfoSteps type="xs:positiveInteger">
+      <libhpc:documentation>Specify the interval in time steps between each 
+      print out of the current solution time.</libhpc:documentation>
+    </IO_InfoSteps>
+  </Admin>               
+</AdvectionDiffusionReaction>

@@ -219,6 +219,19 @@ public class ProfileRestResource {
                     InputStream fileXmlStream = fileFields.get(i).getValueAs(InputStream.class);
                     String fileXml = IOUtils.toString(fileXmlStream);
 
+                    // FIXME: With the revised support for Nektar++ native
+                    // geometries, the geometry file may contain a NEKTAR 
+                    // element as the root rather than the previous custom 
+                    // GeomtryAndBoundaryConditions. To maintain support with 
+                    // both approaches, if we have a native geometry, we strip 
+                    // the start and end of the data to retain only the content 
+                    // between the <NEKTAR></NEKTAR> tags. The GEOMETRY is then 
+                    // processed in the LibhpcNektarToTrueNektar XSLT.
+                    if(fileXml.indexOf("<NEKTAR") != -1) {
+                    	fileXml = fileXml.substring(fileXml.indexOf("<GEOMETRY"),
+                    								fileXml.indexOf("</GEOMETRY>")+11);
+                    }
+                    
                     // Embed file in profile. File name appears in lower case 
                     // so do case-insensitive string replace using (?i)
                     String tempXml = completeXml.replaceAll("(?i)" + fileName, fileXml);
@@ -348,8 +361,7 @@ public class ProfileRestResource {
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
-        @Context HttpServletRequest pRequest,
-        TempssUser pUser) {
+        @Context HttpServletRequest pRequest) {
     
     	TempssUser user = getAuthenticatedUser();
     	

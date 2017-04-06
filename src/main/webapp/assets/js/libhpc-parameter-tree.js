@@ -109,7 +109,10 @@
                             // Node is valid if there are no ul children of it's li which
                             // are not marked as valid or are not marked as chosen.
                             // (.each loop will not run in that case).
-                            $owningUL.children('li').children('ul:not([class="valid"], [chosen="false"])').each(function(i, childUL) {
+                        	// Feb 17: This selector fails if a child UL is valid
+                        	// but has multiple classes on it. Fixed to resolve this.
+                            //$owningUL.children('li').children('ul:not([class="valid"], [chosen="false"])').each(function(i, childUL) {
+                        	$owningUL.children('li').children('ul').not('.valid, [chosen="false"]').each(function(i, childUL) {
                                 // If any remaining ul's are not disabled then is not valid.
                                 // TODO: Convert this into check on class="disabled" for performance?
                                 if ($(childUL).data('disabled') !== true) {
@@ -561,12 +564,23 @@ function isInteger(valueToCheck) {
             var siblings = $element.siblings('ul');
             var children = siblings.children('li');
         	//var children = $(element).siblings('ul').children('li');
+            // Just calling hide or show on the set of elements seems to be 
+            // failing for some reason - the function is only applied to the 
+            // first element where there are repeated elements...
             if (children.is(':visible')) {
-                children.hide('fast');
-                // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+            	for(var i = 0; i < children.length; i++) {
+            		$(children[i]).hide('fast');
+            		//$(children[i]).hide();
+            	}
+            	// children.hide('fast');
+                // // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
             } else {
-                children.show('fast');
-                //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+            	for(var i = 0; i < children.length; i++) {
+            		$(children[i]).show('fast');
+            		//$(children[i]).show();
+            	}
+            	//children.show('fast');
+                // //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
             }
         }
         event.stopPropagation();
@@ -582,10 +596,32 @@ function isInteger(valueToCheck) {
     };
 
     /**
-     * Disable a branch.
+     * Enable / disable a branch with a toggle that can be turned on or off.
+     * 
+     * If constraints are in use and the branch has a set_by_constraint class
+     * then we display a message saying that the branch is restricted by a 
+     * constraint and cannot be changed 
      */
     var toggleBranch = function(elementUL) {
-        if ($(elementUL).data('disabled') === true) {
+    	if($(elementUL).children("li.parent_li.constraint").length > 0 &&
+    			$(elementUL).children("li.parent_li.constraint").hasClass("set_by_constraint")) {
+    		BootstrapDialog.show({
+    			title: "Value change disabled by constraints",
+    			type: BootstrapDialog.TYPE_WARNING,
+    			message: "This node is constrained by other values in the " +
+    			         "template and cannot be changed. Reset the constraints " +
+    			         "or use the undo option to unrestrict this value.",
+    			buttons: [{
+    				icon: 'glyphicon glyphicon-remove',
+    				label: 'Close',
+    				action: function(dialog) {
+    					dialog.close();
+    				}
+    			}]
+    		});
+    		return;
+    	}
+    	if ($(elementUL).data('disabled') === true) {
             // Enable branch
             $(elementUL).removeClass('disabled')
                         .data('disabled', false)
@@ -604,6 +640,7 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', false).trigger('change');
                 // Expand branch
                 $(elementLI).children('ul').children('li').show('fast');
+                //$(elementLI).children('ul').children('li').show();
             });
         } else {
             // Disable branch
@@ -624,7 +661,17 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', true);
                 // Hide branch
                 $(elementLI).children('ul').children('li').hide('fast');
+                //$(elementLI).children('ul').children('li').hide();
             });
+        }
+        // Check if this optional element has a constraint class in which case
+        // it is part of a constraint relationship and we trigger the CS solver.
+        if($(elementUL).children('li.parent_li').hasClass("constraint")) {
+        	log("A constraint element (optional element) has been modified - triggering solver...");
+        	var templateName = treeRoot.find('> li.parent_li > span').data('fqname');
+        	var templateId = $('#template-select option:selected').val();
+
+        	constraints.updateConstraints(templateName, templateId, $(elementUL).children('li.parent_li'));
         }
     };
 
@@ -633,22 +680,92 @@ function isInteger(valueToCheck) {
      */
     var repeatBranch = function(elementUL) {
         // Get the name of the item we're repeating
-    	var ul = $(elementUL);
-    	var choice_path = ul.find('select.choice').attr('choice-path');
+    	var $ul = $(elementUL);
+    	// FIXME: Don't think this is a correct way of counting the number
+    	// of elements! There may be no select element in a node being repeated!
+    	var choice_path = $ul.find('select.choice').attr('choice-path');
     	
-    	var newElement = $(elementUL).clone(true);
+    	var $newElement = $ul.clone(true);
     	// Add an additional parameter to this node so we know which number
         // of a repeated element it is.
-        var numElements = $(elementUL).parent().find('select[choice-path="' + choice_path + '"]').length;
-        newElement.attr('data-repeat', numElements+1);
+        var numElements = $ul.parent().find('select[choice-path="' + choice_path + '"]').length;
+        $newElement.attr('data-repeat', numElements+1);
     	
+        // Update Feb 17: when cloning a repeatable element, we clone the 
+        // element and its descendants in their current state. This causes an
+        // issue when loading a profile that has multiple instances of a 
+        // repeatable element since we get stray elements left behind and 
+        // unexpected results with multiple unwanted elements displaying. We 
+        // now revert a cloned branch back to its original clean state before 
+        // adding it into the tree.
+        // First get the name of the element we're repeating
+        var name = $newElement.children('li.parent_li').data('fqname');
+        // Find any repeatable elements and ensure we have only 1 of each
+        var addButtonItems = $newElement.find('span.repeat_button_add').parent(
+        		'[data-fqname != ' + name + ']').toArray();
+        while(addButtonItems.length > 0) {
+        	var $item = $(addButtonItems.pop());
+        	var $parentUL = $item.closest('ul');
+        	var $repeatedElements = $parentUL.siblings('ul[data-repeat]').children('li.parent_li[data-fqname="' + $item.data('fqname') + '"]');
+        	if($repeatedElements.length > 0) {
+        		var $parentElements = $repeatedElements.parent();
+            	$parentElements.remove();
+            	// Now rebuild the addButtonItems list to take into account the
+            	// removed items.
+            	addButtonItems = $newElement.find('span.repeat_button_add').parent(
+                		'[data-fqname != ' + name + ']').toArray();
+        	}
+        }
+        
+        /*
+        $addButtonItems.each(function() {
+        	// Ignore the top level add button for the element we're cloning
+        	var currentName = $(this).parent().data('fqname');
+        	if(currentName == name) return;
+        	
+        	// For the element with currentName, get the main ul and look for
+        	// siblings of the same name which we can then remove.
+        	var $parentUL = $(this).closest('ul');
+        	var $repeatedElements = $parentUL.siblings('ul[data-repeat]').children('li.parent_li[data-fqname="' + currentName + '"]');
+        	var $parentElements = $repeatedElements.parent();
+        	$parentElements.remove();
+        });
+        */
+        
+        // Now clear any previously populated fields in newElement and
+    	// reset the fields in the repeated block.
+    	var $inputItems = $newElement.find('input[type="text"]');
+    	$inputItems.each(function() { $(this).val(""); });
+    	var $selectItems = $newElement.find('select option');
+    	$selectItems.each(function() { $(this).prop('selected', false); });
+    	var $validEl = $newElement.find('.valid');
+    	$validEl.each(function() {
+    		$(this).removeClass('valid');
+    	});
+    	// We also need to disable any optional fields that are set to enabled.
+    	// - find toggle buttons, find closest UL and see if its disabled, if 
+    	//   not, click the toggle to disable the field.
+    	$newElement.children('li.parent_li').find('ul i.disable_button').each(function() {
+    		var $parentUL = $(this).closest('ul');
+    		if(!$parentUL.hasClass("disabled")) {
+    			// Disable the node
+    			toggleBranch($parentUL);
+    		}
+    	});
+
+    	$ul.find('*').filter(function() {
+    		console.log("checking element <" + $(this).prop('tagName') + "> - display <" + $(this).css('display') + ">");
+    	})
+        
     	// Copy this UL and insert into the tree directly after.
-        if ($(elementUL).children('li.parent_li').children('span.repeat_button_remove').length == 0) {
-        	newElement.insertAfter($(elementUL)).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
+        if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
+        	$newElement.insertAfter($ul).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
         }
         else {
-        	newElement.insertAfter($(elementUL));
+        	$newElement.insertAfter($ul);
         }
+        
+        $newElement.trigger('change');
     };
 
     /**
@@ -707,7 +824,8 @@ function isInteger(valueToCheck) {
                     // There is still a major issues with additional repeatable elements
                     // not expanding when clicked if they have a select box.
                     // Fix is applied below after the select.change()
-                    $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
+                    //$(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
+                    $(owningUL).find('li').attr('style', 'display: none;');
                     console.log('New UL: ', owningUL);
                 }
             }
@@ -901,7 +1019,8 @@ function extractEntriesFromFile(event, path) {
     // Need to use the javascript file reader to read in the xml. This allows us to set an onload handler
     // so we only try to read the xml once it's actually loaded.
     var selectedFile = event.target.files[0];
-    var reader = new FileReader();
+    var reader = new FileReader(); 
+    
     reader.onload = function (event) {
         var fileXml = event.target.result;
 
@@ -995,7 +1114,243 @@ function extractEntriesFromFile(event, path) {
 
 }
 
+/**
+ * This function processes the boundary regions from a geometry file when one 
+ * is added into the template. This is triggered via extract entries from file 
+ * when we find that the target node is ProblemSpecification -> Geometry.
+ * 
+ * @param event The node that is the target of the event.
+ * @param path The path of the node that the 
+ */
+function processGeometryFile(event, path, selectedFile, reader) {
+	var selectedFile = event.target.files[0];
+    var reader = new FileReader();
+    var $geomElement = $(event.currentTarget);
+    
+    //var compositeTypeDim = {V: 0, E: 1, T: 2, Q: 2, A: 3, H: 3, P: 3, R: 3}
+    var compositeTypeDim = {V: 0, E: 1, F: 2};
+	console.log("Undertaking custom boundary region processing...");
+    reader.onload = function (event) {
+        var fileXml = event.target.result;
 
+        var xmlDoc = $.parseXML(fileXml);
+        var $xml = $(xmlDoc); // The $ of $xml just reminds us it is a jquery object
+        
+        // Now we need to find out the dimension of the geometry in order to 
+        // see how many boundary conditions we need
+        var geomXPath = "NEKTAR/GEOMETRY";
+        var compositeXPath = "NEKTAR/GEOMETRY/COMPOSITE";
+        var jqueryGeomXPath = geomXPath.split("/").join(" > ");
+        var jqueryCompositeXPath = compositeXPath.split("/").join(" > ");
+        // Count the number of instances of the
+        var $geomNode = $xml.find(jqueryGeomXPath);
+        var geomCount = $geomNode.length;
+        if(geomCount != 1) {
+        	log("We have not been able to find valid GEOMETRY data in the " +
+        			"provided file");
+        	return;
+        }
+        
+        log("Found valid GEOMETRY data in the provided file.");
+        var dimAttr = $geomNode.attr("DIM");
+        if(typeof dimAttr !== undefined) {
+        	log("Value of dimension attribute: " + dimAttr);
+        }
+        else {
+        	log("Couldn't find a dimension attribute in the GEOMETRY.");
+        	return;
+        }
+        
+        var compositeDim = dimAttr - 1;
+        log("Looking for composites of dimension: " + compositeDim);
+        var $compositeNode = $xml.find(jqueryCompositeXPath);
+        if($compositeNode.length < 1) {
+        	log("ERROR: Couldn't find required COMPOSITE node in the file.");
+        	return;
+        }
+        else if($compositeNode.length > 1) {
+        	log("ERROR: There is more than 1 COMPOSITE node in the file.");
+        	return;
+        }
+        var boundaryRegionCount = 0;
+        var boundaryRegions = [];
+        $compositeNode.children().each(function() {
+        	var compositeID = $(this).attr("ID");
+        	log("Found <" + this.nodeName + "> node with ID <" + compositeID + ">...");
+        	var nodeText = $(this).text().trim();
+        	log("Node text: " + nodeText);
+        	var nodeType = nodeText.substring(0,1);
+        	log("Node type <" + nodeType + "> has dimension <" + compositeTypeDim[nodeType] + ">.");
+        	if(compositeDim == compositeTypeDim[nodeType]) {
+        		log("Found a boundary region...");
+        		boundaryRegions.push({dim: compositeDim,
+        			                  type: nodeType,
+        			                  compositeID: compositeID});	
+        	}
+        });
+        
+        var $boundaryDetails = $geomElement.parent().parent().parent().parent().find('ul li.parent_li[data-fqname="BoundaryDetails"]');
+        log("Boundary details: " + $boundaryDetails);
+        // See if the BoundaryCondition(s) node(s) have display:none set. If 
+        // they do, then we also make the BoundaryRegion elements hidden.
+        var $boundaryCondition = $boundaryDetails.find('li.parent_li[data-fqname="BoundaryCondition"]');
+        
+        // Before we generate any new boundary regions, we remove any existing 
+        // BoundaryRegion nodes that may be present if a file has already been
+        // loaded
+        $boundaryDetails.find('li.parent_li[data-fqname="BoundaryRegion"]').each(function() {
+        	$(this).parent().remove();
+        });
+        
+        var display = ($($boundaryCondition[0]).css("display") == "none") ? false : true;
+        for(var i = 0; i < boundaryRegions.length; i++) {
+        	var id = boundaryRegions[i]['compositeID'];
+        	$boundaryDetails.append(generateBoundaryRegion(null, (i+1), display, id));
+        }
+        $('span[data-fqname="CompositeID"] ~ input').trigger('change');
+        $('span[data-fqname="Comment"] ~ input').trigger('change');
+        
+        // Add a change handler to the BoundaryCondition enable/disable button
+        // to update boundary conditions
+        treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.toggle_button', function(e) {
+        	updateBoundaryRegions(e, true);
+        });
+        // Since the addition of a new boundary condition clones the condition
+        // on which the add icon was clicked, we don't update boundary regions
+        // until the name has been altered (or removed) since it will be the 
+        // same as the name of the previous BC.
+        //treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.repeat_button_add', function(e) {
+        //	updateBoundaryRegions(e, true);
+        //});
+        treeRoot.on('click', 'li.parent_li[data-fqname="BoundaryCondition"] > span.repeat_button_remove', function(e) {
+        	updateBoundaryRegions(e, true);
+        });
+        
+        // Trigger an update of BoundaryRegion nodes that we've just generated
+        // to fill out details of any boundary conditions that have already 
+        // been created.
+        updateBoundaryRegions(null, true);
+    }
+    reader.readAsText(selectedFile);
+}
+
+/**
+ * Generate a boundary region block to insert into the TemPSS HTML tree
+ * 
+ * @param regionType currently unused, pass null
+ * @param count the number of a boundary region (1-indexed) when there are 
+ *              multiple composites/boundary regions.
+ * @returns a jQuery object that is the root element of the boundary region XML
+ */
+function generateBoundaryRegion(regionType, count, display, id) {
+	
+	function generateIndividualNode(type, name, display, options) {
+		// options is an object that can have the following properties: 
+		// repeat; defaultValue; widget; widgetOptions
+		var repeat = 0;
+		if(options.hasOwnProperty("repeat")) {
+			repeat = options.repeat;
+		}
+		var widget = null;
+		var widgetOptions = [];
+		if(options.hasOwnProperty("widget")) {
+			widget = options.widget;
+		}
+		if(widget != null && widget == "choice") {
+			if(options.hasOwnProperty("widgetOptions")) {
+				widgetOptions = options.widgetOptions;
+			}
+		}
+		
+		var $baseUL = $('<ul/>');
+		$baseUL.attr("role", "group");
+		if(repeat > 0) {
+			$baseUL.attr("data-repeat", repeat);
+		}
+		if(type == "leaf") {
+			$baseUL.attr("data-leaf", "true");
+		}
+		
+		var $li = $('<li/>');
+		$li.addClass("parent_li");
+		$li.attr("data-fqname", name);
+		$li.attr("role", "treeitem");
+		$li.css("display", (display) ? "list-item" : "none");
+		
+		var $span = $('<span/>');
+		if(type == "leaf") {
+			$span.addClass("badge badge-info");
+		}
+		else if(type == "group") {
+			$span.addClass("badge badge-success");
+		}
+		$span.attr("data-fqname", name);
+		$span.text(name);
+		$li.append($span);
+		if(widget != null) {
+			switch(widget) {
+			case "text":
+				var readonly = "";
+				if(options.hasOwnProperty("readonly") && options.readonly) {
+					readonly = "readonly ";
+				}
+				var $item = $('<input class="data" ' + readonly + 'type="text" onchange="validateEntries($(this), \'xs:string\');"/>');
+				if(options.hasOwnProperty("defaultValue") && options.defaultValue != null) {
+					$item.val(options.defaultValue);
+				}
+				$li.append($item);
+				break;
+			case "choice":
+				var enumStr = '[';
+				for(var i = 0; i < options.length; i++) {
+					enumStr += '"' + options[i] + '"';
+					if(i < options.length-1) {
+						enumStr += ', ';
+					}
+				}
+				enumStr += "]";
+				var $item = $('<select class="choice" );"/>');
+				var itemChange = "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + enumStr + "}');";
+				$item.attr("onChange", itemChange);
+				$item.append($('<option value="Select from list">Select from list</option>'));
+				for(var i = 0; i < widgetOptions.length; i++) {
+					$item.append($('<option value="' + widgetOptions[i] + '">' + widgetOptions[i] + '</option>'));	
+				}
+				$li.append($item);
+				break;
+			default:
+				log("Unknown widget type received for this boundary region.");
+			}
+			
+		}
+		$baseUL.append($li);
+		return $baseUL;
+	}
+	
+	var $baseUL = $('<ul role="group" data-condition-id="' + count + '"/>');
+	var $baseLI = $('<li/>');
+	$baseLI.attr("data-fqname", "BoundaryRegion");
+	$baseLI.attr("role", "treeitem");
+	$baseLI.addClass("parent_li");
+	$baseLI.css("display", display ? "list-item" : "none");
+	var $baseSPAN = $('<span/>');
+	$baseSPAN.attr("data-fqname", "BoundaryRegion");
+	$baseSPAN.addClass("badge badge-success");
+	$baseSPAN.text('BoundaryRegion');
+	$baseLI.append($baseSPAN);
+	
+	// Now add additional nodes into the baseLI
+	// Boundary regions have a name input field, type dropdown
+	var $idNode = generateIndividualNode("leaf", "CompositeID", false, {repeat: 0, defaultValue: id, widget: "text", readonly: true});
+	$baseLI.append($idNode);
+	var $typeNode = generateIndividualNode("leaf", "BoundaryCondition", false, {repeat: 0, widget: "choice", widgetOptions: []});
+	$baseLI.append($typeNode);
+	var $commentNode = generateIndividualNode("leaf", "Comment", false, {repeat: 0, defaultValue: "Boundary Region " + count, widget: "text"});
+	$baseLI.append($commentNode);
+	
+	$baseUL.append($baseLI);
+	return $baseUL;
+}
 
 function validateList(caller, validationType, restrictionsJSON) {
 
@@ -1146,6 +1501,9 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                     break;
                 case "xs:file":
                     // Any string filename will do for now, but extension will be checked below.
+                	// TODO: Look at adding a class or attribute to a file node 
+                	//       if processing fails. Then we can check for this 
+                	//       value here and mark the node as invalid as required
                 case "xs:string":
                     // Any string will do for now.
                     if ($caller.val().length > 0) {
@@ -1199,7 +1557,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             }
                             if (!(isStringEnumerationFound)) {
                                 $caller.markValidity("invalid",
-                                        {message: 'This property must have a value from the list: ' + value.toString()});
+                                        {message: 'This property must have a value from the list: ' + value.join(", ")});
                             }
                             break;
                         case "xs:filetype":
@@ -1215,7 +1573,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             if (!(extensionFound)) {
                                 // File is not valid after all
                                 $caller.markValidity("invalid",
-                                        {message: 'The filename must have an extension from the list: ' + value.toString()});
+                                        {message: 'The filename must have an extension from the list: ' + value.join(", ")});
                             }
                             break;
                     }
@@ -1239,6 +1597,7 @@ function selectChoiceItem(event) {
     // Without this, if the branch is repeated, making a selection results in 
     // all copies of the branch being expanded.
     var $parentUL = $selectElement.parent().parent();
+    var $parentLI = $selectElement.parent();
     
     // This relies on the option value being the same as the
     // text displayed <option value="text">text</option>
@@ -1295,10 +1654,10 @@ function processJobProfile(treeRootNode, templateId) {
         // Just assume one file provided for each thing for now.
         uploadFile = element.files[0];
         // Only embed if an XML file, assume from extension!
-        var fileName = uploadFile.name;
-        log(fileName);
+        var fileName = (uploadFile && uploadFile.hasOwnProperty("name")) ? uploadFile.name : "";
+        log("Processing job file - name without extension: " + fileName);
         var extension = fileName.substr(fileName.lastIndexOf('.') + 1)
-        log(extension);
+        log("Processing job file - extension: " + extension);
         if ("xml".toUpperCase() !== extension.toUpperCase()) {
             uploadFile = null;
         }

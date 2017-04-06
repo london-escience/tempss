@@ -55,12 +55,18 @@ public class TempssObject {
     private String _name;
     private String _schema;
     private String _transform;
+    private String _constraints;
 
     public TempssObject(String id, String name, String schema, String transform) {
-        this._id = id;
+    	this(id, name, schema, transform, null);
+    }
+    
+    public TempssObject(String id, String name, String schema, String transform, String constraints) {
+    	this._id = id;
         this._name = name;
         this._schema = schema;
         this._transform = transform;
+        this._constraints = constraints;
     }
     
     public TempssObject(TempssObject pObj) {
@@ -68,6 +74,7 @@ public class TempssObject {
         this._name = pObj.getName();
         this._schema = pObj.getSchema();
         this._transform = pObj.getTransform();
+        this._constraints = pObj.getConstraints();
     }
 
     public String getId() {
@@ -94,6 +101,12 @@ public class TempssObject {
     public void setTransform(String transform) {
         this._transform = transform;
     }
+    public String getConstraints() {
+        return _constraints;
+    }
+    public void setConstraints(String constraints) {
+        this._constraints = constraints;
+    }
 
     @Override
     public String toString() {
@@ -102,6 +115,7 @@ public class TempssObject {
         s.append("\n\tName: " + getName());
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());
+        s.append("\n\tConstraints: " + getConstraints());
         return s.toString();
     }
 }

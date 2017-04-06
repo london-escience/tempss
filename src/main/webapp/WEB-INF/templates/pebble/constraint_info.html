@@ -1,0 +1,63 @@
+<div id="container">
+  <div id="row">
+    <div id="col-sm-12">
+      <h2><b>Variable &amp; Constraint Info:</b> {{ templateName }} solver</h2>
+    </div>
+  </div>
+  <!-- <div id="row"><div id="col-sm-12"><h4>Variables</h4></div></div>  -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+      <a href="#vars" aria-controls="vars" role="tab" data-toggle="tab">Variables</a>
+    </li>
+    <li role="presentation">
+      <a href="#constraints" aria-controls="constraints" role="tab" data-toggle="tab">Constraints</a>
+    </li>
+  </ul>
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="vars">
+      <div id="row"><div id="col-sm-12"><h4>Variables</h4></div></div>
+      <table class="table table-bordered">
+        <thead>
+          <th>Variable</th>
+          <th>Domain</th>
+        </thead>
+        <tbody>
+          {% for item in variableDomains %}
+          <tr>
+            <td><b title="{{ item.key }}">{{ variableNameMap[item.key] }}</b></td>
+            <td>
+              {% for val in item.value %}
+                {{ val }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </td>  
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="constraints">
+      <div id="row"><div id="col-sm-12"><h4>Constraints</h4></div></div>
+      <table class="table table-bordered constraint-table">
+        <thead>
+          <th>Constraint Var 1</th>
+          <th>Constraint Var 2</th>
+          <th>Value Mappings (Var 1 -> Var 2)</th>
+        </thead>
+        <tbody>
+          {% for item in constraints %}
+          <tr>
+            <td><b title="{{ item.value[0] }}">{{ variableNameMap[item.value[0]] }}</b></td>
+            <td><b title="{{ item.value[1] }}">{{ variableNameMap[item.value[1]] }}</b></td>
+            <td>
+              {% for mapping in constraintMappings[item.key] %}
+                <span class="mapping-key">{{ mapping.key }}</span> -> {{ mapping.value }}
+                <br/>
+              {% endfor %}
+            </td>  
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

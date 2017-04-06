@@ -443,15 +443,15 @@ FR* options: Flux Reconstruction options - only for tensor product elements (Qua
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="MatrixInversion" type="MatrixInversion">
+      <xs:element name="GlobalSysSolution" type="GlobalSysSolutionType" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+            <libhpc:documentation>Parameters controlling how matrix inversion is performed for individual fields.</libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-
+      
     </xs:sequence>
   </xs:complexType>
   

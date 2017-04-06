@@ -15,7 +15,7 @@
 	                        use-default-filters="false">
     	<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
-	
+		
     <mvc:annotation-driven>
     	<mvc:argument-resolvers>
         	<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
@@ -29,12 +29,14 @@
         </mvc:interceptor>
     </mvc:interceptors>
     
+    <!-- OLD PEBBLE ENGINE CONFIG FOR PEBBLE v1.3 - new v2.3 config moved to application context
     <bean id="pebbleEngine" class="com.mitchellbosecke.pebble.PebbleEngine">
 		<property name="loader">
 			<bean class="com.mitchellbosecke.pebble.spring.PebbleTemplateLoader" />
 		</property>
 	</bean>
-	
+	 -->
+    	
 	<!--
 	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
         <property name="definitions">
@@ -59,10 +61,9 @@
 		<property name="viewNames" value="jsp/*" />
 	</bean>
 	
-	<bean id="viewResolver" class="com.mitchellbosecke.pebble.spring.PebbleViewResolver">
+	<bean id="viewResolver" class="com.mitchellbosecke.pebble.spring4.PebbleViewResolver">
 		<property name="prefix" value="/WEB-INF/templates/pebble/" />
 		<property name="suffix" value=".html" />
 		<property name="pebbleEngine" ref="pebbleEngine" />
 	</bean>
-
 </beans>

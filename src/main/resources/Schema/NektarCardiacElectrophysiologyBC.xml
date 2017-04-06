@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<CardiacElectrophysiology xmlns="http://www.libhpc.imperial.ac.uk"
+                          xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                          xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+  <libhpc:documentation>
+    The Nektar++ finite element PDE solver for cardiac electrophysiology.
+    Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
+  </libhpc:documentation>
+  <Physics>
+    <libhpc:documentation>
+      This section contains the parameters that define the physics of the 
+      problem or, equivalently, the PDE coefficients.
+    </libhpc:documentation>
+    <Model paramType="choice">
+      <libhpc:documentation>
+      		Two models for the electrical properties of cardiac muscle are 
+			supported, the monodomain model and the bidomain model.
+	  </libhpc:documentation>
+      <Monodomain>
+        <libhpc:documentation>
+          The monodomain model is a reduction of the bidomain model of the 
+          electrical propagation in myocardial tissue. The reduction comes 
+          from assuming that the intra- and extracellular domains have equal 
+          anisotropy ratios. Although not as physiologically accurate as the 
+          bidomain model, it is still adequate in some cases, and has reduced 
+          complexity. http://en.wikipedia.org/wiki/Monodomain_model
+        </libhpc:documentation>
+        <Chi type="positiveDouble" inputType="text" units="mm&lt;sup&gt;-1&lt;/sup&gt;">
+          <libhpc:documentation>Membrane surface to volume ratio</libhpc:documentation>
+        </Chi>
+        <Cm  type="positiveDouble" inputType="text" units="&amp;#956;F mm&lt;sup&gt;-2&lt;/sup&gt;">
+          <libhpc:documentation>Membrane capacitance per unit area</libhpc:documentation>
+        </Cm>
+        <IsotropicConductivity paramType="choice" optional="true">
+          <libhpc:documentation>
+            The isotropicConductivity specifies the conductivity of the tissue, 
+            assuming it is the same in the x-, y- and z-coordinate directions. 
+            Nektar++ also allows anisotropic conductivity to be specified, to 
+            allow for fibres in the heart which conduct better along their 
+            length than across their breadth. (Anisotropic conductivity not 
+            currently supported by the libhpc/nekkloud tree).
+            
+            Choose between providing the conductivity directly, or by 
+            providing the intensity from an MRI scan, from which the 
+            conductivity will be approximated internally.
+          </libhpc:documentation>
+          <Conductivity type="xs:double" inputType="text" units="mS mm&lt;sup&gt;-1&lt;/sup&gt;">
+            <libhpc:documentation>The constant conductivity.</libhpc:documentation>
+          </Conductivity>
+          <Intensity>
+            <libhpc:documentation>
+            	Supply a constant value for the intensity. The conductivity is 
+            	computed internally from the intensity.
+           	</libhpc:documentation>
+            <Intensity type="xs:double" inputType="text">
+              <libhpc:documentation>
+                The constant intensity. The conductivity is proportional to 
+                1 / (d_max - d_min) * (1 - Intensity).
+              </libhpc:documentation>
+            </Intensity>
+            <DMin name="d_min" type="xs:double" inputType="text">
+              <libhpc:documentation>d_min specifies the lower threshold of 
+              the intensity.</libhpc:documentation>
+            </DMin>
+            <DMax name="d_max" type="xs:double" inputType="text">
+              <libhpc:documentation>d_max specifies the upper threshold 
+              of the intensity.</libhpc:documentation>
+            </DMax>
+            <OMin name="o_min" type="xs:double" inputType="text">
+              <libhpc:documentation>o_min specifies ... 
+              </libhpc:documentation>
+            </OMin>
+            <OMax name="o_max" type="xs:double" inputType="text">
+              <libhpc:documentation>o_max specifies ... 
+               </libhpc:documentation>
+            </OMax>
+          </Intensity>
+        </IsotropicConductivity>
+      </Monodomain>
+      <Bidomain>
+        <libhpc:documentation>
+          Model of the electrical properties of cardiac muscle that takes 
+          into account the anisotropy of both the intracellular and 
+          extracellular spaces. http://en.wikipedia.org/wiki/Bidomain_model 
+        </libhpc:documentation>
+        <Sigmai type="positiveDouble"></Sigmai>
+        <Sigmaix type="positiveDouble"></Sigmaix>
+        <Sigmaiy type="positiveDouble"></Sigmaiy>
+        <Sigmaiz type="positiveDouble"></Sigmaiz>
+      </Bidomain>
+    </Model>
+    <CellModel>
+      <libhpc:documentation>
+        The action potential of a cardiac cell can be modelled at either a 
+        biophysical level of detail, including a number of transmembrane 
+        currents, or as a phenomenological model, to reproduce the features 
+        of the action potential, with fewer variables. Each cell model will 
+        include a unique system of ODEs to represent the gating variables of 
+        that model.
+      </libhpc:documentation>
+      <CellModelType paramType="choice">
+        <libhpc:documentation>
+          A number of ionic cell models are currently supported by the solver including:
+              
+              - Courtemanche, Ramirez, Nattel, 1998
+              - Luo, Rudy, 1991
+              - ten Tusscher, Panfilov, 2006 (epicardial, endocardial and mid-myocardial variants)
+              
+              Phenomological cell models are also supported:
+
+              - Aliev-Panfilov
+              - Fitzhugh-Nagumo
+              
+          It is important to ensure that the units of the voltage and currents 
+          from the cell model are consistent with the units expected by the 
+          tissue level solver (monodomain/bidomain).
+        </libhpc:documentation>
+        <CourtemancheRamirezNattel98>
+          <libhpc:documentation>Human atrial model.</libhpc:documentation>
+          <CellModelVariant type="xs:string" inputType="choice">
+            <tempss:item>Original</tempss:item>
+            <tempss:item>AF</tempss:item>
+          </CellModelVariant>
+        </CourtemancheRamirezNattel98>
+        <FitzhughNagumo>
+        </FitzhughNagumo>
+        <TenTusscher>
+          <libhpc:documentation>Human ventricular model.</libhpc:documentation>
+          <CellModelVariant type="xs:string" inputType="choice">
+            <tempss:item>Endocardium</tempss:item>
+            <tempss:item>Epicardium</tempss:item>
+            <tempss:item>Mid</tempss:item>
+          </CellModelVariant>
+        </TenTusscher>
+        <AlievPanfilov>
+          <libhpc:documentation>Phenomenological model.</libhpc:documentation>
+          <A type="xs:double" inputType="text"></A>
+          <Eps type="positiveDouble" inputType="text"></Eps>
+          <K type="positiveDouble" inputType="text"></K>
+          <Mu1 type="positiveDouble" inputType="text"></Mu1>
+          <Mu2 type="positiveDouble" inputType="text"></Mu2>
+        </AlievPanfilov>
+        <FentonKarma>
+          <CellModelVariant type="xs:string" inputType="choice">
+            <tempss:item>BR</tempss:item>
+            <tempss:item>MBR</tempss:item>
+            <tempss:item>MLR1</tempss:item>
+            <tempss:item>GP</tempss:item>
+            <tempss:item>CF1</tempss:item>
+            <tempss:item>CF2a</tempss:item>
+            <tempss:item>CF2b</tempss:item>
+            <tempss:item>CF2c</tempss:item>
+            <tempss:item>CF3a</tempss:item>
+            <tempss:item>CF3b</tempss:item>
+          </CellModelVariant>
+        </FentonKarma>
+      </CellModelType>
+      <SubSteps type="xs:positiveInteger">
+        <libhpc:documentation>Sets the number of substeps taken in time 
+        integrating the cell model for each PDE timestep.</libhpc:documentation>
+      </SubSteps>
+    </CellModel>
+  </Physics>
+  <ProblemSpecification>
+    <libhpc:documentation>
+      Specification of the particular problem to solve, including geometry 
+      initial and boundary conditions, etc.
+    </libhpc:documentation>
+    <Geometry type="geometryFileName" inputType="file">
+      <libhpc:documentation>
+        The geometry on which the problem is being solved (usually a mesh 
+        representing a heart). Provide a Nektar XML (with root NEKTAR element) 
+        containing a GEOMETRY element that will be parsed to identify boundary 
+        regions.
+      </libhpc:documentation>
+    </Geometry>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+    </BoundaryDetails>
+      <!-- 
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+      <BoundaryCondition optional="true" repeatable="true">
+        <libhpc:documentation>
+          A boundary condition specifying the solution at one of the geometry 
+          boundaries. Add as many boundary conditions as required for the 
+          problem that you are solving. You will be able to allocate these 
+          boundary conditions to boundary regions once you add a geometry file.
+        </libhpc:documentation>
+        <BoundaryConditionName type="xs:string"/>
+        <Variable repeatable="true">
+          <VariableName type="xs:string"/>
+          <Type paramType="choice">
+            <Expression type="xs:string" inputType="text">
+      	      <libhpc:documentation>
+      	        Provide a function describing this boundary condition.
+      	      </libhpc:documentation>
+      	    </Expression>
+      	    <File type="fileName" inputType="file">
+      	      <libhpc:documentation>
+      	        Provide a file describing this boundary condition - this will 
+      	        be a field file describing an edge of the mesh field.
+      	      </libhpc:documentation>
+      	    </File>
+          </Type>
+          <UserDefinedType type="xs:string" inputType="choice">
+            <tempss:item>NotProvided</tempss:item>
+            <tempss:item>TimeDependent</tempss:item>
+          </UserDefinedType>
+        </Variable>
+      </BoundaryCondition>
+    </BoundaryDetails>
+    -->
+    <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <VariableName type="xs:string"/>
+        <Type paramType="choice">
+          <Expression type="xs:string" inputType="text">
+      	    <libhpc:documentation>
+      	      Provide an expression describing the initial condition for this variable.
+      	    </libhpc:documentation>
+      	  </Expression>
+      	  <File type="fileName" inputType="file">
+      	    <libhpc:documentation>
+      	      Provide a field file containing details of the initial condition for this variable.
+      	    </libhpc:documentation>
+      	  </File>
+        </Type>
+      </Variable>
+    </InitialConditions>
+    <Stimuli>
+      <libhpc:documentation>
+        Specify one or more electrical stimuli to the heart (currently only 
+        one supported by nekkloud/libhpc).
+      </libhpc:documentation>
+      <Stimulus optional="true" repeatable="true">
+        <libhpc:documentation>Specify how pulses of current are applied to the 
+        heart to stimulate contraction.</libhpc:documentation>
+        <StimulusType paramType="choice">
+          <libhpc:documentation>Specify the region to which the stimulus is 
+          applied.</libhpc:documentation>
+          <StimulusPoint>
+            <libhpc:documentation>Apply the stimulus at a single point.
+            </libhpc:documentation>
+            <PStrength type="xs:double" name="p_strength" units="&amp;#956;A">
+              <libhpc:documentation>Strength of the stimulus</libhpc:documentation>
+            </PStrength>
+          </StimulusPoint>
+          <StimulusCircle>
+            <libhpc:documentation>Provide the stimulus in a spherical region.</libhpc:documentation>
+            <PStrength type="xs:double" name="p_strength" units="&amp;#956;A mm&lt;sup&gt;-3&lt;/sup&gt;">
+              <libhpc:documentation>
+                Strength of the stimulus current applied per unit volume
+              </libhpc:documentation>
+            </PStrength>
+            <Px1 type="xs:double" name="p_x1" units="mm">
+              <libhpc:documentation>x-coordinate of centre of the sphere</libhpc:documentation>
+            </Px1>
+            <Py1 type="xs:double" name="p_y1" units="mm">
+              <libhpc:documentation>y-coordinate of centre of the circle</libhpc:documentation>
+            </Py1>
+            <Pz1 type="xs:double" name="p_z1" units="mm">
+              <libhpc:documentation>z-coordinate of centre of the circle</libhpc:documentation>
+            </Pz1>
+            <Pr1 type="positiveDouble" name="p_r1" units="mm">
+              <libhpc:documentation>Radius of the circle</libhpc:documentation>
+            </Pr1>
+            <PIs type="xs:double" name="p_is" />
+          </StimulusCircle>
+          <StimulusRectangle>
+            <libhpc:documentation>stimulates a cuboid-shaped region of the 
+            domain, specified by two coordinates x1, y1, z1 and x2, y2, z2.
+            </libhpc:documentation>
+            <PStrength type="xs:double" name="p_strength" units="&amp;#956;A mm&lt;sup&gt;-3&lt;/sup&gt;">
+              <libhpc:documentation>
+                Strength of the stimulus current applied per unit volume
+              </libhpc:documentation>
+            </PStrength>
+            <Px1 type="xs:double" name="p_x1" units="mm"/>
+            <Py1 type="xs:double" name="p_y1" units="mm"/>
+            <Pz1 type="xs:double" name="p_z1" units="mm"/>
+            <Px2 type="xs:double" name="p_x2" units="mm"/>
+            <Py2 type="xs:double" name="p_y2" units="mm"/>
+            <Pz2 type="xs:double" name="p_z2" units="mm"/>
+            <PIs type="xs:double" name="p_is">
+              <libhpc:documentation>
+                Specifies the "smoothness" of the boundaries of the region; 
+                higher values produce a sharper boundary. Typical value 50. 
+                Appropriate value depends on spatial discretization: coarser 
+                discretization needs less steepness.
+              </libhpc:documentation>
+            </PIs>
+          </StimulusRectangle>
+        </StimulusType>
+        <Protocol paramType="choice">
+          <libhpc:documentation>Specifies the time-dependent function 
+          indicating the strength of the stimulus</libhpc:documentation>
+          <ProtocolS1S2>
+            <libhpc:documentation>Two stimuli are provided. Stimulus S1 is 
+            regular, while stimulus S2 happens only once.</libhpc:documentation>
+            <Start type="xs:double" units="ms">
+              <libhpc:documentation>Start time of the stimulus (usually set 
+              to time zero).</libhpc:documentation>
+            </Start>
+            <Duration type="xs:double" units="ms">
+              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+            </Duration>
+            <S1CycleLength type="xs:double" units="ms">
+              <libhpc:documentation>Cycle length of stimulus S1</libhpc:documentation>
+            </S1CycleLength>
+            <Num_S1 type="xs:positiveInteger">
+              <libhpc:documentation>Number of times stimulus S1 is repeated</libhpc:documentation>
+            </Num_S1>
+            <S2CycleLength type="xs:double" units="ms">
+              <libhpc:documentation>Specifies the time between the start of 
+              the S1 beat and the S2 beat</libhpc:documentation>
+            </S2CycleLength>
+          </ProtocolS1S2>
+          <ProtocolS1>
+            <libhpc:documentation>One stimulus, S1, is provided. It has a 
+            regular cycle length and can be repeated a number of times.</libhpc:documentation>
+            <Start type="xs:double" units="ms">
+              <libhpc:documentation>Start time of the stimulus (usually set 
+              to time zero).</libhpc:documentation>
+            </Start>
+            <Duration type="xs:double" units="ms">
+              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+            </Duration>
+            <S1CycleLength type="xs:double" units="ms">
+              <libhpc:documentation>Cycle length of stimulus S1</libhpc:documentation>
+            </S1CycleLength>
+            <Num_S1 type="xs:positiveInteger">
+              <libhpc:documentation>Number of times stimulus S1 is repeated</libhpc:documentation>
+            </Num_S1>
+          </ProtocolS1>
+          <ProtocolSingle>
+            <libhpc:documentation>A single stimulus, S1, is provided, and not 
+            repeated.</libhpc:documentation>
+            <Start type="xs:double" units="ms">
+              <libhpc:documentation>Start time of the stimulus (usually set to 
+              time zero).</libhpc:documentation>
+            </Start>
+            <Duration type="xs:double" units="ms">
+              <libhpc:documentation>Length of time the current is applied for</libhpc:documentation>
+            </Duration>
+          </ProtocolSingle>
+        </Protocol>
+      </Stimulus>
+    </Stimuli>
+    <Expansion>
+      <libhpc:documentation>Specify details of how the solution function 
+      will be approximated.</libhpc:documentation>
+      <PolynomialOrder type="xs:positiveInteger">
+        <libhpc:documentation>
+          The order of polynomial expansion used on each element. Higher order 
+          gives better approximation to the true solution. The number of modes 
+          is equal to PolyNomialOrder + 1.
+        </libhpc:documentation>
+      </PolynomialOrder>
+      <BasisType type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal. 
+          Modal / hierarchical basis: don't need to redefine basis functions 
+          when increase the order (but have to be modified to get zero at 
+          boundary).
+          Nodal: have to be redefined when the polynomial order is increased, 
+          but are naturally zero at the boundaries.
+          
+          Available choices:
+            MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                      by two linear functions to make them zero at the boundaries.
+            GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+            GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                          Gauss-Lobatto-Legendre
+            GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+            CHEBYSHEV: another modal approach (similar to Fourier modes).
+        </libhpc:documentation>
+        <tempss:item>MODIFIED</tempss:item>
+        <tempss:item>GAUSS_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
+        <tempss:item>CHEBYSHEV</tempss:item>
+      </BasisType>
+    </Expansion>
+    <FinalTime type="positiveDouble" units="ms">
+      <libhpc:documentation>The time over which the simulation occurs.
+      </libhpc:documentation>
+    </FinalTime>
+    <TimeStep type="positiveDouble" units="ms">
+      <libhpc:documentation>Length of time step</libhpc:documentation>
+    </TimeStep>
+  </ProblemSpecification>
+  <NumericalAlgorithm>
+    <libhpc:documentation>
+      This section contains all the parameters that specify the numerical 
+      algorithm for solving the problem.
+    </libhpc:documentation>
+    <Projection type="xs:string"  inputType="choice">
+      <libhpc:documentation>
+        ContinuousGalerkin: enforces continuity of solution across element boundaries
+        DiscontinuousGalerkin: doesn't enforce continuity, but better at 
+                               capturing shocks in solution
+      </libhpc:documentation>
+      <tempss:item>ContinuousGalerkin</tempss:item>
+      <tempss:item>DiscontinuousGalerkin</tempss:item>
+    </Projection>
+    <TimeIntegration>
+      <libhpc:documentation>Parameters setting the method for time integration.
+      </libhpc:documentation>
+      <TimeIntegrationMethod type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          Method of time stepping. See: http://www.nektar.info/wiki/3.2/Reference/TimeStepping
+          
+          - Formally Explicit Methods: These types of methods are considered 
+            explicit from an ODE point of view. They are characterised by a 
+            lower triangular coefficient matrix formula, i.e. formula for 
+            formula. To avoid confusion, we make a further distinction:
+          
+            - direct explicit method: Only forward operators are required.
+            - indirect explicit method: The inverse operator is required.
+            - Diagonally Implicit Methods': Compared to explicit methods, 
+              the coefficient matrix formula has now non-zero entries on the 
+              diagonal. This means that each stage value depend on the stage 
+              derivative at the same stage, requiring an implicit step. 
+              However, the calculation of the different stage values is still 
+              uncoupled. Best known are the DIRK schemes.
+            - IMEX schemes: These schemes support the concept of being able to 
+              split right hand forcing term into an explicit and implicit 
+              component. This is useful in advection diffusion type problems 
+              where the advection is handled explicity and the diffusion is 
+              handled implicit.
+              
+          Choices supported by libhpc/nekkloud:
+          
+            "ForwardEuler"          Forward-Euler scheme
+            "BackwardEuler"         Backward Euler scheme
+            "IMEXOrder1"            IMEX 1st order scheme using Euler Backwards 
+                                    Euler Forwards
+            "IMEXOrder2"            IMEX 2nd order scheme using Backward 
+                                    Different Formula and Extrapolation
+            "IMEXOrder3"            IMEX 3rd order scheme using Backward 
+                                    Different Formula and Extrapolation
+            "DIRKOrder1"            Diagonally Implicit Runge-Kutta scheme of order 1
+            "ClassicalRungeKutta4"  4th order Runge Kutta scheme
+        </libhpc:documentation>
+        <tempss:item>IMEXOrder1</tempss:item>
+        <tempss:item>IMEXOrder2</tempss:item>
+        <tempss:item>IMEXOrder3</tempss:item>
+        <tempss:item>DIRKOrder1</tempss:item>
+        <tempss:item>ForwardEuler</tempss:item>
+        <tempss:item>BackwardEuler</tempss:item>
+        <tempss:item>ClassicalRungeKutta4</tempss:item>
+      </TimeIntegrationMethod>
+      <DiffusionAdvancement type="xs:string"  inputType="choice">
+        <libhpc:documentation>
+          Specifies whether diffusion is handled implicitly or explicitly in 
+          the time integration scheme. 
+          NB: In Cardiac Electrophysiology, the current code only supports 
+          Implicit integration of the diffusion term. The cell model is always 
+          integrated explicitly. In the Compressible solver, the current code 
+          only supports explicit integration.
+        </libhpc:documentation>
+        <tempss:item>Implicit</tempss:item>
+        <tempss:item>Explicit</tempss:item>
+      </DiffusionAdvancement>
+    </TimeIntegration>
+    <GlobalSysSolution optional="true">
+      <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
+      <MatrixInversion repeatable="true">
+        <Field type="xs:string">
+          <libhpc:documentation>The variable name for the field that this matrix inversion applies to.</libhpc:documentation>
+        </Field>
+        <InversionType paramType="choice">
+          <libhpc:documentation>The inversion type for this field.</libhpc:documentation>
+          <Direct>
+            <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <libhpc:documentation>
+              Invert the matrix iteratively using the conjugate gradient 
+              approach. Uses repeated matrix multiplication to converge to a 
+              solution to the matrix inverse problem rather than directly 
+              inverting the matrix.
+            </libhpc:documentation>
+            <SubStructuring type="xs:string" inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                The preconditioner uses linear algebra to bring the matrix 
+                into a form for which the conjugate gradient iterative 
+                algorithm converges faster. A perfect preconditioner would be 
+                the inverse of the matrix!
+                
+                LowEnergy: use for 3D elements with high polynomial order
+                BlockDiagonal: use for 2D elements with high polynomial order
+                Diagonal: use for anything else
+                LowEnergyWithLinearSpace: available for use on the pressure in 
+                                          3D flow simulation (rarely used)
+              </libhpc:documentation>
+              <tempss:item>LowEnergy</tempss:item>
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>BlockDiagonal</tempss:item>
+              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble">
+              <libhpc:documentation>
+                When SuccessiveRHS is set to true, a number of previous 
+                solutions to the linear solver are used to extrapolate an 
+                initial guess for the current solve.
+              </libhpc:documentation>
+            </SuccessiveRHS>
+            <IterativeSolverTolerance type="positiveDouble">
+              <libhpc:documentation>Required tolerance in solution when 
+              solving iteratively</libhpc:documentation>
+            </IterativeSolverTolerance>
+          </Iterative>
+          <Xxt>
+            <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                Substructuring allows the matrix to be reorganised into a form 
+                that is easier to invert.
+                  Full: the degrees of freedom from all elements are put 
+                    together into one big matrix.
+                  StaticCondensation: Using linear algebra, the matrix is 
+                    restructured so that all the degrees of freedom on element  
+                    boundaries come first. This gives a dense matrix in the top  
+                    left hand corner, and a series of block matrices elsewhere. 
+                    Then the Schur complement method is used to invert the matrix.
+              </libhpc:documentation>
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+  </NumericalAlgorithm>
+  <Admin>
+    <libhpc:documentation>
+      This section contains parameters that specify administrative details.
+    </libhpc:documentation>
+    <IO_CheckSteps type="xs:positiveInteger">
+      <libhpc:documentation>
+        The solution can be dumped out at regular intervals. This parameter 
+        specifies the number of time steps for this interval.
+      </libhpc:documentation>
+    </IO_CheckSteps>
+    <IO_InfoSteps type="xs:positiveInteger">
+      <libhpc:documentation>Specify the interval in time steps between each 
+      print out of the current solution time.</libhpc:documentation>
+    </IO_InfoSteps>
+  </Admin>
+</CardiacElectrophysiology>
