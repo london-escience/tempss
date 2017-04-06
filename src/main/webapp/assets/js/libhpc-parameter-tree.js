@@ -670,12 +670,7 @@ function isInteger(valueToCheck) {
         	log("A constraint element (optional element) has been modified - triggering solver...");
         	var templateName = treeRoot.find('> li.parent_li > span').data('fqname');
         	var templateId = $('#template-select option:selected').val();
-        	// FIXME: If redo data is available, triggering a constraint update
-        	// here should invalidate the redo stack since we are potentially 
-        	// taking the tree configuration down a different path. Ideally this
-        	// should be integrated into the main constraints library - however 
-        	// for now, we make the request to invalidate the redo stack here.
-        	constraints.checkInvalidateRedoData();
+
         	constraints.updateConstraints(templateName, templateId, $(elementUL).children('li.parent_li'));
         }
     };

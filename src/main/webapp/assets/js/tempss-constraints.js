@@ -1,7 +1,5 @@
 var constraints = {
-		
-	constraintUndoStack: [],
-	constraintRedoStack: [],
+
 	constraintChangeStack: [],
 	constraintChangeStackPointer: -1,
 	
@@ -160,10 +158,7 @@ var constraints = {
 		// content to send to the solver need references to all the constraint 
 		// elements in the tree. We get a list of these elements here
 		var constraintElements = this._getConstraintElements(templateName);
-		
-		// The solver will be run so we store undo information
-		this.storeConstraintData(constraintElements, this.constraintUndoStack, "undo");
-		
+				
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
 		// Create form data object to post the params to the server
@@ -258,7 +253,7 @@ var constraints = {
 							'">' + solutionValue + '</option>';
 						}
 						$selectEl.html(selectHTML);
-						this.revalidateChoiceElement($selectEl);
+						this._revalidateChoiceElement($selectEl);
 					}
 					// Else if we have an on/off node
 					else if($targetEl.children('span.toggle_button').length > 0) {
@@ -382,74 +377,13 @@ var constraints = {
 	},
 	
 	/**
-	 * Undo a constraint change. We maintain a stack of constraint changes and
-	 * this pops the stack and resets all constraint items to their previous
-	 * values. It is then necessary to trigger validation on these items. 
-	 */
-	undoConstraintChange: function(e) {
-		log("Undo constraint change requested.");
-		// Check the constraint stack has a size of >= 1 and if so, 
-		// pop the value and apply the data to the fields.
-		var size = this.constraintUndoStack.length;
-		if(size < 1) {
-			log("The undo stack is empty, there's nothing to undo.");
-			return;
-		}
-		
-		// Get the list of constraint elements - need to pass the template name
-		var templateName = window.treeRoot.find('> li.parent_li > span').data('fqname');
-		var constraintElements = this._getConstraintElements(templateName);
-		
-		// Store the current data to the redo stack
-		this.storeConstraintData(constraintElements, this.constraintRedoStack, "redo");
-		
-		// Pop the value and handle the data
-		var constraintData = this.constraintUndoStack.pop();
-		if(this.constraintUndoStack.length == 0)
-			$('#constraint-undo').addClass('disabled');
-				
-		this._processConstraintData(constraintData);
-	},
-	
-	/**
-	 * Redo a constraint change. We maintain a redo stack of constraint changes 
-	 * that is populated when an undo request is received. This function pops 
-	 * redo stack and applies the data. It also places the data on the undo 
-	 * stack so that the modification can be undone again. 
-	 */
-	redoConstraintChange: function(e) {
-		log("Redo constraint change requested.");
-		// Check the redo constraint stack has a size of >= 1 and if so, 
-		// pop the value and apply the data to the fields.
-		var size = this.constraintRedoStack.length;
-		if(size < 1) {
-			log("The redo stack is empty, there's nothing to redo.");
-			return;
-		}
-		
-		// Get the list of constraint elements - need to pass the template name
-		var templateName = window.treeRoot.find('> li.parent_li > span').data('fqname');
-		var constraintElements = this._getConstraintElements(templateName);
-		
-		// Store the current data to the undo stack
-		this.storeConstraintData(constraintElements, this.constraintUndoStack, "undo");
-		
-		// Pop the value from the redo stack and handle the data
-		var constraintData = this.constraintRedoStack.pop();
-		if(this.constraintRedoStack.length == 0)
-			$('#constraint-redo').addClass('disabled');
-		
-		this._processConstraintData(constraintData);
-	},
-	
-	/**
 	 * New function to undo a constraint change. Uses the unified undo/redo 
 	 * stack. We maintain a stack of constraint changes and when an undo 
 	 * request is made, this decrements the stack pointer and gets the 
 	 * previous state to display on the screen.
 	 * It is then necessary to trigger re-validation on the constraint items. 
 	 */
-	undoConstraintChangeNew: function(e) {
+	undoConstraintChange: function(e) {
 		log("NEW Undo constraint change requested.");
 		// Decrement the constraint stack pointer and get the data at that
 		// point in the stack. Apply this data into the tree.
@@ -479,7 +413,7 @@ var constraints = {
 	 * is received, we increment the stack pointer and get the state at this  
 	 * location to display in the UI.
 	 */
-	redoConstraintChangeNew: function(e) {
+	redoConstraintChange: function(e) {
 		log("NEW Redo constraint change requested.");
 		if(this.constraintChangeStackPointer == this.constraintChangeStack.length-1) {
 			log("Redo request: There is no future state. There is nothing to redo. ");
@@ -559,7 +493,7 @@ var constraints = {
 					valueHtml += '<option value="' + value + '" ' + title + '>' + text + '</option>\n';
 				}
 				$targetEl.children('select.choice').html(valueHtml);
-				this.revalidateChoiceElement($targetEl.children('select.choice'));
+				this._revalidateChoiceElement($targetEl.children('select.choice'));
 				break;
 			case "toggle":
 				// Get the current value of the toggle - if its the same as 
@@ -682,7 +616,7 @@ var constraints = {
 	 * triggers an update of constraints, calling the solver, which puts us
 	 * into a loop. See details below.
 	 */
-	revalidateChoiceElement: function($selectEl) {
+	_revalidateChoiceElement: function($selectEl) {
 		// Can't trigger change here since this will put is in
 		// an infinite loop since triggering change calls the 
 		// solver and then that would trigger another change to
@@ -714,28 +648,6 @@ var constraints = {
 			selectChoiceItem(event);
 		}
 
-	},
-
-	/**
-	 * This function checks whether we need to invalidate redo data. It is 
-	 * triggered (at present within the TemPSS core library code) when a change 
-	 * is made to a constraint field.
-	 * 
-	 *  We only invalidate the data if we are currently in a position where 
-	 *  the redo stack is not empty - that tells us that we gone back through 
-	 *  the change history by previously selecting undo.
-	 */
-	checkInvalidateRedoData: function() {
-		if(this.constraintRedoStack.length > 0)
-			this.clearRedoData();
-	},
-	
-	clearRedoData: function() {
-		this.constraintRedoStack.length = 0;
-		// Disable the redo button since there is no data for redo
-		if(!$('#constraint-redo').hasClass('disabled')) {
-			$('#constraint-redo').addClass('disabled');
-		}
 	},
 };
 window.constraints = constraints;

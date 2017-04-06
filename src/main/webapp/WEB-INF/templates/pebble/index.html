@@ -525,12 +525,12 @@
      	
 		$('#constraint-undo').on('click', function() {
 			if(window.hasOwnProperty('constraints'))
-				constraints.undoConstraintChangeNew();
+				constraints.undoConstraintChange();
 		});
 
 		$('#constraint-redo').on('click', function() {
 			if(window.hasOwnProperty('constraints'))
-				constraints.redoConstraintChangeNew();
+				constraints.redoConstraintChange();
 		});
         
         // Enable tooltips for dynamically added constraint link icons
