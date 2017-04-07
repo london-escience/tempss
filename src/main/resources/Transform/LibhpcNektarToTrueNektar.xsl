@@ -275,26 +275,30 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <!-- Possible inputs to nektar++ are:
             DirectFull, DirectStaticCond, DirectMultiLevelStaticCond, IterativeFull, 
             IterativeStaticCond, XxtFull, XxtStaticCond -->
-    <I PROPERTY="GlobalSysSoln">
-      <xsl:attribute name="VALUE">
-        <xsl:choose>
-          <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
-          <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
-          <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
-          <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
-          <!-- Options for revised GlobalSysSolution with separate InversionType block -->
-          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
-          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
-          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
-          <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
-          <xsl:otherwise>
-            <xsl:message terminate="yes">
-              Error: unhandled matrix inversion approach -> cannot set GlobalSysSoln
-            </xsl:message>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:attribute>
-    </I>
+    <xsl:if test="GlobalSysSolution">
+      <I PROPERTY="GlobalSysSoln">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
+            <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+            <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
+            <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+            <!-- Options for revised GlobalSysSolution with separate InversionType block -->
+            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
+            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
+            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+
+            <xsl:otherwise>
+              <xsl:message terminate="yes">
+                Error: unhandled matrix inversion approach -> cannot set GlobalSysSoln
+              </xsl:message>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SpectralhpDealiasing" VALUE="True" />
     </xsl:if>
