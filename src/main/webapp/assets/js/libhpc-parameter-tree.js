@@ -564,23 +564,12 @@ function isInteger(valueToCheck) {
             var siblings = $element.siblings('ul');
             var children = siblings.children('li');
         	//var children = $(element).siblings('ul').children('li');
-            // Just calling hide or show on the set of elements seems to be 
-            // failing for some reason - the function is only applied to the 
-            // first element where there are repeated elements...
             if (children.is(':visible')) {
-            	for(var i = 0; i < children.length; i++) {
-            		$(children[i]).hide('fast');
-            		//$(children[i]).hide();
-            	}
-            	// children.hide('fast');
-                // // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+                children.hide('fast');
+                // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
             } else {
-            	for(var i = 0; i < children.length; i++) {
-            		$(children[i]).show('fast');
-            		//$(children[i]).show();
-            	}
-            	//children.show('fast');
-                // //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+                children.show('fast');
+                //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
             }
         }
         event.stopPropagation();
@@ -596,32 +585,10 @@ function isInteger(valueToCheck) {
     };
 
     /**
-     * Enable / disable a branch with a toggle that can be turned on or off.
-     * 
-     * If constraints are in use and the branch has a set_by_constraint class
-     * then we display a message saying that the branch is restricted by a 
-     * constraint and cannot be changed 
+     * Disable a branch.
      */
     var toggleBranch = function(elementUL) {
-    	if($(elementUL).children("li.parent_li.constraint").length > 0 &&
-    			$(elementUL).children("li.parent_li.constraint").hasClass("set_by_constraint")) {
-    		BootstrapDialog.show({
-    			title: "Value change disabled by constraints",
-    			type: BootstrapDialog.TYPE_WARNING,
-    			message: "This node is constrained by other values in the " +
-    			         "template and cannot be changed. Reset the constraints " +
-    			         "or use the undo option to unrestrict this value.",
-    			buttons: [{
-    				icon: 'glyphicon glyphicon-remove',
-    				label: 'Close',
-    				action: function(dialog) {
-    					dialog.close();
-    				}
-    			}]
-    		});
-    		return;
-    	}
-    	if ($(elementUL).data('disabled') === true) {
+        if ($(elementUL).data('disabled') === true) {
             // Enable branch
             $(elementUL).removeClass('disabled')
                         .data('disabled', false)
@@ -640,7 +607,6 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', false).trigger('change');
                 // Expand branch
                 $(elementLI).children('ul').children('li').show('fast');
-                //$(elementLI).children('ul').children('li').show();
             });
         } else {
             // Disable branch
@@ -661,17 +627,7 @@ function isInteger(valueToCheck) {
                 $(elementLI).children('span').children('input').prop('disabled', true);
                 // Hide branch
                 $(elementLI).children('ul').children('li').hide('fast');
-                //$(elementLI).children('ul').children('li').hide();
             });
-        }
-        // Check if this optional element has a constraint class in which case
-        // it is part of a constraint relationship and we trigger the CS solver.
-        if($(elementUL).children('li.parent_li').hasClass("constraint")) {
-        	log("A constraint element (optional element) has been modified - triggering solver...");
-        	var templateName = treeRoot.find('> li.parent_li > span').data('fqname');
-        	var templateId = $('#template-select option:selected').val();
-
-        	constraints.updateConstraints(templateName, templateId, $(elementUL).children('li.parent_li'));
         }
     };
 
@@ -681,8 +637,6 @@ function isInteger(valueToCheck) {
     var repeatBranch = function(elementUL) {
         // Get the name of the item we're repeating
     	var $ul = $(elementUL);
-    	// FIXME: Don't think this is a correct way of counting the number
-    	// of elements! There may be no select element in a node being repeated!
     	var choice_path = $ul.find('select.choice').attr('choice-path');
     	
     	var $newElement = $ul.clone(true);
@@ -732,8 +686,8 @@ function isInteger(valueToCheck) {
         });
         */
         
-        // Now clear any previously populated fields in newElement and
-    	// reset the fields in the repeated block.
+        // Now clear any previously populated fields in newElement
+    	// Now reset the fields in the repeated block
     	var $inputItems = $newElement.find('input[type="text"]');
     	$inputItems.each(function() { $(this).val(""); });
     	var $selectItems = $newElement.find('select option');
@@ -742,20 +696,7 @@ function isInteger(valueToCheck) {
     	$validEl.each(function() {
     		$(this).removeClass('valid');
     	});
-    	// We also need to disable any optional fields that are set to enabled.
-    	// - find toggle buttons, find closest UL and see if its disabled, if 
-    	//   not, click the toggle to disable the field.
-    	$newElement.children('li.parent_li').find('ul i.disable_button').each(function() {
-    		var $parentUL = $(this).closest('ul');
-    		if(!$parentUL.hasClass("disabled")) {
-    			// Disable the node
-    			toggleBranch($parentUL);
-    		}
-    	});
 
-    	$ul.find('*').filter(function() {
-    		console.log("checking element <" + $(this).prop('tagName') + "> - display <" + $(this).css('display') + ">");
-    	})
         
     	// Copy this UL and insert into the tree directly after.
         if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
@@ -824,8 +765,7 @@ function isInteger(valueToCheck) {
                     // There is still a major issues with additional repeatable elements
                     // not expanding when clicked if they have a select box.
                     // Fix is applied below after the select.change()
-                    //$(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
-                    $(owningUL).find('li').attr('style', 'display: none;');
+                    $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
                     console.log('New UL: ', owningUL);
                 }
             }
@@ -1557,7 +1497,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             }
                             if (!(isStringEnumerationFound)) {
                                 $caller.markValidity("invalid",
-                                        {message: 'This property must have a value from the list: ' + value.join(", ")});
+                                        {message: 'This property must have a value from the list: ' + value.toString()});
                             }
                             break;
                         case "xs:filetype":
@@ -1573,7 +1513,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             if (!(extensionFound)) {
                                 // File is not valid after all
                                 $caller.markValidity("invalid",
-                                        {message: 'The filename must have an extension from the list: ' + value.join(", ")});
+                                        {message: 'The filename must have an extension from the list: ' + value.toString()});
                             }
                             break;
                     }
@@ -1597,7 +1537,6 @@ function selectChoiceItem(event) {
     // Without this, if the branch is repeated, making a selection results in 
     // all copies of the branch being expanded.
     var $parentUL = $selectElement.parent().parent();
-    var $parentLI = $selectElement.parent();
     
     // This relies on the option value being the same as the
     // text displayed <option value="text">text</option>
