@@ -192,9 +192,12 @@
   <xsl:template match="BoundaryCondition" mode="BoundaryConditions">
     <xsl:param name="mappings"/>
     
+    <xsl:variable name="bcname"><xsl:value-of select="BoundaryConditionName"/></xsl:variable>
+    
     <xsl:variable name="icount"><xsl:number/></xsl:variable>
+    
     <REGION>
-      <xsl:attribute name="REF"><xsl:value-of select="exslt:node-set($mappings)/@BCNAME"/></xsl:attribute>
+      <xsl:attribute name="REF"><xsl:value-of select="exslt:node-set($mappings)/MAPPING[@BCNAME=$bcname]/@ID"/></xsl:attribute>
         <xsl:apply-templates select="Variable" mode ="BCVariable"/>
     </REGION>
     
@@ -325,7 +328,7 @@
      -->
     <BOUNDARYCONDITIONS>
       <xsl:apply-templates select="BoundaryCondition" mode="BoundaryConditions">
-        <xsl:with-param name="mappings" select="exslt:node-set($br)/REGIONSANDMAPPINGS/MAPPING"/>
+        <xsl:with-param name="mappings" select="exslt:node-set($br)/REGIONSANDMAPPINGS"/>
       </xsl:apply-templates>
       <!-- 
       <xsl:for-each select="exslt:node-set($bc)/*">
@@ -354,6 +357,11 @@
     <xsl:param name="bcname"/>
     <xsl:if test="BoundaryCondition = $bcname">
       <xsl:choose>
+        <!-- Updated this to generate composite data as a series of 
+             comma-separated values rather than using a hyphen for a group of 
+             contiguous boundary condition IDs 
+        -->
+      	<!--
         <xsl:when test="(position() = 1) and (position != last())">
           <xsl:text></xsl:text><xsl:value-of select="CompositeID"/>
         </xsl:when>
@@ -362,6 +370,13 @@
         </xsl:when>
         <xsl:when test="position() = last()">
           <xsl:text>-</xsl:text><xsl:value-of select="CompositeID"/>
+        </xsl:when>
+        -->
+        <xsl:when test="position() = 1">
+          <xsl:text></xsl:text><xsl:value-of select="CompositeID"/>
+        </xsl:when>
+        <xsl:when test="position() > 1">
+          <xsl:text>,</xsl:text><xsl:value-of select="CompositeID"/>
         </xsl:when>
     </xsl:choose>
     </xsl:if>
