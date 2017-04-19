@@ -264,7 +264,8 @@ function isInteger(valueToCheck) {
                 this._mandatoryULs = this._tree.find('ul[data-optional="false"]');
                 this._optionalLIs = this._optionalULs.children('li.parent_li');
                 // Cache all lis
-                this._allLIs = this._tree.find('li');
+                //this._allLIs = this._tree.find('li');
+                this.updateLIs();
                 // Cache uls which are choices
                 this._choiceULs = this._tree.find('ul[choice-id]');
                 // Cache repeatable uls and lis
@@ -481,11 +482,17 @@ function isInteger(valueToCheck) {
             convertProfile: function(successCallback, errorCallback) {
                 var profileXml = getXMLProfile();
                 _processProfile(profileXml, templateId);
+            },
+            
+            /**
+             * Update the list of LIs stored for this profile.
+             */
+            updateLIs: function() {
+            	this._allLIs = this._tree.find('li');
             }
     };
 
-    // Private functions
-
+    // Private functions    
     /**
      * Generate XML for a given node in the tree.
      * This operates recursively.
@@ -760,6 +767,13 @@ function isInteger(valueToCheck) {
      * @param $xmlTree jQuery xml object containing xml tree.
      */
     var loadXMLIntoTree = function($xmlElement, $parentHTMLElement) {
+    	_loadXMLIntoTree($xmlElement, $parentHTMLElement);
+    	// Update the list of LIs so that collapsing/expanding the tree 
+    	// operates correctly
+    	$templateContainer.data('plugin_LibhpcParameterTree').updateLIs();
+    }
+
+    var _loadXMLIntoTree = function($xmlElement, $parentHTMLElement) {
         $xmlElement.children().each(function() {
             var nodeName = $(this).prop('nodeName');
             // TODO - if disabled then activate, as must have been active
@@ -888,7 +902,7 @@ function isInteger(valueToCheck) {
             // This leaf has been loaded
             $owningUL.data('loaded', true);
 
-            loadXMLIntoTree($(this), $elementLI);
+            _loadXMLIntoTree($(this), $elementLI);
         });
     };
     
@@ -1193,8 +1207,8 @@ function processGeometryFile(event, path, selectedFile, reader) {
         
         var $boundaryDetails = $geomElement.parent().parent().parent().parent().find('ul li.parent_li[data-fqname="BoundaryDetails"]');
         log("Boundary details: " + $boundaryDetails);
-        // See if the BoundaryCondition(s) node(s) have display:none set. If 
-        // they do, then we also make the BoundaryRegion elements hidden.
+
+        // Get the boundary condition nodes
         var $boundaryCondition = $boundaryDetails.find('li.parent_li[data-fqname="BoundaryCondition"]');
         
         // Before we generate any new boundary regions, we remove any existing 
@@ -1204,6 +1218,14 @@ function processGeometryFile(event, path, selectedFile, reader) {
         	$(this).parent().remove();
         });
         
+        // If the BoundaryDetails node is not expanded, we expand it now so 
+        // that at least the base BoundaryCondition nodes are visible.
+        if($boundaryDetails.children('ul').length) {
+        	var $li = $boundaryDetails.find('> ul > li.parent_li').first();
+        	if($li.is(":hidden")) {
+        		$boundaryDetails.children('span.badge-success').trigger('click');
+        	}
+        }
         var display = ($($boundaryCondition[0]).css("display") == "none") ? false : true;
         for(var i = 0; i < boundaryRegions.length; i++) {
         	var id = boundaryRegions[i]['compositeID'];
@@ -1232,6 +1254,10 @@ function processGeometryFile(event, path, selectedFile, reader) {
         // to fill out details of any boundary conditions that have already 
         // been created.
         updateBoundaryRegions(null, true);
+        
+        // Now regenerate the list of LI nodes so that node collapse/expand
+        // works correctly.
+        $templateContainer.data('plugin_LibhpcParameterTree').updateLIs();
     }
     reader.readAsText(selectedFile);
 }
