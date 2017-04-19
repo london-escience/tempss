@@ -565,10 +565,13 @@ function isInteger(valueToCheck) {
             var children = siblings.children('li');
         	//var children = $(element).siblings('ul').children('li');
             if (children.is(':visible')) {
-                children.hide('fast');
+                //children.hide('fast');
+                children.hide();
                 // $(element).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
             } else {
-                children.show('fast');
+                //children.show('fast');
+            	// Testing show without animation due to multiple branch display issue
+            	children.show();
                 //$(element).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
             }
         }
@@ -606,7 +609,9 @@ function isInteger(valueToCheck) {
                 $(elementLI).children(':input').prop('disabled', false).trigger('change');
                 $(elementLI).children('span').children('input').prop('disabled', false).trigger('change');
                 // Expand branch
-                $(elementLI).children('ul').children('li').show('fast');
+                //$(elementLI).children('ul').children('li').show('fast');
+                // Testing show without animation due to multiple branch display issue
+                $(elementLI).children('ul').children('li').show();
             });
         } else {
             // Disable branch
@@ -626,7 +631,8 @@ function isInteger(valueToCheck) {
                 $(elementLI).children(':input').prop('disabled', true);
                 $(elementLI).children('span').children('input').prop('disabled', true);
                 // Hide branch
-                $(elementLI).children('ul').children('li').hide('fast');
+                //$(elementLI).children('ul').children('li').hide('fast');
+                $(elementLI).children('ul').children('li').hide();
             });
         }
     };
@@ -696,7 +702,6 @@ function isInteger(valueToCheck) {
     	$validEl.each(function() {
     		$(this).removeClass('valid');
     	});
-
         
     	// Copy this UL and insert into the tree directly after.
         if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
@@ -706,6 +711,16 @@ function isInteger(valueToCheck) {
         	$newElement.insertAfter($ul);
         }
         
+        // Find any on/off elements in the new block and switch them off so 
+    	// that they validate as correct by default
+    	var $toggleButtons = $newElement.children('li.parent_li').children('ul').find('i.toggle_button');
+    	$toggleButtons.each(function() {
+    		if($(this).hasClass('disable_button')) {
+    			log("Disabling repeatable element in new block...");
+    			$(this).trigger('click');
+    		}
+    	});
+        
         $newElement.trigger('change');
     };
 
@@ -714,6 +729,29 @@ function isInteger(valueToCheck) {
      */
     var removeBranch = function(elementUL) {
         $(elementUL).remove();
+    };
+    
+    /**
+     * Expand a branch - check to see if it is already expanded and if not, 
+     * trigger a click to expand it
+     */
+    var expandBranch = function($elementLI) {
+    	// If a node is optional and is disabled, don't bother making checks 
+    	// to expand it
+    	var $toggle = $elementLI.children('span.toggle_button');
+    	if($toggle.length > 0 && $elementLI.closest('ul').data('disabled')) {
+    		return;
+    	}
+    	
+    	// The li.parent_li element of one of the node's descendants needs to 
+    	// be tested for visiblity since the parent ul node will always report 
+    	// as being visible.
+    	var $nodes = $elementLI.find('> ul > li.parent_li');
+    	if($nodes.length > 0) {
+    		if($($nodes[0]).is(":hidden")) {
+    			$elementLI.children('span.badge').trigger('click');
+    		}
+    	}
     };
     
     /**
@@ -741,56 +779,80 @@ function isInteger(valueToCheck) {
                 console.log('Got unit: ' + unit);
             }
             var elementLI = getTreeLiElement($parentHTMLElement, nodeName);
-            var owningUL = $(elementLI).parent('ul');
+            var $elementLI = $(elementLI);
+            var $owningUL = $($elementLI.parent('ul'));
+            
+            // If we're dealing with an element that is not already loaded, 
+            // trigger a click on the node to expand it...
+            // If the element already has a loaded flag then we'll be creating 
+            // a duplicate and we trigger the click to expand that separately 
+            // when the duplicate is created.
+            if( ($owningUL.data('loaded') === undefined) || 
+            	($owningUL.data('loaded') === false) ) {
+            	expandBranch($elementLI);
+            	//$elementLI.children('span.badge').trigger('click');
+            }
+            
             // Activate element if disabled
-            if ($(owningUL).data('disabled') === true) {
+            if ($owningUL.data('disabled') === true) {
                 console.log('Toggling branch');
-                toggleBranch(owningUL);
+                toggleBranch($owningUL[0]);
             }
             // Check to see if this has been populated already (for repeated elements).
             // If so need to create another.
-            if ($(owningUL).data('loaded') === true) {
-                console.log('Branch already populated: ', owningUL);
-                if ($(owningUL).data('max-occurs') != 1) {
-                	//repeatBranch(owningUL);
-                	$(elementLI).children('span.repeat_button_add').click();
+            if ($owningUL.data('loaded') === true) {
+                console.log('Branch already populated: ', $owningUL);
+                if ($owningUL.data('max-occurs') != 1) {
+                	//repeatBranch($owningUL[0]);
+                	$elementLI.children('span.repeat_button_add').click();
                     
-                    //$(owningUL).find('*').removeData('loaded');
+                    //$owningUL.find('*').removeData('loaded');
                     elementLI = getTreeLiElement($parentHTMLElement, nodeName);
+                    $elementLI = $(elementLI);
                     
-                    owningUL = $(elementLI).parent('ul');
-                    //$(owningUL).show('fast');
-                    $(owningUL).find('ul').removeData('loaded')
+                    $owningUL = $($elementLI.parent('ul'));
+                    //$owningUL.show('fast');
+                    $owningUL.find('ul').removeData('loaded')
+                    
+                    // Trigger a click to expand the newly generated element
+                    // if it has not been generated in an expanded state...
+                    expandBranch($elementLI);
+                    
+                    // We now disable any optional elements in the new branch
+                    // These will be enabled if data in a profile specifies 
+                    // that they have data.
+                    
+                    
                     // This attempt to set the styles doesn't seem to be working correctly
                     // There is still a major issues with additional repeatable elements
                     // not expanding when clicked if they have a select box.
                     // Fix is applied below after the select.change()
-                    $(owningUL).find('li').removeAttr('style').attr('style', 'display: list-item;');
-                    console.log('New UL: ', owningUL);
+                    $owningUL.find('li').removeAttr('style').attr('style', 'display: list-item;');
+                    console.log('New UL: ', $owningUL[0]);
                 }
             }
-            var isLeaf = ($(owningUL).data('leaf') === true);
+            var isLeaf = ($owningUL.data('leaf') === true);
             if (isLeaf) {
-                if ($(elementLI).children('input').length) {
+                if ($elementLI.children('input').length) {
                     // Set the entry and call the onchange function
-                    $(elementLI).children('input[data-unit!="true"]').val(textValue).change();
+                    $elementLI.children('input[data-unit!="true"]').val(textValue).change();
                     // Set the unit if one exists in XML
                     if (unit) {
-                        $(elementLI).children('input[data-unit="true"]').val(unit).change();
+                        $elementLI.children('input[data-unit="true"]').val(unit).change();
                     }
                 }
                 // If it's a dropdown select box, get the selection
-                if ($(elementLI).children('select').length) {
-                    $(elementLI).children('select').val(textValue).change();
+                if ($elementLI.children('select').length) {
+                    $elementLI.children('select').val(textValue).change();
                 }
                 // Might also be dropdown select for Default or Specified
-                parentLI = $(elementLI).parent('ul').parent('li');
+                parentLI = $elementLI.parent('ul').parent('li');
                 if ($(parentLI).children('select').length) {
                     $(parentLI).children('select').val(nodeName).change();
                 }
             }
             // If it's a choice via dropdown select but not a leaf
-            if (!isLeaf && $(elementLI).children('select').length) {
+            if (!isLeaf && $elementLI.children('select').length) {
                 // We have a selection (choice) element. Get the child node  
             	// name since we will set the select to this value. There  
             	// should be only one child node
@@ -806,17 +868,17 @@ function isInteger(valueToCheck) {
                 }
                 else {
                 	var childSelect = childSelectList[0];
-                	$(elementLI).children("select").val(childSelect.nodeName).change();
+                	$elementLI.children("select").val(childSelect.nodeName).change();
                 	
                 	// If this select is part of a repeated block then we need
                 	// to apply the fix that updates the style attributes since
                 	// cloning a hidden element seems to include some unwanted
                 	// values that prevent the block from being displayed later.
-                	var $parentRepeat = $(elementLI).closest('[data-repeat]')
+                	var $parentRepeat = $elementLI.closest('[data-repeat]')
                 	if($parentRepeat.length) {
                 		var repeatVal = parseInt($parentRepeat.attr('data-repeat'),10);
                 		if(repeatVal > 1) {
-                			var $choiceElement = $(elementLI).find('li.parent_li[data-fqname="' + childSelect.nodeName + '"]').parent();
+                			var $choiceElement = $elementLI.find('li.parent_li[data-fqname="' + childSelect.nodeName + '"]').parent();
                 			fixRepeatedChoiceElementStyles($choiceElement);
                 		}
                 	}
@@ -824,9 +886,9 @@ function isInteger(valueToCheck) {
             }
 
             // This leaf has been loaded
-            $(owningUL).data('loaded', true);
+            $owningUL.data('loaded', true);
 
-            loadXMLIntoTree($(this), $(elementLI));
+            loadXMLIntoTree($(this), $elementLI);
         });
     };
     
@@ -1548,12 +1610,16 @@ function selectChoiceItem(event) {
     var $selectedUL = $parentUL.find('ul[path="' + fullPath + '"]');
 
     // Expand the selected branch in the tree
-    $selectedUL.show('fast');
+    //$selectedUL.show('fast');
+    $selectedUL.show();
     // Keep a record this choice was made to aid xml generation
     $selectedUL.attr('chosen', 'true');
-    $selectedUL.children().show('fast');
-    $selectedUL.children().children().show('fast');
-    $selectedUL.children().children().children().show('fast');
+    //$selectedUL.children().show('fast');
+    //$selectedUL.children().children().show('fast');
+    //$selectedUL.children().children().children().show('fast');
+    $selectedUL.children().show();
+    $selectedUL.children().children().show();
+    $selectedUL.children().children().children().show();
     // Hide the none-selected branches
     $selectedUL.siblings("ul").hide();
     $selectedUL.siblings("ul").attr('chosen', 'false');
