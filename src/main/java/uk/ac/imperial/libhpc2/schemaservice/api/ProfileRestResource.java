@@ -219,17 +219,17 @@ public class ProfileRestResource {
                     InputStream fileXmlStream = fileFields.get(i).getValueAs(InputStream.class);
                     String fileXml = IOUtils.toString(fileXmlStream);
 
-                    // FIXME: With the revised support for Nektar++ native
-                    // geometries, the geometry file may contain a NEKTAR 
-                    // element as the root rather than the previous custom 
-                    // GeomtryAndBoundaryConditions. To maintain support with 
-                    // both approaches, if we have a native geometry, we strip 
-                    // the start and end of the data to retain only the content 
-                    // between the <NEKTAR></NEKTAR> tags. The GEOMETRY is then 
-                    // processed in the LibhpcNektarToTrueNektar XSLT.
+                    // With the revised support for Nektar++ native geometries, the geometry file must contain a NEKTAR 
+                    // element as the root rather than the previous custom GeomtryAndBoundaryConditions element. To 
+                    // maintain support with both approaches, if we have a native geometry, we strip the start and end 
+                    // of the data to retain only the content between the <NEKTAR></NEKTAR> tags. This removes any
+                    // XML header in the file and also removes any namespace definitions on the root NEKTAR element 
+                    // that seem to cause issues when embedding the content into the main profile and running it 
+                    // through the XSLT transformer. An empty <NEKTAR></NEKTAR> element wrapper is re-inserted.
+                    // (If we've received a geometry in the old format the file is inserted as is - no changes are made) 
                     if(fileXml.indexOf("<NEKTAR") != -1) {
-                    	fileXml = fileXml.substring(fileXml.indexOf("<GEOMETRY"),
-                    								fileXml.indexOf("</GEOMETRY>")+11);
+                    	fileXml = "<NEKTAR>" + fileXml.substring(fileXml.indexOf("<GEOMETRY"),
+                    								fileXml.indexOf("</GEOMETRY>")+11) + "</NEKTAR>";
                     }
                     
                     // Embed file in profile. File name appears in lower case 
