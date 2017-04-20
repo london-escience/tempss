@@ -125,6 +125,7 @@
                       <xs:restriction base="xs:string">
                         <xs:enumeration value="TimeDependent"/>
                         <xs:enumeration value="HighOrderPressure - INS Only"/>
+                        <xs:enumeration value="IsentropicVortex - CFS Only"/>
                       </xs:restriction>
                     </xs:simpleType>
                   </xs:element>
