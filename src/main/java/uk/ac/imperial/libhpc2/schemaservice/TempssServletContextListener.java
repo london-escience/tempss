@@ -162,6 +162,15 @@ public class TempssServletContextListener implements ServletContextListener {
 	                	
 	                }
                 }
+                
+                // For some templates, it may be the case that they're used by third-party tools
+                // and are not designed to be shown in the TemPSS template UI. To support this, 
+                // a template properties file can contain a <template-name>.ignore key and the 
+                // template will be added to the ignore list
+                if(props.containsKey(comp+".ignore")) {
+                	TempssConfig.getInstance().getIgnorePatterns().add(comp);
+                }
+                
                 TempssObject obj = new TempssObject(comp, name, schema, transform, constraints);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
                 componentMap.put(comp, obj);
