@@ -56,17 +56,28 @@ public class TempssObject {
     private String _schema;
     private String _transform;
     private String _constraints;
+    private boolean _ignore;
 
+    
     public TempssObject(String id, String name, String schema, String transform) {
-    	this(id, name, schema, transform, null);
+    	this(id, name, schema, transform, null, false);
+    }
+    
+    public TempssObject(String id, String name, String schema, String transform, boolean ignore) {
+    	this(id, name, schema, transform, null, ignore);
     }
     
     public TempssObject(String id, String name, String schema, String transform, String constraints) {
+    	this(id, name, schema, transform, constraints, false);
+    }
+    
+    public TempssObject(String id, String name, String schema, String transform, String constraints, boolean ignore) {
     	this._id = id;
         this._name = name;
         this._schema = schema;
         this._transform = transform;
         this._constraints = constraints;
+        this._ignore = ignore;
     }
     
     public TempssObject(TempssObject pObj) {
@@ -75,39 +86,57 @@ public class TempssObject {
         this._schema = pObj.getSchema();
         this._transform = pObj.getTransform();
         this._constraints = pObj.getConstraints();
+        this._ignore = pObj.ignore();
     }
 
     public String getId() {
         return _id;
     }
+    
     public void setId(String id) {
         this._id = id;
     }
+    
     public String getName() {
         return _name;
     }
+    
     public void setName(String name) {
         this._name = name;
     }
+    
     public String getSchema() {
         return _schema;
     }
+    
     public void setSchema(String schema) {
         this._schema = schema;
     }
+    
     public String getTransform() {
         return _transform;
     }
+    
     public void setTransform(String transform) {
         this._transform = transform;
     }
+    
     public String getConstraints() {
         return _constraints;
     }
+    
     public void setConstraints(String constraints) {
         this._constraints = constraints;
     }
-
+    
+    public boolean ignore() {
+    	return this._ignore;
+    }
+    
+    public void setIgnore(boolean ignore) {
+    	this._ignore = ignore;
+    }
+    
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
@@ -116,6 +145,7 @@ public class TempssObject {
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());
         s.append("\n\tConstraints: " + getConstraints());
+        s.append("\n\tIgnore template? " + ((ignore()) ? "YES" : "NO"));
         return s.toString();
     }
 }

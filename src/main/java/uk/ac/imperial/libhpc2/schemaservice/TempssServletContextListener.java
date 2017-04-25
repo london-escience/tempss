@@ -179,7 +179,10 @@ public class TempssServletContextListener implements ServletContextListener {
         
         // Now compare the IDs to the ignore patterns obtained from the 
         // tempss configuration and remove any components to be ignored.
-		_updateComponentMap(componentMap.keySet(), ignorePatterns);
+        // UPDATE Apr 17: This updating of the component map has been modified to
+        // set the ignore flag on a tempss object rather than removing it from the
+        // componentMap altogether.
+		_updateComponentMap(componentMap.keySet(), ignorePatterns, componentMap);
         pContext.getServletContext().setAttribute("components", componentMap);
         
     }
@@ -189,7 +192,8 @@ public class TempssServletContextListener implements ServletContextListener {
     }
     
     private void _updateComponentMap(
-    			Set<String> pComponents, List<String> pIgnorePatterns) {
+    			Set<String> pComponents, List<String> pIgnorePatterns,
+    			Map<String, TempssObject> pComponentMap) {
     	
     	Set<String> removeSet = new HashSet<String>();
     	for(String pattern : pIgnorePatterns) {
@@ -209,8 +213,13 @@ public class TempssServletContextListener implements ServletContextListener {
     	}
     	// The component IDs are a keySet obtained from the component Map. They
     	// maintain a two-way binding with the component map so calling
-    	// removeAll on the keySet removes 
-    	pComponents.removeAll(removeSet);
+    	// removeAll on the keySet removes the associated items from the map
+    	// pComponents.removeAll(removeSet);
+    	// UPDATE Apr 17: Instead of removing items from component map we now lookup
+    	// each item in the removeSet and set its ignore flag to true.
+    	for(String id : removeSet) {
+    		pComponentMap.get(id).setIgnore(true);
+    	}
     }
     
     private File[] getResourceFiles(ServletContextEvent pContext, String pPath, 
