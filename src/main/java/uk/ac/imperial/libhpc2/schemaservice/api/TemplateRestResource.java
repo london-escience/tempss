@@ -116,6 +116,7 @@ public class TemplateRestResource {
 
     	JSONArray componentList = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             JSONObject componentObj = new JSONObject();
             try {
                 componentObj.put("id", component.getId());
@@ -148,6 +149,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append("[" + component.getId() + ", "
                       + component.getName() + ", "
                       + component.getSchema() + ", "
@@ -165,6 +167,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append(component.getName() + "\n");
         }
         return sb.toString();
@@ -179,6 +182,7 @@ public class TemplateRestResource {
 
         JSONArray componentNames = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             componentNames.put(component.getName());
         }
         return componentNames.toString();
@@ -193,6 +197,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append(component.getId() + "\n");
         }
         return sb.toString();
@@ -207,6 +212,7 @@ public class TemplateRestResource {
 
         JSONArray componentNames = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             componentNames.put(component.getId());
         }
         return componentNames.toString();
