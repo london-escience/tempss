@@ -96,6 +96,7 @@ File (MCF) for NekMesh.
       </xs:annotation>
     </xs:element>
       <xs:element name="MeshType">
+      <xs:complexType>
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>
@@ -121,6 +122,7 @@ BoundaryLayer: A mesh with boundary layer surfaces specified.
         </xs:annotation>
       </xs:element>
     </xs:choice>
+    </xs:complexType>
       </xs:element>
     </xs:sequence>
 </xs:complexType>
