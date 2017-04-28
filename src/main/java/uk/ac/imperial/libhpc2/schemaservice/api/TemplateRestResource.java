@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -239,7 +240,8 @@ public class TemplateRestResource {
     @GET
     @Produces("application/json")
     @Path("id/{templateId}")
-    public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId) {
+    public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId,
+    		@Context HttpServletRequest request) {
     	String templateHtml = "";
     	TempssObject metadata = null;
     	try {
@@ -253,7 +255,7 @@ public class TemplateRestResource {
     	}
     	
     	JSONObject templateObj = new JSONObject();
-        try {
+        try {        	
         	// Keys used for compatibility with old API
             templateObj.put("ComponentName", templateId);
             templateObj.put("TreeHtml", templateHtml);

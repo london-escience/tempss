@@ -20,6 +20,10 @@
 	        class="uk.ac.imperial.libhpc2.schemaservice.security.TempssAuthFailureHandler">
 	</b:bean>
 	
+	<b:bean id="tempssCsrfRequestMatcher" 
+	        class="uk.ac.imperial.libhpc2.schemaservice.security.TempssCsrfRequestMatcher">
+	</b:bean>
+	
 	<b:bean id="messageSource"
 	         class="org.springframework.context.support.ResourceBundleMessageSource">
 	    <b:property name="basenames">
@@ -38,7 +42,10 @@
 		            authentication-failure-handler-ref="tempssAuthFailureHandler" />
 		     <!-- authentication-failure-url="/profiles/signin"  -->
 		 <logout logout-url="/logout" success-handler-ref="logoutSuccessHandler" />
+		 <!--Reference to the request matcher that defines which URLs use CSRF protection -->
+		 <csrf request-matcher-ref="tempssCsrfRequestMatcher" />
 	</http>
+	 
 	
 	<b:bean id="tempssLdapContextMapper" 
             class="uk.ac.imperial.libhpc2.schemaservice.security.TempssLdapContextMapper"/>
