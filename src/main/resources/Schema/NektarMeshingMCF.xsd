@@ -23,9 +23,10 @@ File (MCF) for NekMesh.
   </xs:simpleContent>
 </xs:complexType>
   
-<xs:complexType name="EulerMesh"/>
+<xs:complexType name="Mesh2D"/>
+<xs:complexType name="Mesh3D"/>
 
-<xs:complexType name="BoundaryLayerMesh">
+<xs:complexType name="BoundaryLayerMeshType">
     <xs:sequence>
       <xs:element name="BoundaryLayerSurfaces" type="xs:string">
         <xs:annotation>
@@ -100,24 +101,40 @@ File (MCF) for NekMesh.
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>
-The type of mesh to generate -- Euler: An Euler mesh without boundary layer surfaces.
-BoundaryLayer: A mesh with boundary layer surfaces specified.
+The type of mesh to generate -- 2D: A 2D mesh without boundary layer surfaces;
+3D: A 3D mesh without boundary layer surfaces; 2DBoundaryLayer: A 2D mesh 
+with boundary layer surfaces specified; 3DBoundaryLayer: A 3D mesh with  
+boundary layer surfaces specified 
             </libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
         <xs:choice>
-      <xs:element name="Euler" type="EulerMesh">
+      <xs:element name="Mesh2D" type="Mesh2D">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>Euler mesh without boundary layers.</libhpc:documentation>
+            <libhpc:documentation>2D mesh without boundary layers.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayer" type="BoundaryLayerMesh">
+      <xs:element name="Mesh3D" type="Mesh3D">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>Mesh with boundary layers.</libhpc:documentation>
+            <libhpc:documentation>3D mesh without boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerMesh2D" type="BoundaryLayerMeshType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>2D mesh with boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerMesh3D" type="BoundaryLayerMeshType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>3D mesh with boundary layers.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
