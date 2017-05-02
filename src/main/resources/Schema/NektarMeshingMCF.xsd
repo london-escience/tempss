@@ -22,6 +22,33 @@ File (MCF) for NekMesh.
     </xs:extension>
   </xs:simpleContent>
 </xs:complexType>
+
+<xs:simpleType name="nacaCode">
+  <xs:restriction base="xs:string">
+    <xs:pattern value="^[0-9][0-9][0-9][0-9]$"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="CADSourceType">
+  <xs:choice>
+    <xs:element name="CADFile" type="stepFileName">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="NACAAirfoilCode" type="nacaCode">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:choice>
+</xs:complexType>
   
 <xs:complexType name="Mesh2D"/>
 <xs:complexType name="Mesh3D"/>
@@ -37,6 +64,31 @@ File (MCF) for NekMesh.
           </xs:appinfo>
         </xs:annotation>        
       </xs:element>
+      <xs:element name="BoundaryLayerLayers" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the number of boundary layers.
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+      </xs:element>
+      <xs:element name="BoundaryLayerThickness" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="BoundaryLayerProgression" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation></libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
     </xs:sequence>
 </xs:complexType>
 
@@ -74,10 +126,31 @@ File (MCF) for NekMesh.
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
-    <xs:element name="BoundaryLayerThickness" type="xs:double">
+  </xs:sequence>
+</xs:complexType>
+    
+<xs:complexType name="AdditionalParameters">
+  <xs:sequence>
+    <xs:element name="SurfaceOptimiser" minOccurs="0" maxOccurs="1">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+          <libhpc:documentation>Turn on surface mesh optimisation</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="VariationalOptimiser" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Turn on variational optimiser</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="WriteOctree" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation></libhpc:documentation>
           <libhpc:units></libhpc:units>
         </xs:appinfo>
       </xs:annotation>
@@ -85,18 +158,16 @@ File (MCF) for NekMesh.
   </xs:sequence>
 </xs:complexType>
 
-
 <xs:complexType name="MeshConfiguration">
     <xs:sequence>
-    <xs:element name="CADFile" type="stepFileName">
+    <xs:element name="CADSource" type="CADSourceType">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
-          <libhpc:units></libhpc:units>
+          <libhpc:documentation>Set the source of the CAD geometry for the mesh to be generated. This may be a STEP file that you provide or a NACA 4-digit code that is used to generate a NACA airfoil geometry.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
-      <xs:element name="MeshType">
+    <xs:element name="MeshType">
       <xs:complexType>
         <xs:annotation>
           <xs:appinfo>
@@ -166,6 +237,13 @@ The base element for a NekMesh mesh configuration that is used to provide the pa
           <xs:annotation>
             <xs:appinfo>
               <libhpc:documentation>This section contains the meshing metadata describing the specific properties of the mesh to be generated from the CAD model.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AdditionalParameters" type="AdditionalParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Additional boolean parameters for switching optimisation and octree writing on/off.</libhpc:documentation>
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
