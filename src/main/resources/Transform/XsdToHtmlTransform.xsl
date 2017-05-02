@@ -312,6 +312,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:value-of select="xs:pattern/@value"/>
             <xsl:text>"}');</xsl:text>
           </xsl:attribute>
+          <xsl:attribute name="name">
+            <xsl:value-of select="../@name"/>
+          </xsl:attribute>
         </input>
       </xsl:when>
       <xsl:otherwise>
