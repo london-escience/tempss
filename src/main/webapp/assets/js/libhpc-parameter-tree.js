@@ -1604,6 +1604,29 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                                         {message: 'The filename must have an extension from the list: ' + value.toString()});
                             }
                             break;
+                        case "xs:pattern":
+                        	// handling a regex provided to valid the content
+                        	// This is currently configured to support 
+                        	// validationTypes of xs:string:regex
+                        	if(!validationType == "xs:string:regex") {
+                        		log("ERROR: The validation type <" + validationType 
+                        				+ "> is not currently supported for regex validation");
+                        		return;
+                        	}
+                        	var inputValue = $caller.val();
+                        	// value is the regex value from the JSON
+                        	// Create a regex object using the regex from the JSON restriction data
+                        	var regex = new RegExp(value, "g");
+                        	// See if value matches the regex
+                        	if(!inputValue.match(regex)) {
+                        		$caller.markValidity("invalid",
+                                        {message: 'The value provided does not match the required value pattern: ' + value.toString()});
+                        	}
+                        	else {
+                        		$caller.markValidity("valid");
+                        	}
+                        	break;
+
                     }
                 });
             }
