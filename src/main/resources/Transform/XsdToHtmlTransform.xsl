@@ -302,32 +302,47 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   </xsl:template>
 
   <xsl:template match="xs:restriction[@base='xs:string']" mode="findChildNodes">
-    <select class="choice">
-      <xsl:attribute name="onchange">
-        <xsl:text>validateEntries($(this), '</xsl:text>
-        <xsl:value-of select="@base"/>
-        <xsl:text>', '{"xs:enumeration": [</xsl:text>
-        <xsl:call-template name="process-enumeration-restrictions">
-          <xsl:with-param name="elements-to-process"
-                          select="child::*"/>
-        </xsl:call-template>
-        <xsl:text>]}');</xsl:text>
-      </xsl:attribute>
-      <option value="Select from list">Select from list</option>
-      <xsl:for-each select="xs:enumeration">
-        <option>
-          <xsl:attribute name="value">
-            <xsl:value-of select="@value"/>
+    <xsl:choose>
+      <xsl:when test="xs:pattern">
+        <input type="text">
+          <xsl:attribute name="onchange">
+            <xsl:text>validateEntries($(this), '</xsl:text>
+            <xsl:value-of select="@base"/><xsl:text>:regex'</xsl:text>
+            <xsl:text>, '{"xs:pattern": "</xsl:text>
+            <xsl:value-of select="xs:pattern/@value"/>
+            <xsl:text>"}');</xsl:text>
           </xsl:attribute>
-          <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
-            <xsl:attribute name="title">
-              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation"/>
-            </xsl:attribute>
-          </xsl:if>
-          <xsl:value-of select="@value"/>
-        </option>
-      </xsl:for-each>
-    </select>
+        </input>
+      </xsl:when>
+      <xsl:otherwise>
+        <select class="choice">
+          <xsl:attribute name="onchange">
+            <xsl:text>validateEntries($(this), '</xsl:text>
+            <xsl:value-of select="@base"/>
+            <xsl:text>', '{"xs:enumeration": [</xsl:text>
+            <xsl:call-template name="process-enumeration-restrictions">
+              <xsl:with-param name="elements-to-process"
+                              select="child::*"/>
+            </xsl:call-template>
+            <xsl:text>]}');</xsl:text>
+          </xsl:attribute>
+          <option value="Select from list">Select from list</option>
+          <xsl:for-each select="xs:enumeration">
+            <option>
+              <xsl:attribute name="value">
+                <xsl:value-of select="@value"/>
+              </xsl:attribute>
+              <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
+                <xsl:attribute name="title">
+                  <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation"/>
+                </xsl:attribute>
+              </xsl:if>
+              <xsl:value-of select="@value"/>
+            </option>
+          </xsl:for-each>
+        </select>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
 
