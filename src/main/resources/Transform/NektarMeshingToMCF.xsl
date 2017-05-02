@@ -86,6 +86,21 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerSurfaces" />
           </xsl:attribute>
         </P>
+        <P PARAM="BndLayerLayers">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerLayers" />
+          </xsl:attribute>
+        </P>
+        <P PARAM="BndLayerThickness">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness"/>
+          </xsl:attribute>
+        </P>
+        <P PARAM="BndLayerProgression">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerProgression"/>
+          </xsl:attribute>
+        </P>        
       </xsl:if>
       <xsl:if test="$meshtype = 'BoundaryLayerMesh3D'">
         <P PARAM="BndLayerSurfaces">
@@ -93,17 +108,36 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces" />
           </xsl:attribute>
         </P>
+        <P PARAM="BndLayerLayers">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerLayers" />
+          </xsl:attribute>
+        </P>
+        <P PARAM="BndLayerThickness">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness"/>
+          </xsl:attribute>
+        </P>
+        <P PARAM="BndLayerProgression">
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerProgression"/>
+          </xsl:attribute>
+        </P>
       </xsl:if>
     </xsl:if>
-        
-    <xsl:if test="$meshtype = 'BoundaryLayer'">
-      <P PARAM="BndLayerThickness">
-        <xsl:attribute name="VALUE">
-          <xsl:value-of select="BoundaryLayerThickness"/>
-        </xsl:attribute>
-      </P>
+                    
+  </xsl:template>
+  
+  <xsl:template match="AdditionalParameters" mode="BoolParameters">
+    <xsl:if test="SurfaceOptimiser">
+      <P PARAM="SurfaceOptimiser" />
     </xsl:if>
-                
+    <xsl:if test="VariationalOptimiser">
+      <P PARAM="VariationalOptimiser" />
+    </xsl:if>
+    <xsl:if test="WriteOctree">
+      <P PARAM="WriteOctree" />
+    </xsl:if>
   </xsl:template>
 
   <!-- NekMesh Mesh Configuration File transform -->
@@ -118,6 +152,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <PARAMETERS>
           <xsl:apply-templates select="MeshParameters" mode ="MeshingParameters"/>
         </PARAMETERS>
+        
+        <BOOLPARAMETERS>
+          <xsl:apply-templates select="AdditionalParameters" mode ="BoolParameters"/>
+        </BOOLPARAMETERS>
       
       </MESHING>
 
