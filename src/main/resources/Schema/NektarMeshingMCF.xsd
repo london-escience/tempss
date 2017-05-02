@@ -23,11 +23,71 @@ File (MCF) for NekMesh.
   </xs:simpleContent>
 </xs:complexType>
 
-<xs:simpleType name="NACAAirfoilCode">
+<xs:simpleType name="NACAAerofoilCode">
   <xs:restriction base="xs:string">
     <xs:pattern value="^[0-9][0-9][0-9][0-9]$"/>
   </xs:restriction>
 </xs:simpleType>
+
+<xs:complexType name="NACAParametersType">
+  <xs:sequence>
+    <xs:element name="Xmin" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Xmin value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Ymin" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Ymin value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Xmax" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Xmax value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Ymax" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Ymax value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AOA" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The angle of attack for the aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="NACAAerofoilType">
+  <xs:sequence>
+    <xs:element name="NACACode" type="NACAAerofoilCode">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="NACAParameters" type="NACAParametersType">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Set of parameters that configure the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
 
 <xs:complexType name="CADSourceType">
   <xs:choice>
@@ -39,10 +99,10 @@ File (MCF) for NekMesh.
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
-    <xs:element name="NACAAirfoilCode" type="NACAAirfoilCode">
+    <xs:element name="NACAAerofoil" type="NACAAerofoilType">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:documentation>Description of a NACA aerofoil to use as the input to the mesh generator.</libhpc:documentation>
           <libhpc:units></libhpc:units>
         </xs:appinfo>
       </xs:annotation>
@@ -163,7 +223,7 @@ File (MCF) for NekMesh.
     <xs:element name="CADSource" type="CADSourceType">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Set the source of the CAD geometry for the mesh to be generated. This may be a STEP file that you provide or a NACA 4-digit code that is used to generate a NACA airfoil geometry.</libhpc:documentation>
+          <libhpc:documentation>Set the source of the CAD geometry for the mesh to be generated. This may be a STEP file that you provide or a NACA 4-digit code that is used to generate a NACA aerofoil geometry.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
