@@ -23,7 +23,7 @@ File (MCF) for NekMesh.
   </xs:simpleContent>
 </xs:complexType>
 
-<xs:simpleType name="nacaCode">
+<xs:simpleType name="NACAAirfoilCode">
   <xs:restriction base="xs:string">
     <xs:pattern value="^[0-9][0-9][0-9][0-9]$"/>
   </xs:restriction>
@@ -39,7 +39,7 @@ File (MCF) for NekMesh.
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
-    <xs:element name="NACAAirfoilCode" type="nacaCode">
+    <xs:element name="NACAAirfoilCode" type="NACAAirfoilCode">
       <xs:annotation>
         <xs:appinfo>
           <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
