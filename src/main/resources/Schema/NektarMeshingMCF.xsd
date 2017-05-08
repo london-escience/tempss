@@ -113,6 +113,35 @@ File (MCF) for NekMesh.
 <xs:complexType name="Mesh2D"/>
 <xs:complexType name="Mesh3D"/>
 
+<xs:complexType name="BLThicknessType">
+  <xs:choice>
+    <xs:element name="Constant" type="xs:double"/>
+    <xs:element name="Expression" type="xs:string"/>
+  </xs:choice>
+</xs:complexType>
+
+<xs:complexType name="BoundaryLayerSplitType">
+  <xs:sequence>
+    <xs:element name="BoundaryLayerLayers" type="xs:string">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Specify the number of boundary layers.
+          </libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>        
+    </xs:element>
+    <xs:element name="BoundaryLayerProgression" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation></libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="BoundaryLayerMeshType">
     <xs:sequence>
       <xs:element name="BoundaryLayerSurfaces" type="xs:string">
@@ -124,31 +153,31 @@ File (MCF) for NekMesh.
           </xs:appinfo>
         </xs:annotation>        
       </xs:element>
-      <xs:element name="BoundaryLayerLayers" type="xs:string">
+      <xs:element name="BoundaryLayerThickness" type="BLThicknessType">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>Specify the number of boundary layers.
-            </libhpc:documentation>
+            <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
-        </xs:annotation>        
+        </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayerThickness" type="xs:double">
-      <xs:annotation>
-        <xs:appinfo>
-          <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
-          <libhpc:units></libhpc:units>
-        </xs:appinfo>
-      </xs:annotation>
-    </xs:element>
-    <xs:element name="BoundaryLayerProgression" type="xs:double">
-      <xs:annotation>
-        <xs:appinfo>
-          <libhpc:documentation></libhpc:documentation>
-          <libhpc:units></libhpc:units>
-        </xs:appinfo>
-      </xs:annotation>
-    </xs:element>
+      <xs:element name="SplitBoundaryLayer">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Whether or not to split the boundary layer 
+            into sections. If you select Yes then you have the option to 
+            select the layer elements to split and to set a progression that 
+            determines how the size of the created sections changes across the 
+            space.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Yes" type="BoundaryLayerSplitType"/>
+            <xs:element name="No"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
 </xs:complexType>
 

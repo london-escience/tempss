@@ -30,12 +30,19 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="MeshConfiguration" mode="MeshingInformation">
     <xsl:variable name="meshtype" select="name(MeshType/*[1])"/>
-    
     <I PROPERTY="CADFile">
       <xsl:attribute name="VALUE">
-        <xsl:value-of select="CADFile" />
+        <xsl:choose>
+          <xsl:when test="CADSource/CADFile">
+            <xsl:value-of select="CADSource/CADFile" />
+          </xsl:when>
+          <xsl:when test="CADSource/NACAAerofoil">
+            <xsl:value-of select="CADSource/NACAAerofoil/NACACode" />
+          </xsl:when>
+        </xsl:choose>  
       </xsl:attribute>
     </I>
+    
     <I PROPERTY="MeshType">
       <xsl:attribute name="VALUE">
         
@@ -50,6 +57,38 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     
   </xsl:template>
 
+  <xsl:template match="MeshConfiguration" mode="NACAParameters">
+    <xsl:if test="CADSource/NACAAerofoil">
+      <xsl:text>
+      
+      </xsl:text>
+      <P PARAM="Xmin">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="CADSource/NACAAerofoil/NACAParameters/Xmin"/>
+        </xsl:attribute>
+      </P>
+      <P PARAM="Ymin">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="CADSource/NACAAerofoil/NACAParameters/Ymin"/>
+        </xsl:attribute>
+      </P>
+      <P PARAM="Xmax">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="CADSource/NACAAerofoil/NACAParameters/Xmax"/>
+        </xsl:attribute>
+      </P>
+      <P PARAM="Ymax">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="CADSource/NACAAerofoil/NACAParameters/Ymax"/>
+        </xsl:attribute>
+      </P>
+      <P PARAM="AOA">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="CADSource/NACAAerofoil/NACAParameters/AOA"/>
+        </xsl:attribute>
+      </P>  
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template match="MeshParameters" mode="MeshingParameters">
     <xsl:variable name="meshtype" select="name(/NektarMeshing/MeshConfiguration/MeshType/*[1])"/>
@@ -81,48 +120,81 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:if test="($meshtype = 'BoundaryLayerMesh2D') or ($meshtype = 'BoundaryLayerMesh3D')">
       <xsl:comment> Boundary layer </xsl:comment>
       <xsl:if test="$meshtype = 'BoundaryLayerMesh2D'">
-        <P PARAM="BndLayerSurfaces">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerSurfaces" />
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerLayers">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerLayers" />
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerThickness">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness"/>
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerProgression">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerProgression"/>
-          </xsl:attribute>
-        </P>        
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerSurfaces) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerSurfaces != ''))">
+          <P PARAM="BndLayerSurfaces">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerSurfaces" />
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness != ''))">
+          <P PARAM="BndLayerThickness">
+            <xsl:attribute name="VALUE">
+              <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness/Constant">
+                <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness/Constant"/>
+              </xsl:if>
+              <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness/Expression">
+                <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThickness/Expression"/>
+              </xsl:if>
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes/BoundaryLayerLayers))">
+          <P PARAM="BndLayerLayers">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes/BoundaryLayerLayers" />
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes/BoundaryLayerProgression))">
+          <P PARAM="BndLayerProgression">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes/BoundaryLayerProgression"/>
+            </xsl:attribute>
+          </P>
+        </xsl:if>        
       </xsl:if>
       <xsl:if test="$meshtype = 'BoundaryLayerMesh3D'">
-        <P PARAM="BndLayerSurfaces">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces" />
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerLayers">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerLayers" />
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerThickness">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness"/>
-          </xsl:attribute>
-        </P>
-        <P PARAM="BndLayerProgression">
-          <xsl:attribute name="VALUE">
-            <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerProgression"/>
-          </xsl:attribute>
-        </P>
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces != ''))">
+          <P PARAM="BndLayerSurfaces">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces" />
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness != ''))">
+          <P PARAM="BndLayerThickness">
+            <xsl:attribute name="VALUE">
+              <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness/Constant">
+                <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness/Constant"/>
+              </xsl:if>
+              <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness/Expression">
+                <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThickness/Expression"/>
+              </xsl:if>
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes/BoundaryLayerLayers))">
+          <P PARAM="BndLayerLayers">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes/BoundaryLayerLayers" />
+            </xsl:attribute>
+          </P>
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes/BoundaryLayerProgression))">
+          <P PARAM="BndLayerProgression">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/SplitBoundaryLayer/Yes/BoundaryLayerProgression"/>
+            </xsl:attribute>
+          </P>
+        </xsl:if>
       </xsl:if>
     </xsl:if>
                     
@@ -151,6 +223,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         
         <PARAMETERS>
           <xsl:apply-templates select="MeshParameters" mode ="MeshingParameters"/>
+          <xsl:apply-templates select="MeshConfiguration" mode ="NACAParameters"/>
         </PARAMETERS>
         
         <BOOLPARAMETERS>
