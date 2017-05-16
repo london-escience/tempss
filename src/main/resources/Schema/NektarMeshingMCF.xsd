@@ -33,6 +33,13 @@ File (MCF) for NekMesh.
   </xs:restriction>
 </xs:simpleType>
 
+<xs:simpleType name="gtZeroLtOneDouble">
+  <xs:restriction base="xs:double">
+    <xs:minExclusive value="0"/>
+    <xs:maxExclusive value="1"/>
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:complexType name="stepFileName">
   <xs:simpleContent>
     <xs:extension base="xs:string">
@@ -217,10 +224,10 @@ File (MCF) for NekMesh.
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
-    <xs:element name="CurvatureSensitivity" type="xs:double">
+    <xs:element name="CurvatureSensitivity" type="gtZeroLtOneDouble">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Value (n) must be 0&lt;n&lt;=1 Sensivity to curvature, smaller value will make more elements.</libhpc:documentation>
+          <libhpc:documentation>Value (n) must be 0&lt;n&lt;1 Sensivity to curvature, smaller value will make more elements. This value is symmetric around 0.5, e.g. entering 0.01 or 0.99 will have the same effect.</libhpc:documentation>
           <libhpc:units></libhpc:units>
         </xs:appinfo>
       </xs:annotation>
@@ -322,6 +329,19 @@ boundary layer surfaces specified
     </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="LineRefinementsType">
+  <xs:sequence>
+    <xs:element name="X1" type="xs:double"/>
+    <xs:element name="Y1" type="xs:double"/>
+    <xs:element name="Z1" type="xs:double"/>
+    <xs:element name="X2" type="xs:double"/>
+    <xs:element name="Y2" type="xs:double"/>
+    <xs:element name="Z2" type="xs:double"/>
+    <xs:element name="R" type="xs:double"/>
+    <xs:element name="D" type="xs:double"/>
+  </xs:sequence>
+</xs:complexType>
+
   <!-- Mesh Configuration File root node    -->
   <xs:element name="NektarMeshing">
     <xs:annotation>
@@ -344,6 +364,13 @@ The base element for a NekMesh mesh configuration that is used to provide the pa
           <xs:annotation>
             <xs:appinfo>
               <libhpc:documentation>This section contains the meshing metadata describing the specific properties of the mesh to be generated from the CAD model.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LineRefinements" type="LineRefinementsType" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This optional section is used to add line refinement parameters.</libhpc:documentation>
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
