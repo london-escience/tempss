@@ -212,6 +212,37 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:if>
   </xsl:template>
 
+  <xsl:template match="LineRefinements" mode="LineRefinementParameters">
+    <REFINEMENT>
+      <LINE>
+        <xsl:if test="X1">
+          <X1><xsl:value-of select="X1"/></X1>
+        </xsl:if>
+        <xsl:if test="Y1">
+          <Y1><xsl:value-of select="Y1"/></Y1>
+        </xsl:if>
+        <xsl:if test="Z1">
+          <Z1><xsl:value-of select="Z1"/></Z1>
+        </xsl:if>
+        <xsl:if test="X2">
+          <X2><xsl:value-of select="X2"/></X2>
+        </xsl:if>
+        <xsl:if test="Y2">
+          <Y2><xsl:value-of select="Y2"/></Y2>
+        </xsl:if>
+        <xsl:if test="Z2">
+          <Z2><xsl:value-of select="Z2"/></Z2>
+        </xsl:if>
+        <xsl:if test="R">
+          <R><xsl:value-of select="R"/></R>
+        </xsl:if>
+        <xsl:if test="D">
+          <D><xsl:value-of select="D"/></D>
+        </xsl:if>
+      </LINE>
+    </REFINEMENT>  
+  </xsl:template>
+
   <!-- NekMesh Mesh Configuration File transform -->
   <xsl:template match="/NektarMeshing">
     <NEKTAR>
@@ -229,6 +260,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <BOOLPARAMETERS>
           <xsl:apply-templates select="AdditionalParameters" mode ="BoolParameters"/>
         </BOOLPARAMETERS>
+        
+        <xsl:apply-templates select="LineRefinements" mode ="LineRefinementParameters"/>
       
       </MESHING>
 
