@@ -33,7 +33,7 @@ valid profile and can be used to generate an input for for a job.
 #### Building and Running the Service
 
 TemPSS is a Java Web Service. The service can be built using
-[Apache Maven](http://maven.apache.org) and requires Java 1.7+. To build, clone
+[Apache Maven](http://maven.apache.org) and requires Java 7+. To build, clone
 the repository, and run `mvn package` in the project base directory.
 
 If the build completes successfully, output files will be generated in the
