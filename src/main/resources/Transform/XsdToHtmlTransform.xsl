@@ -35,6 +35,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
     <xsl:param name="units" select="xs:annotation/xs:appinfo/libhpc:units"/>
     <xsl:param name="editable_units" select="xs:annotation/xs:appinfo/libhpc:editableUnits"/>
+    <xsl:param name="node_info" select="xs:annotation/xs:appinfo/libhpc:nodeInfo"/>
     <xsl:param name="badge_type">
       <xsl:choose>
         <xsl:when test="./xs:complexType/xs:choice or /xs:schema/xs:complexType[@name=$type]/xs:choice">badge badge-warning</xsl:when>
@@ -162,6 +163,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:element name="i">
               <xsl:attribute name="class">repeat_button repeat_button_add</xsl:attribute>
             </xsl:element>
+          </xsl:element>
+        </xsl:if>
+        <xsl:if test="$node_info">
+          <xsl:element name="i">
+            <xsl:attribute name="class">glyphicon glyphicon-info-sign text-info node-info</xsl:attribute>
+            <xsl:attribute name="title"><xsl:value-of select="$node_info"/></xsl:attribute>
+            <xsl:attribute name="style">vertical-align: middle;</xsl:attribute>
+            <xsl:attribute name="data-toggle">tooltip</xsl:attribute>
+            <xsl:attribute name="data-placement">right</xsl:attribute>
           </xsl:element>
         </xsl:if>
         <xsl:if test="substring($type,1,3)='xs:'">
@@ -440,6 +450,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
   <xsl:template match="libhpc:alias" mode="findChildNodes"/>
   <xsl:template match="libhpc:units" mode="findChildNodes"/>
+  <xsl:template match="libhpc:nodeInfo" mode="findChildNodes"/>
   <xsl:template match="libhpc:editableUnits" mode="findChildNodes"/>
   <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>
   <xsl:template match="libhpc:refersToFile" mode="findChildNodes"/>

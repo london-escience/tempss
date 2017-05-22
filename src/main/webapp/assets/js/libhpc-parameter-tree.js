@@ -402,7 +402,7 @@ function isInteger(valueToCheck) {
              */
             enableTooltips: function() {
                 $('body').tooltip({
-                    selector: ".val-help, .tree-control-btn"
+                    selector: ".val-help, .tree-control-btn, .node-info"
                 });
             },
 
