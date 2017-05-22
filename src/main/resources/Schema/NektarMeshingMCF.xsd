@@ -108,8 +108,14 @@ File (MCF) for NekMesh.
       <xs:annotation>
         <xs:appinfo>
           <libhpc:documentation>Set of parameters that configure the NACA aerofoil.</libhpc:documentation>
+          <libhpc:nodeInfo>The values in this section define the bounding box for the NACA aerofoil. 
+                 You need to take into account the geometry of the aerofoil when defining 
+                 the bounding box to ensure there is sufficient space for the computation 
+                 to be carried out correctly.
+          </libhpc:nodeInfo>
         </xs:appinfo>
       </xs:annotation>
+      
     </xs:element>
   </xs:sequence>
 </xs:complexType>
