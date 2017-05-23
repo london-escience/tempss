@@ -1,6 +1,6 @@
 # Building TemPSS Templates
 
-###### Note: This document relates to the _new XML model_ for creating templates in TemPSS, not the original XML Schema model for creating templates.
+###### Note: This document relates to the _new XML model_ for creating templates in TemPSS, not the [original XML Schema model](CreatingTemplates.md) for creating templates.
 
 ## Overview
 
