@@ -1,5 +1,7 @@
 # Creating templates
 
+###### Note: This document relates to the _original XML Schema approach_ for creating templates in TemPSS. A new, simpler method using pure XML is now available. Details are provided in [BuildingTemplatesXML.md](BuildingTemplatesXML.md).
+
 Creating a new template is a three-step process:
 
 1. First, an XML schema which defines the properties of the parameter tree is
