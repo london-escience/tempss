@@ -51,6 +51,14 @@ service again will be accessible at `http://localhost:8080/tempss`.
 
 The interface at `http://localhost:8080/tempss/component.jsp` provides an example of a simple interface to display template trees. The interface available at `http://localhost:8080/tempss` is a more advance profile manager tool and is the recommended interface for general use of TemPSS.
 
+---
+
+__NOTE:__ The database file `profiles.db` used by a running TemPSS instance is, by default, stored within the deployed `tempss.war` file.
+This simplifies the process of deploying TemPSS but each time you redeploy, the database will 
+be overwritten by the base version in `src/main/resources`. This means that any stored profiles will be lost. To avoid this, you should place your database file in a location on your system that is outside the Tomcat server tree. Edit `src/main/webapp/WEB-INF/spring/applicationContext.xml` and within the `<bean id="dataSource"...` section, edit the `<property name="url"...` element and set the value to the location of your `profiles.db` file. For example, if the file is placed in `/home/myuser/tempss` you would set the value to `jdbc:sqlite:/home/myuser/tempss/profiles.db`.  
+
+---
+
 ###### Using Docker
 A Dockerfile is provided to support building a [docker](https://www.docker.com) image that can be used to start a container running the TemPSS service. To build the image, clone the repository and change into the base repository directory, `tempss`, where the `Dockerfile` file is located. From here you can use docker's command line tool to build the image:
 
