@@ -133,8 +133,8 @@
 				    <div class="col-sm-6">
 				      <p class="text-info">By registering for a TemPSS  
 				      account you confirm that you have read and accept our 
-				      <a href="/tempss/tandc">terms</a> and 
-				      <a href="/tempss/privacy">privacy policy</a>.
+				      <a href="/tempss/profiles/privacy">terms</a> and 
+				      <a href="/tempss/profiles/privacy">privacy policy</a>.
 				    </div>
 				    <div class="col-sm-3"></div>
 				  </div>
