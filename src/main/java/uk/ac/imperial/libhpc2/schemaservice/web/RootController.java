@@ -211,6 +211,23 @@ public class RootController {
 		return mav;
 	}
 	
+	@RequestMapping("/privacy")
+	public ModelAndView privacy(Model pModel,
+                             @AuthenticationPrincipal Principal principal,
+                             HttpServletRequest pRequest) {
+	
+		TempssUserDetails userDetails = getUserDetails(principal);
+		
+		ModelAndView mav = new ModelAndView("privacy");
+		
+		String tokenKey = CsrfToken.class.getName();
+		CsrfToken token = (CsrfToken)pRequest.getAttribute(tokenKey);
+        mav.addObject("_csrf", token);
+		
+		mav.addObject("user", userDetails);
+		return mav;
+	}
+	
 	@RequestMapping(value="/*")
     public ModelAndView redirectHome(@AuthenticationPrincipal Principal principal) {
 		TempssUserDetails userDetails = getUserDetails(principal);
