@@ -74,7 +74,7 @@
           <tempss:item>FRcmin</tempss:item>
           <tempss:item>FRcinf</tempss:item>
         </AdvectionType>
-        <DiffusionType type="string" inputType="choice">
+        <DiffusionType type="xs:string" inputType="choice">
           <tempss:item>NotSpecified</tempss:item>
           <tempss:item>LDGNS</tempss:item>
           <tempss:item>LFRDGNS</tempss:item>
