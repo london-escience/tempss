@@ -1131,6 +1131,19 @@ function extractEntriesFromFile(event, path) {
 }
 
 /**
+ * Used to update the value of a file text field that will be used to generate
+ * fields that only contain a file name string rather than file contents.
+ */
+function updateFileValue(event, path) {
+	var selectedFile = event.target.files[0];
+	var $target = $(event.target);
+	// Find the text field
+	var $inputText = $target.parent().parent().find('input[name="fileNameString"]');
+	var filename = selectedFile.name;
+	$inputText.val(filename);
+}
+
+/**
  * This function processes the boundary regions from a geometry file when one 
  * is added into the template. This is triggered via extract entries from file 
  * when we find that the target node is ProblemSpecification -> Geometry.
