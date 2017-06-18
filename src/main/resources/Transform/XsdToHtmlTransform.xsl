@@ -233,6 +233,28 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       </input>
     </span>
   </xsl:template>
+  
+  <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='fileTypeString']" mode="findChildNodes">
+    <xsl:param name="path" />
+    <input type="text" name="fileNameString" disabled="disabled" 
+           style="margin-right: 10px;"/>
+    <span>
+      <input type="file">
+        <xsl:attribute name="onchange">
+          <xsl:text>validateEntries($(this), 'xs:file', '{"xs:filetype": ["</xsl:text>
+          <xsl:value-of select="@fixed"/>
+          <xsl:text>"]}');extractEntriesFromFile(event, '</xsl:text>
+          <xsl:value-of select="$path"/>
+          <xsl:text>');updateFileValue(event, '</xsl:text>
+          <xsl:value-of select="$path"/>
+          <xsl:text>')</xsl:text>
+        </xsl:attribute>
+        <xsl:attribute name="path">
+          <xsl:value-of select="$path"/>
+        </xsl:attribute>
+      </input>
+    </span>
+  </xsl:template>
 
   <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='multipleFileType']" mode="findChildNodes">
     <span>

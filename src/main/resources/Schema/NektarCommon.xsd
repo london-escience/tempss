@@ -54,6 +54,14 @@ PA: why is this necessary?
     </xs:simpleContent>
   </xs:complexType>
   
+  <xs:complexType name="fileNameString">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileTypeString" type="xs:string" fixed="XML" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
   <xs:complexType name="geometryFileName">
     <xs:simpleContent>
       <xs:extension base="xs:string">
