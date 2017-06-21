@@ -252,6 +252,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:attribute name="path">
           <xsl:value-of select="$path"/>
         </xsl:attribute>
+        <xsl:attribute name="chosen">
+          <xsl:text>false</xsl:text>
+        </xsl:attribute>
       </input>
     </span>
   </xsl:template>
