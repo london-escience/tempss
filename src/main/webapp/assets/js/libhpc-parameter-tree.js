@@ -1708,28 +1708,6 @@ function processJobProfile(treeRootNode, templateId) {
     //TODO set container through parameter
     var profileXml = $('#template-container').data('plugin_LibhpcParameterTree').getXmlProfile();
 
-    // Add the files to the form data
-    var uploadFile = null;
-    // Since we can have optional file elements, we only want to select the 
-    // ones where they either don't have a chosen parameter or where chosen
-    // is set to true.
-    
-    var $fileElementsWithoutChosen = $("input[type = 'file']").not(['[chosen]']);
-    var $fileElementsChosenTrue = $("input[type = 'file'][chosen = 'true']");
-    var $fileElements = $fileElementsWithoutChosen.add($fileElementsChosenTrue);
-    $fileElements.each(function (index, element) {
-        // Just assume one file provided for each thing for now.
-        uploadFile = element.files[0];
-        // Only embed if an XML file, assume from extension!
-        var fileName = (uploadFile && uploadFile.hasOwnProperty("name")) ? uploadFile.name : "";
-        log("Processing job file - name without extension: " + fileName);
-        var extension = fileName.substr(fileName.lastIndexOf('.') + 1)
-        log("Processing job file - extension: " + extension);
-        if ("xml".toUpperCase() !== extension.toUpperCase()) {
-            uploadFile = null;
-        }
-    });
-
     log('Profile XML: ' + profileXml);
     _processProfile(profileXml, templateId)
 }
@@ -1737,11 +1715,32 @@ function processJobProfile(treeRootNode, templateId) {
 function _processProfile(profileXml, templateId) {
     // Create form data object to post the xml and files to the server
     var formData = new FormData();
-
-    // Add the files to the form data
-    $("input[type = 'file']").each(function (index, element) {
-        formData.append('xmlupload_file', element.files[0]);  // Just assume one file provided for each thing for now.
+    
+    // Since we can have optional file elements, we only want to select the 
+    // ones where they either don't have a chosen parameter or where chosen
+    // is set to true.    
+    var $fileElementsWithoutChosen = $("input[type = 'file']").not('[chosen]');
+    var $fileElementsChosenTrue = $("input[type = 'file'][chosen = 'true']");
+    var $fileElements = $fileElementsWithoutChosen.add($fileElementsChosenTrue);
+    $fileElements.each(function (index, element) {
+        // Just assume one file provided for each thing for now.
+        var uploadFile = element.files[0];
+        // Only embed if an XML file, assume from extension!
+        var fileName = (uploadFile && ('name' in uploadFile)) ? uploadFile.name : "";
+        log("Processing job file - name without extension: " + fileName);
+        var extension = fileName.substr(fileName.lastIndexOf('.') + 1)
+        log("Processing job file - extension: " + extension);
+        if ("xml".toUpperCase() !== extension.toUpperCase()) {
+        	log("Ignoring file [" + fileName + "] with extension: " + extension);
+        }
+        else {
+        	// Add the file to the form data
+        	formData.append('xmlupload_file', uploadFile);  // Just assume one file provided for each thing for now.
+        }
     });
+
+    
+    
 
     // Add the xml string
     formData.append('xmlupload', profileXml);

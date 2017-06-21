@@ -25,13 +25,7 @@ PA: why is this necessary?
 
   <xs:include schemaLocation="NektarCommon.xsd" />
 
-  <xs:complexType name="fileNameString">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="fileTypeString" type="xs:string" fixed="XML" use="required"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
+  
 
   <xs:element name="TestSchema">
     <xs:annotation>
@@ -54,7 +48,7 @@ PA: why is this necessary?
 	          <xs:element name="MyFile" type="fileNameString">
 	            <xs:annotation>
 	              <xs:appinfo>
-	                <libhpc:documentation>The file field used to test the new file type	.</libhpc:documentation>
+	                <libhpc:documentation>The file field used to test the new file type.</libhpc:documentation>
 	                <libhpc:units></libhpc:units>
 	              </xs:appinfo>
 	            </xs:annotation>

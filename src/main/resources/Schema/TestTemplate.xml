@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<IncompressibleNavierStokes xmlns="http://www.libhpc.imperial.ac.uk"
+                            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                            xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+
+  <libhpc:documentation>
+    The Nektar++ finite element PDE solver for fluid flow using the 
+    incompressible Navier-Stokes equation. Nektar++ user guide: 
+    http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
+  </libhpc:documentation>
+  <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <VariableName type="xs:string"/>
+        <Type paramType="choice">
+          <Expression type="xs:string" />
+          <File type="fileNameString" inputType="file">
+          </File>
+        </Type>
+      </Variable>
+    </InitialConditions>
+    <!-- 
+  <File type="fileTypeString" inputType="file">
+    <libhpc:documentation>
+      Test file field that results in only the file name being used, not the 
+      whole file being embedded in the resulting output.
+    </libhpc:documentation>
+  </File>
+   -->
+                          
+</IncompressibleNavierStokes>
