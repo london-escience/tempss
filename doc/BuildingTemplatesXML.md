@@ -151,6 +151,8 @@ In addition to the standard XML types, TemPSS defines some additional types that
 
 *__fileName__*: A complex type providing a file browse button to enable selection of a local file.
 
+*__fileNameString__*: A complex type providing a text box with file browse button to enable selection of a local file. This selects only the file name, not the content. 
+
 *__geometryFileName__* and *__BoundaryDetails__*: These are special types that are detailed in the "*Handling input geometries and boundary conditions*" section below.
 
 #### Additional elements
