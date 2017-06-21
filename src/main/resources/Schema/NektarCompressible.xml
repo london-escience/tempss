@@ -95,7 +95,8 @@
         Specific gas constant (http://en.wikipedia.org/wiki/Gas_constant)
       </libhpc:documentation>
     </GasConstant>
-    <AngleOfAttack type="xs:double" units="degrees">
+    <AngleOfAttack optional="true">
+      <Value type="xs:double" units="degrees"/>
       <libhpc:documentation>Angle of attack of simulation</libhpc:documentation>
     </AngleOfAttack>
     <RhoInf name="rhoInf" type="positiveDouble" units="kg/m^2">
