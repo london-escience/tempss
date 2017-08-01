@@ -270,6 +270,41 @@
 			    </webResources>
 			  </configuration>
 			</plugin>
+			<plugin>
+			  <groupId>com.github.eirslett</groupId>
+			  <artifactId>frontend-maven-plugin</artifactId>
+			  <version>1.5</version>
+			  <executions>
+			    <execution>
+			      <id>install node and npm</id>
+			      <goals>
+			        <goal>install-node-and-npm</goal>
+			      </goals>
+			      <configuration>
+			        <nodeVersion>v6.11.2</nodeVersion>
+			        <npmVersion>4.6.1</npmVersion>
+			      </configuration>
+			    </execution>
+			    <execution>
+			      <id>npm install</id>
+			      <goals>
+			        <goal>npm</goal>
+			      </goals>
+			      <configuration>
+			        <arguments>install</arguments>
+			      </configuration>
+			    </execution>
+			    <execution>
+			      <id>grunt npmcopy</id>
+			      <goals>
+			        <goal>grunt</goal>
+			      </goals>
+			      <configuration>
+			        <arguments>npmcopy</arguments>
+			      </configuration>
+			    </execution>
+			  </executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencyManagement>

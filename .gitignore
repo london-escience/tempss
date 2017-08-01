@@ -7,3 +7,5 @@ target
 .settings
 src/main/webapp/assets/lib/
 node_modules/
+node/
+etc/
