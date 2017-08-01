@@ -300,24 +300,15 @@ var constraints = {
 	},
 
 	resetConstraintsConfirmation: function(e) {
-		BootstrapDialog.show({
+		swal({
 			title: "Reset constraints",
-			message: "This will reset all values that have constraints within this template to their default values.<br/><br/>If you only want to undo your most recent change, use the undo button at the top right of the profile editor panel.<br/><br/><strong>Are you sure you want to reset all constraints to their original state?</strong><br/><br/>",
-			type: BootstrapDialog.TYPE_WARNING,
-			buttons: [{
-                label: 'Close',
-                cssClass: 'btn-danger',
-                action: function(dialog) {
-                    dialog.close();
-                }
-            },{
-                label: 'Confirm',
-                action: (function(dialog) {
-                	this.resetConstraints(e);
-                	dialog.close();
-                }).bind(this)
-            }]
-		});
+			html: "This will reset all values that have constraints within this template to their default values.<br/><br/>If you only want to undo your most recent change, use the undo button at the top right of the profile editor panel.<br/><br/><strong>Are you sure you want to reset all constraints to their original state?</strong><br/><br/>",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonText: "Confirm",
+		}).then(function() {
+			this.resetConstraints(e);
+		}.bind(this)).catch(swal.noop);
 	},
 	
 	resetConstraints: function(e) {

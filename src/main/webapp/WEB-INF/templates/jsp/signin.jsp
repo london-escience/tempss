@@ -107,14 +107,11 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <!-- <script src="../assets/js/jquery-1.11.0.min.js"></script> -->
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <!-- <script src="../assets/js/bootstrap.min.js"></script> -->
+	<script src="../assets/lib/js/jquery.min.js"></script>
+    <script src="../assets/lib/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>  -->
-    
+	<script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"></script>
+	    
     <!-- Local script file for the template manager app -->
     <script src="../assets/js/tempss-manager.js"></script>
 	<script type="text/javascript">

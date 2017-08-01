@@ -296,7 +296,7 @@ public class ProfileRestResource {
             @PathParam("newState") String newState,
             @Context HttpServletRequest pRequest) {
     	
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -363,7 +363,7 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -421,7 +421,7 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -517,7 +517,7 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -591,7 +591,7 @@ public class ProfileRestResource {
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
 
-		TempssUser user = getAuthenticatedUser();
+		TempssUser user = ApiUtils.getAuthenticatedUser();
 		
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	JSONArray profileArray = new JSONArray();
@@ -640,7 +640,7 @@ public class ProfileRestResource {
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	StringBuilder profileNames = new StringBuilder();
@@ -702,25 +702,5 @@ public class ProfileRestResource {
 				header("Content-Disposition", cd).
 				header("Content-Type", "application/xml").
 				cookie(c).entity(so).build();
-    }
-    
-    /**
-     * Get the details of the currently authenticated user.
-     *  
-     * @return null if no user is authenticated or the TempssUser object of the
-     *         authenticated user if a user is logged in.
-     */
-    private TempssUser getAuthenticatedUser() {
-    	Authentication authToken = 
-    			SecurityContextHolder.getContext().getAuthentication();
-    	
-    	TempssUserDetails userDetails = null;
-		TempssUser user = null;
-		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
-			userDetails = (TempssUserDetails) authToken.getPrincipal();
-			user = userDetails.getUser();
-		}
-		
-		return user;
     }
 }

@@ -814,19 +814,6 @@ function handleAjaxLogin(e, modalSource) {
 		else {
 			$('#signin-form-errors').html('An incorrect user name or password was entered. Login failed.');
 		}
-		/*
-		BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_DANGER,
-			title: 'Login failed',
-            message: 'Invalid credentials entered, login failed. Please retry.',
-            buttons: [{
-                label: 'Close',
-                action: function(dialog) {
-                    dialog.close();
-                }
-            }]
-        });
-        */
 	});
 	
 }
