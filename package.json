@@ -1,0 +1,27 @@
+{
+  "name": "tempss",
+  "version": "1.0.0",
+  "description": "TemPSS - Templates and Profiles for Scientific Software",
+  "author": "Jeremy Cohen <jeremy.cohen@imperial.ac.uk>",
+  "license": "BSD-3-Clause",
+  "repository": "https://github.com/jcohen02/tempss.git",
+  "main": "index.js",
+  "dependencies": {
+  	"bootstrap": "3.3.7",
+  	"jquery": "1.11.0",
+  	"font-awesome": "4.7.0",
+  	"blueimp-file-upload": "9.5.7",
+  	"jquery.ui.widget": "1.10.3",
+  	"blueimp-tmpl": "3.8.0",
+  	"sweetalert2": "6.6.5",
+  	"bootstrap3-dialog": "1.35.4",
+  	"jquery-file-download": "1.4.6"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+  	"grunt": "^1.0.1",
+    "grunt-npmcopy": "^0.1.0"
+  }
+}

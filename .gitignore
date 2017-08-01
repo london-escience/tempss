@@ -5,4 +5,5 @@ target
 .cproject
 .project
 .settings
-
+src/main/webapp/assets/lib/
+node_modules/
