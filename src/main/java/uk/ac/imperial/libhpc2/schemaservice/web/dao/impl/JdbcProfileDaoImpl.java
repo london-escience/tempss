@@ -45,9 +45,7 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +86,12 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 		rowParams.put("owner", pProfile.getOwner());
 		Number id = _insertProfile.executeAndReturnKey(rowParams);
 		return id.intValue();
+	}
+	
+	@Override
+	public int update(Profile pProfile) {
+		int rowsAffected = _jdbcTemplate.update("UPDATE profile SET profileXml = ? WHERE name = ? and templateId = ? and owner = ?", pProfile.getProfileXml(), pProfile.getName(), pProfile.getTemplateId(), pProfile.getOwner());
+		return rowsAffected;
 	}
 	
 	@Override

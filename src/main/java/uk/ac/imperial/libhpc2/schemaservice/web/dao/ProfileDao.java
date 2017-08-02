@@ -54,6 +54,8 @@ public interface ProfileDao {
 
 	public int add(Profile pProfile);
 	
+	public int update(Profile pProfile);
+	
 	public int delete(String pTemplateId, String pProfileName, 
 			          TempssUser pUser);
 	
