@@ -119,7 +119,8 @@ function displayTemplate(templateID, templateText) {
     log("About to display tree for template with ID <" + templateID + "> and text <" + templateText + ">");
 
     if (templateID == "NONE") {
-        disableProfileButtons(true);
+    	disableClearTemplateButton(true);
+    	disableSaveProfileButton(true);
         disableGenerateInputButton(true);
         hideTreeExpandCollapseButtons(true);
         hideConstraintButtons(true);
@@ -152,12 +153,14 @@ function displayTemplate(templateID, templateText) {
             var templateName = $templateNameNode.text();
             
             // Enable the profile buttons for saving/clearing template content
-            // and show the expand/collapse buttons
+            // and show the expand/collapse buttons. Enable save profile button
+            // if the user is authenticated
+            disableClearTemplateButton(false);
             if(data.authenticated) {
-            	disableProfileButtons(false);
+            	disableSaveProfileButton(false);
             }
             else {
-            	disableProfileButtons(true);
+            	disableSaveProfileButton(true);
             }
             
             // If this template has constraints, and the constraint functions
@@ -273,19 +276,34 @@ function updateProfileList(templateID) {
 }
 
 /**
- * Disable the buttons used for saving a profile or
- * clearing profile content. These should only be enabled
- * when a template is selected.
+ * Disable/enable the button used for saving a profile.
+ * This should only be enabled when a user is signed in
+ * and a template is selected.
  *
- * @param disable disable or enable buttons
+ * @param disable <code>true</code> to disable button, 
+ *                <code>false</code> enable button
  */
-function disableProfileButtons(disable) {
+function disableSaveProfileButton(disable) {
     if (disable) {
-        $('#clear-profile-btn').prop('disabled', true);
         $('#save-as-profile-btn').prop('disabled', true);
     } else {
-        $('#clear-profile-btn').removeProp('disabled');
         $('#save-as-profile-btn').removeProp('disabled');
+    }
+}
+
+/**
+ * Disable/enable the button used for clearing and selected/entered
+ * values from a profile tree. This should only be enabled when 
+ * a template is selected.
+ *
+ * @param disable <code>true</code> to disable button, 
+ *                <code>false</code> enable button
+ */
+function disableClearTemplateButton(disable) {
+    if (disable) {
+        $('#clear-profile-btn').prop('disabled', true);
+    } else {
+        $('#clear-profile-btn').removeProp('disabled');
     }
 }
 
