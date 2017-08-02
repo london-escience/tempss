@@ -4,7 +4,8 @@
 		log("Index page - document ready...")
 
 		updateTemplateList();
-		disableProfileButtons(true);
+		disableClearTemplateButton(true);
+		disableSaveProfileButton(true);
 		disableGenerateInputButton(true);
 
 		// Variable to check whether a template has been edited
