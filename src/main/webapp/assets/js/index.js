@@ -1,5 +1,10 @@
 (function($, document, window, log) {
 
+	/**
+	 * The frequency with which the keep alive call is made in seconds 
+	 */
+	var KEEP_ALIVE_FREQUENCY = 300;
+	
 	$(function() {
 		log("Index page - document ready...")
 
@@ -236,6 +241,18 @@
         $('#add-template-init-btn').on('click', function(e) {
         	$('#add-template-modal').modal('show');
         });
+        
+        // Set up the keepalive call to run periodically to main an 
+        // active session
+        setInterval(function() {
+        	var time = new Date();
+			var keepalive = $.get('/tempss/api/keepalive');
+			keepalive.done(function() {
+				log("Keep alive request successful at: " + time.toLocaleString());
+			}).fail(function() {
+				log("Keep alive request FAILED at: " + time.toLocaleString());
+			});
+		}, 1000 * KEEP_ALIVE_FREQUENCY);
         	
 	});
 	
