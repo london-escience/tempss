@@ -157,6 +157,41 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="save-existing-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Save profile</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to save an updated version of profile 
+          <span id="save-existing-name"></span>?
+        </p>
+        <p>
+          If you would like to retain the previously saved version of this 
+          profile and save this profile under a new name, click the &quot;Save 
+          as new&quot; button below.
+        </p>
+        <p>
+          To update the existing profile, click &quot;Save&quot;.
+        </p>
+      </div>
+      <div class="modal-footer">
+       <div class="text-danger" id="save-existing-error" style="float:left; max-width:40%;"></div>
+       <div class="loading" id="profile-saving" style="float: left; display: none;">
+         <img src="../assets/img/loading.gif"/>
+         <span>Saving profile...</span>
+       </div>
+        <button type="button" id="cancel-profile-btn-modal" class="btn btn-danger" data-dismiss="modal"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+        <button id="save-profile-btn-new" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Save as new</button>
+        <button id="save-profile-btn-current" type="button" class="btn btn-success"><i class="glyphicon glyphicon-save"></i> Save</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <div id="delete-profile-modal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">

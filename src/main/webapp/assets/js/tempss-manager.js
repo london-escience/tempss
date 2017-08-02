@@ -477,6 +477,10 @@ function loadProfile(templateId, profileId) {
                     if ($('ul[role=tree]').hasClass('valid')) {
                         $('ul[role=tree]').trigger('nodeValid', $('ul[role=tree]'));
                     }
+                    // Add the saved data tag to the template-container node 
+                    // so that we get a prompt to overwrite the template when 
+                    // saving.
+                    $templateContainer.data('saved', true);
                 } else {
                     //$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
                 }
@@ -966,8 +970,9 @@ function getNodeFromPath(path, $rootNode) {
 }
 
 // Utility function for displaying log messages
-function log(message) {
+window.log = function(message) {
     if(console && console.log) {
         console.log(message);
     }
 }
+var log = window.log;

@@ -260,10 +260,10 @@
 		$('#save-existing-error').text("");
 		$('#save-profile-btn-modal').prop('disabled', true);
 		if($('#template-container').data('saved')) {
-			$('#save-existing-modal').modal();
+			$('#save-existing-modal').modal('show');
 		}
 		else {
-			$('#save-profile-modal').modal();
+			$('#save-profile-modal').modal('show');
 		}
 	}
 
@@ -307,6 +307,8 @@
 		            $('#save-existing-modal').modal('hide');
 		            $('#template-container').data('saved', true);
 		            updateProfileList(templateId);
+		            // Set the profile name in the editor panel header
+		            $('#editing-profile-name').text(profileName);
 		        } else {
 		            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
 		        }
