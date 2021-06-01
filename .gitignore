@@ -1,8 +1,10 @@
 target
 /bin/
-# Ignore eclipse project files
+# Ignore eclipse/vscode project files
 .classpath
 .cproject
 .project
 .settings
+*.code-workspace
 
+node_modules
