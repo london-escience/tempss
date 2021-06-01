@@ -9,7 +9,7 @@
 
 	<!-- Here we're in the root context so exclude controllers which are 
 	     scanned for in the web context. -->
-	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web">
+	<context:component-scan base-package="uk.ac.imperial.libhpc2.schemaservice.web, uk.ac.imperial.libhpc2.schemaservice.api">
     	<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 
