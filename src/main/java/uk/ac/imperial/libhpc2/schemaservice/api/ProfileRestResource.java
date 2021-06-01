@@ -52,11 +52,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletContext;
@@ -91,7 +92,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -221,6 +221,10 @@ public class ProfileRestResource {
                     InputStream fileXmlStream = fileFields.get(i).getValueAs(InputStream.class);
                     String fileXml = IOUtils.toString(fileXmlStream);
 
+                    // To prevent an error caused by embedding an XML header within XML, check
+                    // if fileXml begins with an XML header (e.g. <? xml ... ?>) and remove it.
+                    fileXml = removeXMLDeclaration(fileXml);
+
                     // Embed file in profile. File name appears in lower case 
                     // so do case-insensitive string replace using (?i)
                     String tempXml = completeXml.replaceAll("(?i)" + fileName, fileXml);
@@ -287,6 +291,7 @@ public class ProfileRestResource {
      *         under key 'code' and any additional description of the error under 
      *         the key 'message'.
      */
+    @SuppressWarnings("unchecked")
     @GET
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
@@ -441,6 +446,7 @@ public class ProfileRestResource {
      *         completed successfully, if it is ERROR, the error can be found under key 'code'
      *         and any additional description of the error under the key 'message'.
      */
+    @SuppressWarnings("unchecked")
     @DELETE
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
@@ -655,4 +661,35 @@ public class ProfileRestResource {
 		
 		return user;
     }
+
+    /**
+     * Check the provided string to see if it begins with an XML declaration.
+     * If it does, remove the declaration and return the modified string.
+     * 
+     * This is used when embedding one block of XML content within another.
+     * If the content being embedded begins with an XML declaration, parsers
+     * will reject the updated XML because the occurrence of another
+     * declaration.
+     * 
+     * @param pXml The string containing XML to check for a declaration
+     * @return The original string, unchanged, if no declaration found
+     *         at the start or a modified string with the declaration removed.
+     */
+    private String removeXMLDeclaration(String pXml) {
+        // Compile the regex for finding an XML declaration at start of string
+        Pattern p = Pattern.compile("^<\\?xml .*\\?>\\s*\\v+", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(pXml);
+        boolean found = m.find(0);
+
+        if(found) {
+            // Get a new string with the declaration removed
+            sLog.debug("XML declaration found in included content, removing");
+            String newString = m.replaceFirst("");
+            return newString;
+        }
+        
+        sLog.debug("No XML declaration found in included content.");
+        return pXml;
+    }
+    
 }
